@@ -20,3 +20,11 @@ describe("WidgetWindow (browser preview of the floating widget)", () => {
     expect(html).toContain("data-tauri-drag-region");
   });
 });
+
+describe("WidgetWindow size switch", () => {
+  const html = renderToStaticMarkup(<WidgetWindow />);
+  it("offers small, medium and large, with medium selected by default", () => {
+    expect(html).toContain('aria-label="Widget size"');
+    expect(html).toMatch(/aria-pressed="true"[^>]*title="medium widget"/);
+  });
+});

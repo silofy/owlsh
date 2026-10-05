@@ -112,10 +112,10 @@ A run imported without a write-up is graded against a canonical methodology ladd
 **Live widget** — a compact companion to keep in a pane beside your shell (e.g. a tmux split). It mirrors your run as you work — phase, elapsed time, stealth, findings — and flags your own loose threads (an unused credential, a path you never revisited) or a long run with little to show. It never tells you the next move: hints are opt-in (`h`), escalate one tier at a time, and each pull costs independence.
 
 ```sh
-npm run widget -- --report <session.json>   # redraws as the capture updates; [h] hint, [q] quit
+npm run widget -- --report <session.json> --size medium   # small | medium | large; [s] cycles, [h] hint, [q] quit
 ```
 
-In the desktop app, click **Widget** in the header for the same view as a small, always-on-top window you can park beside your terminal. It follows your newest capture, and hints you pull there are recorded the same way.
+In the desktop app, click **Widget** in the header for the same view as a small, always-on-top window you can park beside your terminal. It follows your newest capture, and hints you pull there are recorded the same way. Three sizes: **small** (phase and one line), **medium** (stats and your open threads), **large** (adds your latest finds and pace) — switch with S/M/L in its header or the `s` key.
 
 **Draft a report** — turn a graded run into an OSCP/CPTS-style Markdown report (findings with severity, evidence, reproduction and remediation), deterministic and offline:
 

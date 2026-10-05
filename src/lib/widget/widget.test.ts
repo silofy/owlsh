@@ -64,3 +64,36 @@ describe("renderWidget", () => {
     expect(out).toContain("−3 independence");
   });
 });
+
+describe("widget sizes", () => {
+  const s = deriveWidgetState(report, Date.parse(report.session.ended_at));
+
+  it("small: phase + one coaching line, no stats", () => {
+    const out = renderWidget(s, { size: "small" });
+    expect(out.length).toBeLessThanOrEqual(7);
+    expect(out.join("\n")).not.toContain("stealth");
+    expect(out.join("\n")).toContain(s.phase.toUpperCase());
+  });
+
+  it("large: adds latest finds and pace", () => {
+    const out = renderWidget(s, { size: "large" }).join("\n");
+    expect(out).toContain("latest finds");
+    expect(out).toContain(`${s.commands} commands`);
+  });
+
+  it("each size keeps a constant box width", () => {
+    for (const size of ["small", "medium", "large"] as const) {
+      const out = renderWidget(s, { size });
+      expect(new Set(out.map((l) => l.length)).size).toBe(1);
+    }
+  });
+
+  it("masks secret kinds in the latest finds", () => {
+    const r = structuredClone(report);
+    r.findings = [{ id: "c", kind: "cred", value: "hunter2", source_seq: 1 }, { id: "p", kind: "port", value: "22", source_seq: 2 }];
+    const recent = deriveWidgetState(r).recent;
+    expect(recent[0]).toEqual({ kind: "port", value: "22" });
+    expect(recent[1]).toEqual({ kind: "cred", value: "••••" });
+    expect(JSON.stringify(recent)).not.toContain("hunter2");
+  });
+});

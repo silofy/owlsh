@@ -1,7 +1,9 @@
 /**
  * The live widget, in the terminal — run it in a pane beside your shell (e.g. tmux split).
  *
- *   npm run widget -- --report <session.json>      # a live capture or a finished report
+ *   npm run widget -- --report <session.json> [--size small|medium|large]
+ *
+ * [s] cycles the size live.
  *
  * Redraws whenever the file changes. Mirrors your run and coaches process only; [h] pulls an
  * opt-in hint that costs independence (recorded in <report>.hints, merged into the grade), [q] quits.
@@ -10,13 +12,14 @@ import { readFileSync, writeFileSync, existsSync, watchFile } from "node:fs";
 import { resolve } from "node:path";
 import type { WatcherReport } from "../src/types/report";
 import { deriveWidgetState } from "../src/lib/widget/state";
-import { renderWidget } from "../src/lib/widget/render";
+import { renderWidget, WIDGET_SIZES, type WidgetSize } from "../src/lib/widget/render";
 import { hintFor, nextTier, independencePenalty, HINTS_SUFFIX, type HintPull } from "../src/lib/widget/hints";
 
 const argv = process.argv.slice(2);
 const arg = (k: string) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : undefined; };
 const path = resolve(arg("--report") ?? "fixtures/session-demo-full.json");
-const width = Number(arg("--width") ?? 46);
+const widthArg = arg("--width");
+let size: WidgetSize = (WIDGET_SIZES as string[]).includes(arg("--size") ?? "") ? (arg("--size") as WidgetSize) : "medium";
 const hintsPath = path + HINTS_SUFFIX; // not .json — the app reads every .json in sessions/ as a report
 
 let pulls: HintPull[] = existsSync(hintsPath) ? JSON.parse(readFileSync(hintsPath, "utf8")) : [];
@@ -36,7 +39,7 @@ function load() {
 function draw() {
   if (!report) return;
   const state = deriveWidgetState(report);
-  const lines = renderWidget(state, { width, hint: lastHint, penalty: independencePenalty(pulls) });
+  const lines = renderWidget(state, { size, width: widthArg ? Number(widthArg) : undefined, hint: lastHint, penalty: independencePenalty(pulls) });
   process.stdout.write("\x1b[2J\x1b[H" + lines.map(colour).join("\n") + "\n");
 }
 
@@ -61,5 +64,6 @@ if (process.stdin.isTTY) {
     const k = b.toString();
     if (k === "q" || k === "\u0003") { process.stdout.write("\x1b[2J\x1b[H"); process.exit(0); }
     if (k === "h") pullHint();
+    if (k === "s") { size = WIDGET_SIZES[(WIDGET_SIZES.indexOf(size) + 1) % WIDGET_SIZES.length]; draw(); }
   });
 }

@@ -3,5 +3,5 @@
   "identifier": "default",
   "description": "Default capability set for the report window. The Phase-1 slice needs only the core webview — no filesystem, shell, or network permissions.",
   "windows": ["main", "widget"],
-  "permissions": ["core:default", "core:window:allow-start-dragging", "core:window:allow-close"]
+  "permissions": ["core:default", "core:window:allow-start-dragging", "core:window:allow-close", "core:window:allow-set-size"]
 }

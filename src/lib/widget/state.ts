@@ -12,7 +12,14 @@ export interface WidgetState {
   findings: number;
   threads: string[];
   nudge: string | null;
+  /** Newest findings first (large size) — your own loot; secret kinds are masked. */
+  recent: { kind: string; value: string }[];
+  /** Pace (large size): commands so far, and time since the last new finding (null when none yet). */
+  commands: number;
+  sinceLastFindMs: number | null;
 }
+
+const SECRET_KINDS = new Set(["cred", "hash"]);
 
 const STALE_MS = 10 * 60_000; // no new finding for this long → "widen the search?"
 
@@ -38,14 +45,22 @@ export function deriveWidgetState(report: WatcherReport, nowMs: number = Date.no
   if (unvisited) threads.push(unvisited === 1 ? "A path you found was never revisited." : `${unvisited} paths you found were never revisited.`);
 
   // process nudges: rabbit hole on the latest work, or a long stretch with nothing new
+  const seqAt = (seq: number) => eps.find((e) => e.seq === seq)?.started_at_ms ?? 0;
+  const recent = [...findings]
+    .sort((a, b) => b.source_seq - a.source_seq)
+    .slice(0, 3)
+    .map((f) => ({ kind: f.kind, value: SECRET_KINDS.has(f.kind) ? "••••" : f.value }));
+  const lastFindAt = findings.length ? Math.max(...findings.map((f) => seqAt(f.source_seq))) : 0;
+  const lastAt = last?.started_at_ms ?? 0;
+  const sinceLastFindMs = lastFindAt && lastAt ? Math.max(0, lastAt - lastFindAt) : null;
+
   let nudge: string | null = null;
   const holes = computeFocus(report).rabbit_holes;
   const lastHole = holes[holes.length - 1];
   if (last && lastHole && lastHole.end_seq === last.seq) {
     nudge = `Long run on ${lastHole.binary} with little to show. Step back and re-enumerate?`;
-  } else if (findings.length && last?.started_at_ms) {
-    const lastFind = Math.max(...findings.map((f) => eps.find((e) => e.seq === f.source_seq)?.started_at_ms ?? 0));
-    if (lastFind && last.started_at_ms - lastFind > STALE_MS) nudge = `Nothing new in ${Math.round((last.started_at_ms - lastFind) / 60_000)}m. Widen the search?`;
+  } else if (sinceLastFindMs != null && sinceLastFindMs > STALE_MS) {
+    nudge = `Nothing new in ${Math.round(sinceLastFindMs / 60_000)}m. Widen the search?`;
   }
 
   return {
@@ -57,5 +72,8 @@ export function deriveWidgetState(report: WatcherReport, nowMs: number = Date.no
     findings: findings.length,
     threads,
     nudge,
+    recent,
+    commands: eps.length,
+    sinceLastFindMs,
   };
 }
