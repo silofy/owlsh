@@ -109,6 +109,12 @@ The Watcher grades a run from any of these sources too — each feeds the same e
 
 A run imported without a write-up is graded against a canonical methodology ladder (host or web), so coverage is meaningful rather than zero. The **defensive** run uses the attacker capture as the answer key and scores five metrics: Coverage, Reconstruction, Time-to-detect, Scoping and Discipline.
 
+**Live widget** — a compact companion to keep in a pane beside your shell (e.g. a tmux split). It mirrors your run as you work — phase, elapsed time, stealth, findings — and flags your own loose threads (an unused credential, a path you never revisited) or a long run with little to show. It never tells you the next move: hints are opt-in (`h`), escalate one tier at a time, and each pull costs independence.
+
+```sh
+npm run widget -- --report <session.json>   # redraws as the capture updates; [h] hint, [q] quit
+```
+
 **Draft a report** — turn a graded run into an OSCP/CPTS-style Markdown report (findings with severity, evidence, reproduction and remediation), deterministic and offline:
 
 ```sh

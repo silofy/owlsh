@@ -21,8 +21,10 @@ describe("Section", () => {
         <p>x</p>
       </Section>,
     );
-    expect(html).toContain('class="sr-only">the explainable rubric');
-    expect(html).toContain('title="the explainable rubric"');
+    // exposed to assistive tech on the focusable info button, and as a hover/focus tooltip that's
+    // hidden until then — never printed as visible prose
+    expect(html).toContain('aria-label="the explainable rubric"');
+    expect(html).toMatch(/role="tooltip" class="[^"]*invisible[^"]*">the explainable rubric</);
   });
 });
 

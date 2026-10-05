@@ -32,10 +32,10 @@ describe("report renders end-to-end", () => {
   it("renders the new layout's hero, Findings, and Session window sections", () => {
     // The hero — the single evidence-backed takeaway, led big above the fold (see HeroLesson).
     expect(html).toContain("The one lesson");
-    // The Deep dive's Findings and Timeline tabs stay mounted (just visually `hidden`), so their
-    // labels are always in the static markup regardless of which tab is active.
+    // The detail views are docked inline under the beat each explains (no tab drawer), so their
+    // section titles are always in the static markup.
     expect(html).toContain("Findings");
-    expect(html).toContain("Timeline");
+    expect(html).toContain("How the run unfolded");
     // The Session window accordion (SessionFacts + TrimControl), collapsed by default.
     expect(html).toContain("Session window");
   });

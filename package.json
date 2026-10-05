@@ -30,7 +30,8 @@
     "doctor": "node scripts/doctor.mjs",
     "capture": "node scripts/capture.mjs",
     "pretauri": "node scripts/doctor.mjs",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "widget": "vite-node scripts/widget.tsx"
   },
   "dependencies": {
     "@fontsource-variable/hanken-grotesk": "^5.2.8",
