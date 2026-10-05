@@ -19,6 +19,7 @@
  * is routed to an integrity queue with an evidence bundle — a signal to a human, never an automated
  * verdict — rather than being averaged away. Pure and deterministic (browser-safe, no crypto).
  */
+import { independencePenalty } from "../widget/hints";
 import type { WatcherReport } from "../../types/report";
 
 export const RUBRIC_V1 = {
@@ -96,7 +97,12 @@ export function computeGrade(report: WatcherReport): Grade {
   // fixtures carry it — no live capture ever computes it — so treating "absent" as 0 both docked a real
   // run 15 points and falsely routed it to the integrity queue. When it wasn't measured, drop it from
   // the rubric and the gate entirely and re-normalize the remaining weights.
-  const measured = m.independence != null;
+  const signalMeasured = m.independence != null;
+  // Hint pulls from the live widget are a direct, self-declared independence signal: pulling any makes
+  // independence measured (from 100 when there's no other signal) and deducts the tiered penalty.
+  const pulls = report.hints ?? [];
+  const hintPenalty = independencePenalty(pulls);
+  const measured = signalMeasured || pulls.length > 0;
 
   const raws: Record<RubricKey, number> = {
     coverage: clamp(m.objective_coverage_pct),
@@ -104,7 +110,7 @@ export function computeGrade(report: WatcherReport): Grade {
     efficiency: clamp(m.efficiency_pct),
     progression: clamp(m.ukc_progression ?? 100),
     discipline: clamp(m.stealth_score),
-    independence: clamp(m.independence?.score ?? 0),
+    independence: measured ? clamp((m.independence?.score ?? 100) - hintPenalty) : 0,
     methodology: clamp(m.methodology_coverage_pct ?? 0),
     focus: clamp(m.focus_discipline_pct ?? 100),
   };
@@ -126,7 +132,9 @@ export function computeGrade(report: WatcherReport): Grade {
   score = round1(score);
 
   const indep = raws.independence;
-  const flagged = measured && indep < INDEPENDENCE_GATE;
+  // The integrity gate stays reserved for the underlying integrity signal: a declared hint lowers the
+  // score but is not misconduct, so hints alone never route a run to the integrity queue.
+  const flagged = signalMeasured && clamp(m.independence!.score) < INDEPENDENCE_GATE;
 
   const rationale: string[] = [];
   if (flagged) {
@@ -142,6 +150,7 @@ export function computeGrade(report: WatcherReport): Grade {
       if (raws[key] < 50) rationale.push(`Low ${key} (${round1(raws[key])}).`);
     }
   }
+  if (pulls.length) rationale.push(`Used ${pulls.length} hint${pulls.length === 1 ? "" : "s"} from the live widget (−${hintPenalty} independence).`);
   if (rationale.length === 0) rationale.push("Solid across the rubric; no integrity concerns.");
 
   return {

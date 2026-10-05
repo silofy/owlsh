@@ -4,20 +4,20 @@
  *   npm run widget -- --report <session.json>      # a live capture or a finished report
  *
  * Redraws whenever the file changes. Mirrors your run and coaches process only; [h] pulls an
- * opt-in hint that costs independence (recorded in <report>.hints.json), [q] quits.
+ * opt-in hint that costs independence (recorded in <report>.hints, merged into the grade), [q] quits.
  */
 import { readFileSync, writeFileSync, existsSync, watchFile } from "node:fs";
 import { resolve } from "node:path";
 import type { WatcherReport } from "../src/types/report";
 import { deriveWidgetState } from "../src/lib/widget/state";
 import { renderWidget } from "../src/lib/widget/render";
-import { hintFor, nextTier, independencePenalty, type HintPull } from "../src/lib/widget/hints";
+import { hintFor, nextTier, independencePenalty, HINTS_SUFFIX, type HintPull } from "../src/lib/widget/hints";
 
 const argv = process.argv.slice(2);
 const arg = (k: string) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : undefined; };
 const path = resolve(arg("--report") ?? "fixtures/session-demo-full.json");
 const width = Number(arg("--width") ?? 46);
-const hintsPath = path + ".hints.json";
+const hintsPath = path + HINTS_SUFFIX; // not .json — the app reads every .json in sessions/ as a report
 
 let pulls: HintPull[] = existsSync(hintsPath) ? JSON.parse(readFileSync(hintsPath, "utf8")) : [];
 let lastHint: string | null = null;

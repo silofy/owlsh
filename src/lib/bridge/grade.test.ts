@@ -201,3 +201,46 @@ describe("v2 rubric (candidate C — reports carrying the methodology signal)", 
     expect(activeWeight).toBeCloseTo(1, 9);
   });
 });
+
+describe("live-widget hint pulls", () => {
+  const unmeasured = (): WatcherReport => {
+    const r = structuredClone(report);
+    delete (r.metrics as { independence?: unknown }).independence;
+    return r;
+  };
+
+  it("change nothing when no hint was pulled", () => {
+    const r = unmeasured();
+    expect(computeGrade({ ...r, hints: [] })).toEqual(computeGrade(r));
+  });
+
+  it("make independence measured from 100 and deduct the tiered penalty", () => {
+    const base = computeGrade(unmeasured());
+    const g = computeGrade({ ...unmeasured(), hints: [{ tier: 1, atMs: 1, phase: "Discovery" }, { tier: 2, atMs: 2, phase: "Discovery" }] });
+    expect(base.independence_gate.measured).toBe(false);
+    expect(g.independence_gate.measured).toBe(true);
+    expect(g.components.independence!.raw).toBe(91); // 100 − (3 + 6)
+    expect(g.rationale.join(" ")).toMatch(/Used 2 hints .*−9 independence/);
+  });
+
+  it("deduct from an existing independence signal", () => {
+    const r = structuredClone(report);
+    r.metrics.independence = { score: 80, signals: {} };
+    const g = computeGrade({ ...r, hints: [{ tier: 3, atMs: 1, phase: "x" }] });
+    expect(g.components.independence!.raw).toBe(70);
+  });
+
+  it("lower the grade as more are pulled", () => {
+    const one = computeGrade({ ...unmeasured(), hints: [{ tier: 1, atMs: 1, phase: "x" }] }).score;
+    const three = computeGrade({ ...unmeasured(), hints: [{ tier: 1, atMs: 1, phase: "x" }, { tier: 2, atMs: 2, phase: "x" }, { tier: 3, atMs: 3, phase: "x" }] }).score;
+    expect(three).toBeLessThan(one);
+  });
+
+  it("never route a run to the integrity queue on hints alone", () => {
+    const many = Array.from({ length: 10 }, (_, i) => ({ tier: 3 as const, atMs: i, phase: "x" }));
+    const g = computeGrade({ ...unmeasured(), hints: many });
+    expect(g.components.independence!.raw).toBe(0);
+    expect(g.independence_gate.flagged).toBe(false);
+    expect(g.routed_to).toBe("grade");
+  });
+});

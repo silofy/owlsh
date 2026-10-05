@@ -1,9 +1,19 @@
 /** Opt-in, graded hints. The widget never volunteers these: the operator pulls one when stuck, and
  *  each pull is recorded and costs independence. Prompts are generic methodology — they point at
  *  *process* (what kind of thing to re-check), never at a box-specific answer. */
-export type HintTier = 1 | 2 | 3;
+import type { HintPull, WatcherReport } from "../../types/report";
 
-export interface HintPull { tier: HintTier; atMs: number; phase: string }
+export type HintTier = HintPull["tier"];
+export type { HintPull };
+
+/** Hint pulls live in a sidecar next to the capture (`<report>.hints`) — deliberately NOT `.json`,
+ *  since the app treats every `.json` in the sessions folder as a report. Readers merge it in. */
+export const HINTS_SUFFIX = ".hints";
+
+/** The report with its sidecar hint pulls attached (no-op when there are none). */
+export function attachHints(report: WatcherReport, pulls: HintPull[] | null | undefined): WatcherReport {
+  return pulls && pulls.length ? { ...report, hints: pulls } : report;
+}
 
 /** Independence points deducted per pull, by tier. */
 export const HINT_PENALTY: Record<HintTier, number> = { 1: 3, 2: 6, 3: 10 };

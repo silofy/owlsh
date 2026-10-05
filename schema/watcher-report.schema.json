@@ -315,6 +315,21 @@
       }
     },
 
+    "hints": {
+      "type": "array",
+      "description": "Opt-in hint pulls from the live widget. Each pull lowers the independence component of the grade.",
+      "items": {
+        "type": "object",
+        "required": ["tier", "atMs", "phase"],
+        "additionalProperties": false,
+        "properties": {
+          "tier": { "type": "integer", "enum": [1, 2, 3] },
+          "atMs": { "type": "number", "minimum": 0 },
+          "phase": { "type": "string" }
+        }
+      }
+    },
+
     "ghost": {
       "type": "object",
       "description": "Counterfactual 'optimal-from-your-state' analysis (schema v1.4). Deterministic; never feeds the grade.",

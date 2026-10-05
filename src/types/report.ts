@@ -241,6 +241,13 @@ export interface Ghost {
   items?: GhostItem[];
 }
 
+/** One opt-in hint pull from the live widget (tiers escalate 1→3; each costs independence). */
+export interface HintPull {
+  tier: 1 | 2 | 3;
+  atMs: number;
+  phase: string;
+}
+
 export interface WatcherReport {
   schema_version: "1.0" | "1.1" | "1.2" | "1.3" | "1.4";
   session: Session;
@@ -261,4 +268,6 @@ export interface WatcherReport {
   findings?: Finding[];
   /** Counterfactual "optimal-from-your-state" analysis (schema v1.4). Deterministic; never feeds the grade. */
   ghost?: Ghost;
+  /** Hint pulls from the live widget; each lowers the independence component of the grade. */
+  hints?: HintPull[];
 }

@@ -5,7 +5,8 @@
  *
  * Defaults: reads fixtures/session-demo-full.json, writes dist/report.md. Deterministic; no model.
  */
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { attachHints, HINTS_SUFFIX } from "../src/lib/widget/hints";
 import { resolve, dirname } from "node:path";
 import { draftReport } from "../src/lib/report/draft";
 import type { WatcherReport } from "../src/types/report";
@@ -20,7 +21,9 @@ const argOf = (flag: string, def: string) => {
 const reportPath = resolve(root, argOf("--report", "fixtures/session-demo-full.json"));
 const outPath = resolve(root, argOf("--out", "dist/report.md"));
 
-const report = JSON.parse(readFileSync(reportPath, "utf8")) as WatcherReport;
+// merge any live-widget hint pulls from the sidecar so the drafted report reflects the same grade
+const hintsPath = reportPath + HINTS_SUFFIX;
+const report = attachHints(JSON.parse(readFileSync(reportPath, "utf8")) as WatcherReport, existsSync(hintsPath) ? JSON.parse(readFileSync(hintsPath, "utf8")) : null);
 const md = draftReport(report);
 mkdirSync(dirname(outPath), { recursive: true });
 writeFileSync(outPath, md, "utf8");
