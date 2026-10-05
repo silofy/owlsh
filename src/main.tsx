@@ -5,11 +5,15 @@ import "@fontsource-variable/spline-sans-mono";
 import "./index.css";
 import { App } from "./App";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { WidgetWindow } from "./components/WidgetWindow";
+
+// The floating live-widget window loads the same bundle with ?widget=1 (see open_widget in src-tauri).
+const isWidget = new URLSearchParams(window.location.search).has("widget");
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ErrorBoundary>
-      <App />
+      {isWidget ? <WidgetWindow /> : <App />}
     </ErrorBoundary>
   </StrictMode>,
 );

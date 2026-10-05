@@ -115,6 +115,8 @@ A run imported without a write-up is graded against a canonical methodology ladd
 npm run widget -- --report <session.json>   # redraws as the capture updates; [h] hint, [q] quit
 ```
 
+In the desktop app, click **Widget** in the header for the same view as a small, always-on-top window you can park beside your terminal. It follows your newest capture, and hints you pull there are recorded the same way.
+
 **Draft a report** — turn a graded run into an OSCP/CPTS-style Markdown report (findings with severity, evidence, reproduction and remediation), deterministic and offline:
 
 ```sh

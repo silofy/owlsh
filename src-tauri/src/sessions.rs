@@ -71,3 +71,50 @@ fn with_hints(report_path: &std::path::Path, raw: String) -> String {
         None => raw,
     }
 }
+
+/// The most recently written session report (with its hint pulls merged) — what the floating widget
+/// window follows. `None` until a capture has written anything.
+#[derive(serde::Serialize)]
+pub struct LatestSession {
+    path: String,
+    json: String,
+}
+
+#[tauri::command]
+pub fn latest_session() -> Option<LatestSession> {
+    let entries = fs::read_dir(sessions_dir()).ok()?;
+    let mut best: Option<(std::time::SystemTime, PathBuf)> = None;
+    for e in entries.flatten() {
+        let p = e.path();
+        if p.extension().and_then(|x| x.to_str()) != Some("json") {
+            continue;
+        }
+        let Ok(t) = e.metadata().and_then(|m| m.modified()) else { continue };
+        if best.as_ref().map_or(true, |(bt, _)| t > *bt) {
+            best = Some((t, p));
+        }
+    }
+    let (_, p) = best?;
+    let raw = fs::read_to_string(&p).ok()?;
+    Some(LatestSession { path: p.display().to_string(), json: with_hints(&p, raw) })
+}
+
+/// Append one hint pull to `<report>.hints`. The path must resolve to a `.json` report inside the
+/// sessions folder, so the webview can't point this command at an arbitrary file.
+#[tauri::command]
+pub fn record_hint(path: String, tier: u8, at_ms: f64, phase: String) -> Result<(), String> {
+    if !(1..=3).contains(&tier) {
+        return Err("tier must be 1, 2 or 3".into());
+    }
+    let dir = fs::canonicalize(sessions_dir()).map_err(|e| e.to_string())?;
+    let report = fs::canonicalize(&path).map_err(|e| e.to_string())?;
+    if !report.starts_with(&dir) || report.extension().and_then(|x| x.to_str()) != Some("json") {
+        return Err("not a session report".into());
+    }
+    let side = PathBuf::from(format!("{}.hints", report.display()));
+    let mut pulls: Vec<serde_json::Value> =
+        fs::read_to_string(&side).ok().and_then(|s| serde_json::from_str(&s).ok()).unwrap_or_default();
+    pulls.push(serde_json::json!({ "tier": tier, "atMs": at_ms, "phase": phase }));
+    let body = serde_json::to_string_pretty(&pulls).map_err(|e| e.to_string())?;
+    fs::write(&side, body).map_err(|e| e.to_string())
+}

@@ -9,6 +9,28 @@ mod pwnbox;
 mod secrets;
 mod sessions;
 
+/// Open (or focus) the floating live-widget window: small, frameless, always on top, so it can sit
+/// beside a terminal while you work. It renders the same widget view, routed by `?widget=1`.
+#[tauri::command]
+fn open_widget(app: tauri::AppHandle) -> Result<(), String> {
+    use tauri::Manager;
+    if let Some(w) = app.get_webview_window("widget") {
+        let _ = w.show();
+        let _ = w.set_focus();
+        return Ok(());
+    }
+    tauri::WebviewWindowBuilder::new(&app, "widget", tauri::WebviewUrl::App("index.html?widget=1".into()))
+        .title("The Watcher — widget")
+        .inner_size(360.0, 330.0)
+        .min_inner_size(300.0, 240.0)
+        .always_on_top(true)
+        .decorations(false)
+        .resizable(true)
+        .build()
+        .map(|_| ())
+        .map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -17,6 +39,9 @@ pub fn run() {
             llm::start_ollama,
             llm::pull_model,
             sessions::list_sessions,
+            sessions::latest_session,
+            sessions::record_hint,
+            open_widget,
             sessions::list_ssh_logs,
             net::fetch_writeup,
             net::open_url,

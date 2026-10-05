@@ -30,6 +30,7 @@ import { pickOneLesson } from "./lib/one-lesson";
 import { shouldShowNudge } from "./lib/onboarding";
 import { ScanEye } from "./components/icons";
 import { ditherMask } from "./lib/dither";
+import { isDesktop } from "./lib/net";
 import { StepStrip } from "./components/StepStrip";
 import { DefenseRubric } from "./components/DefenseRubric";
 import type { OneLesson } from "./lib/one-lesson";
@@ -233,6 +234,16 @@ export function App() {
               ) : (
                 <button type="button" onClick={openOnboarding} className="label text-faint hover:text-muted">
                   Setup guide
+                </button>
+              )}
+              {isDesktop() && (
+                <button
+                  type="button"
+                  onClick={() => void import("@tauri-apps/api/core").then(({ invoke }) => invoke("open_widget"))}
+                  className="label rounded-[3px] border border-edge px-2.5 py-1.5 text-muted transition-colors hover:border-signal hover:text-fg"
+                  title="Open the live widget: a small always-on-top window to keep beside your terminal"
+                >
+                  Widget
                 </button>
               )}
               <PwnboxSync />
