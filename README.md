@@ -13,7 +13,7 @@ Record your run against any box, then get a graded debrief: what you achieved, w
 
 <sub>Formerly <b>The Watcher</b>. Existing sessions, settings and plugins carry over automatically.</sub>
 
-[Features](#features) · [Install](#install) · [Usage](#usage) · [How it works](#how-it-works) · [Testing](TESTING.md)
+**[owlsh.com](https://owlsh.com)** · [Features](#features) · [Install](#install) · [Usage](#usage) · [How it works](#how-it-works) · [Testing](TESTING.md)
 
 </div>
 
@@ -28,7 +28,7 @@ Record your run against any box, then get a graded debrief: what you achieved, w
   </tr>
   <tr>
     <td width="50%"><img src="docs/screenshots/grade.png" alt="Explainable rubric: radar plus seven weighted metrics"><br><b>A grade you can defend</b> — seven weighted metrics across ATT&amp;CK, the Kill Chain and CWE.</td>
-    <td width="50%"><img src="docs/screenshots/report.png" alt="OSCP/CPTS-style report with executive summary"><br><b>The report writes itself</b> — an OSCP/CPTS-style write-up with a CISO summary, exported as Markdown or PDF. <a href="https://watcher-site-six.vercel.app/assets/owlsh-sample-report-abducted.pdf">Sample PDF</a>.</td>
+    <td width="50%"><img src="docs/screenshots/report.png" alt="OSCP/CPTS-style report with executive summary"><br><b>The report writes itself</b> — an OSCP/CPTS-style write-up with a CISO summary, exported as Markdown or PDF. <a href="https://owlsh.com/assets/owlsh-sample-report-abducted.pdf">Sample PDF</a>.</td>
   </tr>
   <tr>
     <td colspan="2"><img src="docs/screenshots/widget.png" alt="The live widget in a tmux split beside your shell"><br><b>A coach beside your shell</b> — the live widget mirrors your run in a tmux pane and flags loose ends. Hints are opt-in and cost you independence.</td>
