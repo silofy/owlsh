@@ -215,14 +215,14 @@ dependencies = [
 
 [[package]]
 name = "owlsh-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "regex",
 ]
 
 [[package]]
 name = "owlsh-daemon"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "owlsh-core",
  "owlsh-store",
@@ -234,7 +234,7 @@ dependencies = [
 
 [[package]]
 name = "owlsh-store"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "rusqlite",
  "serde",
