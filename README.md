@@ -101,12 +101,12 @@ Then capture, which differs by where you're working:
 
 Two real runs you can watch build live in your browser, no install — transcribed from public write-ups, flags and credentials redacted:
 
-- **[HTB Abducted](https://silofy.github.io/watcher-demos/?demo=abducted)** (medium) — Samba print-job RCE → `rclone` creds → wide-links pivot → writable systemd drop-in to root.
-- **[THM RootMe](https://silofy.github.io/watcher-demos/?demo=rootme)** (easy) — upload-filter bypass to a `www-data` shell → SUID-python GTFOBins jump to root.
+- **[HTB Abducted](https://silofy.github.io/owlsh-demos/?demo=abducted)** (medium) — Samba print-job RCE → `rclone` creds → wide-links pivot → writable systemd drop-in to root.
+- **[THM RootMe](https://silofy.github.io/owlsh-demos/?demo=rootme)** (easy) — upload-filter bypass to a `www-data` shell → SUID-python GTFOBins jump to root.
 
 ## The debrief
 
-When the run ends, the live panel settles into a single-column, lesson-first report: the verdict, then the one thing to fix, then the detail — so "what do I do differently next time" is answered before you scroll. [See it in the demo ▶](https://silofy.github.io/watcher-demos/?demo=abducted)
+When the run ends, the live panel settles into a single-column, lesson-first report: the verdict, then the one thing to fix, then the detail — so "what do I do differently next time" is answered before you scroll. [See it in the demo ▶](https://silofy.github.io/owlsh-demos/?demo=abducted)
 
 ![The graded debrief](docs/screenshots/grade.png)
 
