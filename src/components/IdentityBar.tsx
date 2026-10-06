@@ -99,7 +99,7 @@ export function IdentityBar() {
       <AsciiField mask={HEADER_MASK} alpha={0.34} className="-top-[70px] left-[calc(50%-50vw)] h-[calc(100%+100px)] w-screen" />
       <div className="relative z-[1]">
         {/* identity + the headline grade */}
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3.5">
             <MachineAvatar target={target} size={88} />
             <div className="min-w-0">
