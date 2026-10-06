@@ -1,4 +1,4 @@
-watcher-capture (0.1.0-1) unstable; urgency=medium
+owlsh (0.1.0-1) unstable; urgency=medium
 
   * Initial Debian packaging of the capture agent.
 

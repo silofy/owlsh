@@ -1,4 +1,4 @@
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 import type { Incident, ArtifactHit, InvestigationResult } from "./types";
 
 /** Token-level containment: indicator appears as a whole token in the text (case-insensitive). */
@@ -15,7 +15,7 @@ function surfaces(text: string, indicator: string): boolean {
   return boundaryOk(before, needle[0]) && boundaryOk(after, needle[needle.length - 1]);
 }
 
-export function alignInvestigation(incident: Incident, run: WatcherReport): InvestigationResult {
+export function alignInvestigation(incident: Incident, run: OwlshReport): InvestigationResult {
   const eps = [...(run.episodes ?? [])].sort((a, b) => a.seq - b.seq);
   const t0 = eps[0]?.started_at_ms ?? 0;
   const hits: ArtifactHit[] = incident.artifacts.map((a) => ({

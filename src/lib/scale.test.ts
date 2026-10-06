@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import fixture from "../../fixtures/session-htb-easy.json";
-import type { Episode, WatcherReport } from "../types/report";
+import type { Episode, OwlshReport } from "../types/report";
 import {
   buildTimeline,
   makeTimeScale,
@@ -13,7 +13,7 @@ import {
   DETOUR_COLOR,
 } from "./scale";
 
-const report = fixture as unknown as WatcherReport;
+const report = fixture as unknown as OwlshReport;
 
 const mk = (over: Partial<Episode>): Episode => ({
   seq: 0,

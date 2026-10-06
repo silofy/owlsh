@@ -4,7 +4,7 @@
  * Produces a single report.html that opens at file:// with zero dependencies:
  *   - all Tailwind-compiled CSS inlined in <style>
  *   - pre-rendered static markup in #root (readable with JS disabled)
- *   - a schema-versioned, public_safe-redacted JSON blob in <script id="watcher-data">
+ *   - a schema-versioned, public_safe-redacted JSON blob in <script id="owlsh-data">
  *   - the inlined React bundle that re-renders #root for interactivity
  *   - a free-tier watermark
  *
@@ -14,7 +14,7 @@ import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import rawFixture from "../fixtures/session-htb-easy.json";
-import type { WatcherReport } from "../src/types/report";
+import type { OwlshReport } from "../src/types/report";
 import { redactReport, maskIps } from "../src/lib/redact";
 
 const dist = resolve(import.meta.dirname, "../dist");
@@ -27,20 +27,20 @@ function readAsset(ext: string): string {
 }
 
 // Source the report: an external JSON (e.g. a live capture via ingest-capture) when
-// WATCHER_REPORT_JSON is set, else the bundled fixture under the public_safe profile.
+// OWLSH_REPORT_JSON is set, else the bundled fixture under the public_safe profile.
 // Inject it BEFORE importing App so the pre-rendered markup matches the runtime.
 const reportArgIdx = process.argv.indexOf("--report");
 const reportPath =
   (reportArgIdx >= 0 && reportArgIdx + 1 < process.argv.length ? process.argv[reportArgIdx + 1] : undefined) ??
-  process.env.WATCHER_REPORT_JSON;
+  process.env.OWLSH_REPORT_JSON;
 // Redact BOTH sources under public_safe — the whole promise of the portable export is a file safe to
 // post on Discord/GitHub, so an externally-supplied capture (which lands here with profile "full" and
 // unredacted episodes) must be scrubbed exactly like the bundled fixture, never embedded verbatim.
-const rawReport: WatcherReport = reportPath
-  ? (JSON.parse(readFileSync(resolve(reportPath), "utf8")) as WatcherReport)
-  : (rawFixture as unknown as WatcherReport);
-const report: WatcherReport = redactReport(rawReport, "public_safe");
-(globalThis as { __WATCHER_REPORT__?: WatcherReport }).__WATCHER_REPORT__ = report;
+const rawReport: OwlshReport = reportPath
+  ? (JSON.parse(readFileSync(resolve(reportPath), "utf8")) as OwlshReport)
+  : (rawFixture as unknown as OwlshReport);
+const report: OwlshReport = redactReport(rawReport, "public_safe");
+(globalThis as { __OWLSH_REPORT__?: OwlshReport }).__OWLSH_REPORT__ = report;
 const { App } = await import("../src/App");
 
 const css = readAsset(".css");
@@ -55,13 +55,13 @@ const html = `<!doctype html>
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>The Watcher — Session Report</title>
+<title>owlsh — Session Report</title>
 <style>${css}</style>
 </head>
 <body>
 <div id="root">${staticMarkup}</div>
-<div style="position:fixed;bottom:8px;right:12px;font:11px ui-sans-serif,system-ui;color:#5a6678;opacity:.7;pointer-events:none">Generated with The Watcher · free tier</div>
-<script type="application/json" id="watcher-data">${blob.replace(/</g, "\\u003c")}</script>
+<div style="position:fixed;bottom:8px;right:12px;font:11px ui-sans-serif,system-ui;color:#5a6678;opacity:.7;pointer-events:none">Generated with owlsh · free tier</div>
+<script type="application/json" id="owlsh-data">${blob.replace(/</g, "\\u003c")}</script>
 <script type="module">${js}</script>
 </body>
 </html>

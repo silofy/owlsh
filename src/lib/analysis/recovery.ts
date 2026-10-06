@@ -1,4 +1,4 @@
-import type { WatcherReport, Episode } from "../../types/report";
+import type { OwlshReport, Episode } from "../../types/report";
 
 export interface Recovery { stuck_seq: number; recovered_seq: number; latency_ms: number; }
 export interface RecoveryResult { recoveries: Recovery[]; median_ms: number | null; }
@@ -13,7 +13,7 @@ function median(xs: number[]): number | null {
 }
 
 /** Deterministic recovery: latency from the start of a stuck/detour cluster to the next objective-advancing episode. */
-export function computeRecovery(report: WatcherReport): RecoveryResult {
+export function computeRecovery(report: OwlshReport): RecoveryResult {
   const running = report.episodes.filter((e) => e.actor !== "think_pause" && e.actor !== "idle");
   const satisfierSeqs = new Set(report.golden_dag.map((o) => o.user_satisfied_by_seq).filter((s): s is number => s != null));
   const recoveries: Recovery[] = [];

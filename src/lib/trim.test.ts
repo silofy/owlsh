@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
 import fixture from "../../fixtures/session-htb-easy.json";
-import type { WatcherReport } from "../types/report";
+import type { OwlshReport } from "../types/report";
 import { applyTrim, seqBounds } from "./trim";
 import { computeMetrics } from "./metrics";
 
-const full = fixture as unknown as WatcherReport;
+const full = fixture as unknown as OwlshReport;
 
 describe("applyTrim", () => {
   it("returns the full report when range is null", () => {

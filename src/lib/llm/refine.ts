@@ -6,7 +6,7 @@
  *   refineClassification — confirm/override an episode's MITRE tactic (the table is the prior)
  *   judgeEquivalence     — does this episode satisfy this golden objective (the only LLM role in §4.3)
  */
-import type { Episode, GoldenObjective, WatcherReport } from "../../types/report";
+import type { Episode, GoldenObjective, OwlshReport } from "../../types/report";
 import { equivalenceIndex } from "../pipeline/align";
 import { CLASSIFY_SCHEMA, EQUIV_SCHEMA, TACTICS } from "./grammar";
 import type { LlmProvider } from "./provider";
@@ -83,7 +83,7 @@ export async function judgeEquivalence(provider: LlmProvider, ep: Episode, obj: 
 }
 
 /** Refine every runnable episode's classification. Rules-only (NullProvider) returns the report unchanged. */
-export async function refineReport(report: WatcherReport, provider: LlmProvider): Promise<WatcherReport> {
+export async function refineReport(report: OwlshReport, provider: LlmProvider): Promise<OwlshReport> {
   const episodes: Episode[] = [];
   for (const ep of report.episodes) {
     if (ep.actor === "think_pause" || ep.actor === "idle" || !ep.cmd) {

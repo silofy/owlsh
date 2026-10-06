@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { refineCoaching, buildCoachPrompt, type CoachStep } from "../src/lib/llm/coach";
 import type { LlmProvider } from "../src/lib/llm/provider";
-import type { WatcherReport } from "../src/types/report";
+import type { OwlshReport } from "../src/types/report";
 
 const provider = (json: unknown): LlmProvider => ({ name: "fake", available: async () => true, generateJson: async () => json });
-const report = { session: { machine: { name: "Uploadr" }, target_scope: "Uploadr" } } as unknown as WatcherReport;
+const report = { session: { machine: { name: "Uploadr" }, target_scope: "Uploadr" } } as unknown as OwlshReport;
 const steps: CoachStep[] = [{ seq: 12, cmd: "curl -F file=@shell.php", output: "rejected: .php blocked", kind: "dead-end", intended: "bypass upload filter" }];
 
 describe("refineCoaching", () => {

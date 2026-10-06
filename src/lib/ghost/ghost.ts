@@ -1,4 +1,4 @@
-import type { WatcherReport, Episode, Finding, GoldenObjective, GhostVerdict } from "../../types/report";
+import type { OwlshReport, Episode, Finding, GoldenObjective, GhostVerdict } from "../../types/report";
 import { computeSignalGhost, dedupeSignals } from "./signals";
 
 export interface GhostDiffItem { objective: string; verdict: GhostVerdict; unlock_seq: number | null; actual_seq: number | null; lag_ms: number; note: string; }
@@ -14,7 +14,7 @@ const ENABLING: Record<string, Finding["kind"][]> = {
 /** More than this many running episodes between unlock and action = a late pivot (you had chances to pivot). */
 const LATE_PIVOT_INTERVENING = 2;
 
-export function computeGhost(report: WatcherReport): GhostResult | null {
+export function computeGhost(report: OwlshReport): GhostResult | null {
   const golden = report.golden_dag ?? [];
   const episodes = report.episodes;
   const findings = report.findings ?? [];

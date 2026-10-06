@@ -5,12 +5,12 @@
  * coverage, and metrics. This is the safety valve for any missed or over-eager auto-boundary:
  * drag the start/end and the report regenerates identically.
  */
-import type { WatcherReport } from "../types/report";
+import type { OwlshReport } from "../types/report";
 import { derivePhases } from "./pipeline";
 import { computeMetrics, round } from "./metrics";
 
 /** Return the report scoped to the inclusive seq window, or the full report when range is null. */
-export function applyTrim(full: WatcherReport, range: [number, number] | null): WatcherReport {
+export function applyTrim(full: OwlshReport, range: [number, number] | null): OwlshReport {
   if (!range) return full;
   const lo = Math.min(range[0], range[1]);
   const hi = Math.max(range[0], range[1]);
@@ -30,7 +30,7 @@ export function applyTrim(full: WatcherReport, range: [number, number] | null): 
   // Every metric computeGrade reads (efficiency, stealth, breadth, progression, coverage) must be
   // re-derived for the trimmed window — spreading the full-session numbers made the scorecard describe
   // the whole run while the charts showed only the slice.
-  const scoped: WatcherReport = { ...full, episodes, golden_dag, phases };
+  const scoped: OwlshReport = { ...full, episodes, golden_dag, phases };
   const cm = computeMetrics(scoped);
   return {
     ...scoped,
@@ -50,7 +50,7 @@ export function applyTrim(full: WatcherReport, range: [number, number] | null): 
 }
 
 /** The full session's seq bounds, for the trim control. */
-export function seqBounds(full: WatcherReport): [number, number] {
+export function seqBounds(full: OwlshReport): [number, number] {
   const seqs = full.episodes.map((e) => e.seq);
   return [Math.min(...seqs), Math.max(...seqs)];
 }

@@ -1,4 +1,4 @@
-//! The Watcher — cross-platform PTY capture proof-of-concept.
+//! owlsh — cross-platform PTY capture proof-of-concept.
 //!
 //! Spawns the user's shell through a pseudo-terminal (ConPTY on Windows, openpty on
 //! Unix — one `portable-pty` API), parses output through a terminal model (line capture +
@@ -26,7 +26,7 @@ use portable_pty::{native_pty_system, PtySize};
 use uuid::Uuid;
 
 use envelope::TelemetryEvent;
-use watcher_core::{EndReason, SessionConfig, SessionController, SessionEvent};
+use owlsh_core::{EndReason, SessionConfig, SessionController, SessionEvent};
 use shell::{platform_profile, ShellProfile};
 use terminal::{clean_lines, extract_sessions, Captured, Sink, Terminal};
 
@@ -99,7 +99,7 @@ fn retag(events: &mut [TelemetryEvent], source: &str, context: &str) {
 /// exact boundaries (OSC 133), client-side regex redaction, and the guest context template.
 fn handshake_json(source: &str, context: &str) -> String {
     format!(
-        r#"{{"watcher_handshake":"1.0","plugin":"{source}","class":"source","capabilities":{{"has_exit_codes":true,"has_stdin":true,"boundary_confidence":"exact","redaction":"regex"}},"context_template":"{context}"}}"#
+        r#"{{"owlsh_handshake":"1.0","plugin":"{source}","class":"source","capabilities":{{"has_exit_codes":true,"has_stdin":true,"boundary_confidence":"exact","redaction":"regex"}},"context_template":"{context}"}}"#
     )
 }
 
@@ -112,7 +112,7 @@ fn forward_events(addr: &str, source: &str, context: &str, events: &[TelemetryEv
         writeln!(stream, "{}", serde_json::to_string(e)?)?;
     }
     stream.flush()?;
-    eprintln!("[watcher-capture] forwarded {} envelopes to {addr} (source={source}, context={context})", events.len());
+    eprintln!("[owlsh] forwarded {} envelopes to {addr} (source={source}, context={context})", events.len());
     Ok(())
 }
 
@@ -167,7 +167,7 @@ fn run_scripted(
     write!(writer, "{}\r", profile.integration_command())?;
     writer.flush()?;
     if !wait_until(&term, |t| t.has_b(), Duration::from_secs(5)) {
-        eprintln!("[watcher-capture] warning: OSC 133 markers not detected; boundaries degraded");
+        eprintln!("[owlsh] warning: OSC 133 markers not detected; boundaries degraded");
     }
 
     let mut events: Vec<TelemetryEvent> = Vec::new();
@@ -197,10 +197,10 @@ fn run_scripted(
     // Redaction runs before anything hits disk (the same invariant the attach path enforces): mask
     // IPs, flag hashes, and credential tokens so this debug transcript can't leak a live IP or a root
     // flag into a world-readable temp file.
-    let dump = std::env::temp_dir().join("watcher-capture-transcript.txt");
-    let transcript = watcher_core::redact(&term.lock().unwrap().lines.join("\n"));
+    let dump = std::env::temp_dir().join("owlsh-transcript.txt");
+    let transcript = owlsh_core::redact(&term.lock().unwrap().lines.join("\n"));
     let _ = std::fs::write(&dump, transcript);
-    eprintln!("[watcher-capture] transcript -> {}", dump.display());
+    eprintln!("[owlsh] transcript -> {}", dump.display());
 
     let _ = write!(writer, "exit\r");
     let _ = writer.flush();
@@ -266,7 +266,7 @@ fn run_interactive(
         install_ssh_tap();
         write!(writer, "{}\r", tap)?;
         writer.flush()?;
-        eprintln!("[watcher-capture] SSH sessions in this shell will be captured per-command.");
+        eprintln!("[owlsh] SSH sessions in this shell will be captured per-command.");
     }
 
     // Real stdin -> PTY (forward the user's keystrokes).
@@ -330,7 +330,7 @@ fn run_interactive(
 
 // ---- Attach mode: stream a local terminal into a live recording session ----
 //
-// A live session is a ~/.watcher/sessions/<uuid>.json file with the machine identity and
+// A live session is a ~/.owlsh/sessions/<uuid>.json file with the machine identity and
 // recording:true. `--attach` finds the newest one (or self-starts it) and streams the commands you
 // run in a watched shell straight into it as episodes, so your local hacking shows up in the
 // report, correlated to the box, with no second session to reconcile. A second terminal can attach
@@ -338,25 +338,25 @@ fn run_interactive(
 
 use serde_json::{json, Value};
 
-fn watcher_sessions_dir() -> Option<std::path::PathBuf> {
+fn owlsh_sessions_dir() -> Option<std::path::PathBuf> {
     let home = std::env::var("USERPROFILE").or_else(|_| std::env::var("HOME")).ok()?;
-    Some(std::path::Path::new(&home).join(".watcher").join("sessions"))
+    Some(std::path::Path::new(&home).join(".owlsh").join("sessions"))
 }
 
-/// Write the bundled `ssh()` capture tap to ~/.watcher/watcher-ssh.sh so the watched shell can
+/// Write the bundled `ssh()` capture tap to ~/.owlsh/owlsh-ssh.sh so the watched shell can
 /// source it. Best-effort — a failure just means SSH sessions fall back to one opaque block.
 fn install_ssh_tap() {
     if let Ok(home) = std::env::var("USERPROFILE").or_else(|_| std::env::var("HOME")) {
-        let dir = std::path::Path::new(&home).join(".watcher");
+        let dir = std::path::Path::new(&home).join(".owlsh");
         if std::fs::create_dir_all(&dir).is_ok() {
-            let _ = std::fs::write(dir.join("watcher-ssh.sh"), include_str!("../watcher-ssh.sh"));
+            let _ = std::fs::write(dir.join("owlsh-ssh.sh"), include_str!("../owlsh-ssh.sh"));
         }
     }
 }
 
 /// The newest still-recording session file (a live engagement already open on this machine).
 fn find_active_session() -> Option<(std::path::PathBuf, Value)> {
-    let dir = watcher_sessions_dir()?;
+    let dir = owlsh_sessions_dir()?;
     let mut best: Option<(std::path::PathBuf, Value, String)> = None;
     for e in std::fs::read_dir(&dir).ok()?.flatten() {
         let p = e.path();
@@ -412,13 +412,13 @@ fn episodes_from_captured(caps: &[Captured]) -> Vec<Value> {
     for (i, c) in caps.iter().enumerate() {
         let bin = binary_of(&c.cmd);
         let (tactic, technique) = tactic_for(&bin);
-        let digest: String = watcher_core::redact(&c.output).chars().take(280).collect();
+        let digest: String = owlsh_core::redact(&c.output).chars().take(280).collect();
         let duration_ms = c.end_us.saturating_sub(c.start_us) / 1000;
         let gap_before_ms = prev_end.map(|p| c.start_us.saturating_sub(p) / 1000).unwrap_or(0);
         prev_end = Some(c.end_us);
         out.push(json!({
             "seq": (i as u64) + 1,
-            "cmd": watcher_core::redact(&c.cmd),
+            "cmd": owlsh_core::redact(&c.cmd),
             "binary": bin,
             "started_at_ms": c.start_us / 1000,
             "duration_ms": duration_ms,
@@ -477,12 +477,12 @@ fn machine_arg(args: &[String]) -> Value {
 
 /// A complete, schema-shaped report for an agent-owned capture (the in-Pwnbox `--export` agent, or a
 /// self-started local `--attach`). Same shape the daemon writes for a live session, so the file can
-/// be dropped straight into ~/.watcher/sessions/. `source` is the §3.3
+/// be dropped straight into ~/.owlsh/sessions/. `source` is the §3.3
 /// provenance ("in_vm_daemon" for Pwnbox, "local_pty" for a local watched shell).
 fn build_base_report(uuid: &str, machine: Value, target: &str, context: &str, source: &str) -> Value {
     let t = iso_now();
     let intro = if source == "in_vm_daemon" {
-        "Captured inside Pwnbox. Download this file and drop it into ~/.watcher/sessions/ on your PC."
+        "Captured inside Pwnbox. Download this file and drop it into ~/.owlsh/sessions/ on your PC."
     } else {
         "Live local capture — commands stream into this report as you run them."
     };
@@ -564,7 +564,7 @@ fn run_attached(profile: &dyn ShellProfile, path: &std::path::Path, base: &Value
         install_ssh_tap();
         write!(writer, "{}\r", tap)?;
         writer.flush()?;
-        eprintln!("[watcher-capture] SSH sessions in this shell will be captured per-command.");
+        eprintln!("[owlsh] SSH sessions in this shell will be captured per-command.");
     }
 
     // Stream episodes into the session file as commands complete.
@@ -636,7 +636,7 @@ fn run_attached(profile: &dyn ShellProfile, path: &std::path::Path, base: &Value
     let eps = episodes_from_terminal(&term.lock().unwrap());
     let n = eps.len();
     write_session_episodes(path, base, eps);
-    eprintln!("[watcher-capture] detached — {n} command(s) written to the session report.");
+    eprintln!("[owlsh] detached — {n} command(s) written to the session report.");
     Ok(())
 }
 
@@ -696,7 +696,7 @@ fn prompt_start_new(machine: &str) -> bool {
         return false;
     }
     eprint!(
-        "[watcher-capture] a live session for '{machine}' is already recording.\n  \
+        "[owlsh] a live session for '{machine}' is already recording.\n  \
          Attach this terminal to it as a new lane, or start a new engagement? [A/n]: "
     );
     let _ = std::io::stderr().flush();
@@ -717,7 +717,7 @@ fn prompt_start_new(machine: &str) -> bool {
 // stdout/stderr, since preflight.ts can't be imported from Rust).
 
 const BURP_MCP_PORT: u16 = 9876;
-/// Standard sink the bridge tees its web envelopes into (WATCHER_WEB_NDJSON) — read by
+/// Standard sink the bridge tees its web envelopes into (OWLSH_WEB_NDJSON) — read by
 /// `scripts/ingest-capture.tsx` alongside `events.ndjson` so live `--web` traffic renders.
 const WEB_NDJSON_PATH: &str = "crates/capture/web-events.ndjson";
 
@@ -759,7 +759,7 @@ fn spawn_web_bridge(platform: &str) {
         // outside the repo root gets an honest, actionable message instead of a silently dead
         // web path.
         eprintln!(
-            "[watcher-capture] web capture: bridge.py not found at {} — run from the repo root, or see docs/web-capture.md — continuing without web capture.",
+            "[owlsh] web capture: bridge.py not found at {} — run from the repo root, or see docs/web-capture.md — continuing without web capture.",
             bridge.display()
         );
         return;
@@ -770,12 +770,12 @@ fn spawn_web_bridge(platform: &str) {
             .arg(&bridge)
             .arg("--platform")
             .arg(platform)
-            .env("WATCHER_WEB_NDJSON", WEB_NDJSON_PATH)
+            .env("OWLSH_WEB_NDJSON", WEB_NDJSON_PATH)
             .spawn()
         {
             Ok(_) => {
                 eprintln!(
-                    "[watcher-capture] web capture: spawned burp-bridge via {interpreter} (platform={platform})"
+                    "[owlsh] web capture: spawned burp-bridge via {interpreter} (platform={platform})"
                 );
                 return;
             }
@@ -783,7 +783,7 @@ fn spawn_web_bridge(platform: &str) {
         }
     }
     eprintln!(
-        "[watcher-capture] web capture: could not spawn burp-bridge ({}) — continuing without web capture.",
+        "[owlsh] web capture: could not spawn burp-bridge ({}) — continuing without web capture.",
         last_err.expect("loop always sets last_err before exiting without returning")
     );
 }
@@ -798,14 +798,15 @@ fn handle_web_capture(args: &[String], platform: &str) {
         if burp_mcp_reachable(BURP_MCP_PORT) {
             spawn_web_bridge(platform);
         } else {
-            eprintln!("[watcher-capture] {}", preflight_unreachable(BURP_MCP_PORT));
+            eprintln!("[owlsh] {}", preflight_unreachable(BURP_MCP_PORT));
         }
     } else if burp_mcp_reachable(BURP_MCP_PORT) {
-        eprintln!("[watcher-capture] {}", preflight_detected());
+        eprintln!("[owlsh] {}", preflight_detected());
     }
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    owlsh_core::migrate_legacy_home();
     let args: Vec<String> = std::env::args().collect();
 
     // `--shell <path>` picks the shell (and its marker scheme) by family; default = host shell.
@@ -835,10 +836,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let base = build_base_report(&session, machine_arg(&args), &target, &context, "in_vm_daemon");
         let path = std::path::PathBuf::from(&out);
         write_session_episodes(&path, &base, vec![]); // create it immediately so it's visible live
-        eprintln!("[watcher-capture] exporting to {out} — hack as normal, type 'exit' to finish.");
+        eprintln!("[owlsh] exporting to {out} — hack as normal, type 'exit' to finish.");
         run_attached(profile.as_ref(), &path, &base)?;
         mark_finished(&path); // imports as an archived run, not a live recording
-        eprintln!("[watcher-capture] done -> {out}. Download it and drop it into ~/.watcher/sessions/ on your PC.");
+        eprintln!("[owlsh] done -> {out}. Download it and drop it into ~/.owlsh/sessions/ on your PC.");
         return Ok(());
     }
 
@@ -861,12 +862,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let (path, base, self_started) = match (choice, active) {
             (AttachChoice::UseExisting, Some((p, b))) => {
-                eprintln!("[watcher-capture] joining the live session '{}' as a new lane.", session_label(&b));
+                eprintln!("[owlsh] joining the live session '{}' as a new lane.", session_label(&b));
                 (p, b, false)
             }
             (_, prior) => {
                 if prior.is_some() {
-                    eprintln!("[watcher-capture] a session was already live — starting a new engagement.");
+                    eprintln!("[owlsh] a session was already live — starting a new engagement.");
                 }
                 let target = arg_value(&args, "--target")
                     .or_else(|| requested_machine.clone())
@@ -876,18 +877,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     None => "host".to_string(), // unchanged local default when --platform is omitted
                 });
                 let base = build_base_report(&session, machine_arg(&args), &target, &context, "local_pty");
-                let dir = watcher_sessions_dir().ok_or("cannot resolve ~/.watcher/sessions")?;
+                let dir = owlsh_sessions_dir().ok_or("cannot resolve ~/.owlsh/sessions")?;
                 std::fs::create_dir_all(&dir)?;
                 let path = dir.join(format!("{session}.json"));
-                write_session_episodes(&path, &base, vec![]); // visible in The Watcher immediately
+                write_session_episodes(&path, &base, vec![]); // visible in owlsh immediately
                 if prior.is_none() {
-                    eprintln!("[watcher-capture] no live session found — started a new one ('{target}').");
+                    eprintln!("[owlsh] no live session found — started a new one ('{target}').");
                 }
                 (path, base, true)
             }
         };
         let name = session_label(&base);
-        eprintln!("[watcher-capture] attached to '{name}'. Your commands will appear in The Watcher live.");
+        eprintln!("[owlsh] attached to '{name}'. Your commands will appear in owlsh live.");
         eprintln!("                  Hack as normal; type 'exit' to stop capturing.");
         run_attached(profile.as_ref(), &path, &base)?;
         if self_started {
@@ -903,7 +904,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .and_then(|i| args.get(i + 1).cloned())
         .unwrap_or_else(|| "capture session".to_string());
 
-    eprintln!("[watcher-capture] session {session} via {surface} ({}, platform={platform})", if interactive { "interactive" } else { "scripted" });
+    eprintln!("[owlsh] session {session} via {surface} ({}, platform={platform})", if interactive { "interactive" } else { "scripted" });
 
     let raw_events = if interactive {
         run_interactive(profile.as_ref(), &session, &platform)?
@@ -930,7 +931,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         for e in &events {
             println!("{}", serde_json::to_string(e)?);
         }
-        eprintln!("[watcher-capture] emitted {} envelopes", events.len());
+        eprintln!("[owlsh] emitted {} envelopes", events.len());
     }
     Ok(())
 }
@@ -1102,7 +1103,7 @@ mod tests {
         // beyond stderr — it never spawns a process or touches capture's control flow. This is a
         // smoke test that the function returns normally (doesn't panic) in the common "no Burp,
         // no --web" case, which is the overwhelming majority of runs.
-        let args: Vec<String> = vec!["watcher-capture".into()];
+        let args: Vec<String> = vec!["owlsh".into()];
         handle_web_capture(&args, "local");
     }
 
@@ -1111,7 +1112,7 @@ mod tests {
         // --web with no Burp running must print the unreachable message and return — never
         // panic, never abort the caller. (The reachability probe here targets the real default
         // port, which is expected to be closed in CI/sandboxes.)
-        let args: Vec<String> = vec!["watcher-capture".into(), "--web".into()];
+        let args: Vec<String> = vec!["owlsh".into(), "--web".into()];
         handle_web_capture(&args, "local");
     }
 }

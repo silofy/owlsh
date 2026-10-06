@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { GoldenObjective, Target, WatcherReport } from "../types/report";
+import type { GoldenObjective, Target, OwlshReport } from "../types/report";
 import { alignEpisodes, annotateObjectiveStatus } from "../lib/pipeline";
 import {
   buildTimeline,
@@ -25,7 +25,7 @@ import defenseFixture from "../../fixtures/session-defense.json";
 
 /**
  * The normalized store. The report blob is resolved from, in order:
- *   1. an SSR-injected global / embedded <script id="watcher-data"> (the export — single
+ *   1. an SSR-injected global / embedded <script id="owlsh-data"> (the export — single
  *      session, §6.3),
  *   2. otherwise every fixtures/session-*.json (dev): the curated demo plus any captured
  *      session written by `npm run ingest` — selectable in the UI.
@@ -34,18 +34,18 @@ import defenseFixture from "../../fixtures/session-defense.json";
 interface SessionEntry {
   id: string;
   label: string;
-  report: WatcherReport;
+  report: OwlshReport;
 }
 
 function loadSessions(): SessionEntry[] {
-  const injected = (globalThis as { __WATCHER_REPORT__?: WatcherReport }).__WATCHER_REPORT__;
+  const injected = (globalThis as { __OWLSH_REPORT__?: OwlshReport }).__OWLSH_REPORT__;
   if (injected) return [{ id: "injected", label: injected.session.target_scope, report: injected }];
 
   if (typeof document !== "undefined") {
-    const el = document.getElementById("watcher-data");
+    const el = document.getElementById("owlsh-data");
     if (el?.textContent) {
       try {
-        const r = JSON.parse(el.textContent) as WatcherReport;
+        const r = JSON.parse(el.textContent) as OwlshReport;
         return [{ id: "embedded", label: r.session.target_scope, report: r }];
       } catch {
         /* fall through */
@@ -59,14 +59,14 @@ function loadSessions(): SessionEntry[] {
 }
 
 interface Derived {
-  report: WatcherReport;
+  report: OwlshReport;
   timeline: Timeline;
   metrics: ComputedMetrics;
   phaseWindows: PhaseWindow[];
   scale: TimeScale;
 }
 
-function derive(report: WatcherReport): Derived {
+function derive(report: OwlshReport): Derived {
   const timeline = buildTimeline(report.episodes);
   return {
     report,
@@ -81,7 +81,7 @@ const SESSIONS = loadSessions();
 
 // A mutable registry so live sessions (spawned in the browser, written by the daemon) can be merged
 // in at runtime alongside the bundled fixtures.
-const REPORTS: Record<string, WatcherReport> = {};
+const REPORTS: Record<string, OwlshReport> = {};
 for (const s of SESSIONS) REPORTS[s.id] = s.report;
 
 /** Defense fixtures (`mode: "defense"`) never enter the offense pipeline — they're held and
@@ -117,7 +117,7 @@ export interface SessionCard {
   mode?: "defense";
 }
 
-function toCard(id: string, r: WatcherReport): SessionCard {
+function toCard(id: string, r: OwlshReport): SessionCard {
   const g = computeGrade(r);
   const rooted = r.golden_dag.some((o) => /escalate_to_root|capture_flags|root\b/i.test(o.objective) && o.user_satisfied_by_seq != null);
   return {
@@ -143,13 +143,13 @@ function toCard(id: string, r: WatcherReport): SessionCard {
 }
 
 function toDefenseCard(id: string, d: DefenseReport): SessionCard {
-  const asWatcher = { session: d.session } as WatcherReport;
+  const asOwlsh = { session: d.session } as OwlshReport;
   const total = d.result.hits.length;
   const found = d.result.hits.filter((h) => h.found).length;
   return {
     id,
-    machine: machineOf(asWatcher),
-    target: targetOf(asWatcher),
+    machine: machineOf(asOwlsh),
+    target: targetOf(asOwlsh),
     target_scope: d.session.target_scope,
     started_at: d.session.started_at,
     ended_at: d.session.ended_at,
@@ -170,12 +170,12 @@ function toDefenseCard(id: string, d: DefenseReport): SessionCard {
 }
 
 /** Host-supplied prior runs (e.g. the marketing embed) so the Progress trend has history to plot.
- *  Read once from `window.__WATCHER_CARDS__` or a `<script id="watcher-cards">` JSON array; each entry
+ *  Read once from `window.__OWLSH_CARDS__` or a `<script id="owlsh-cards">` JSON array; each entry
  *  needs only the fields Progress uses. Never present in the real app, so this is inert there. */
 function injectedCards(): SessionCard[] {
-  let raw: unknown = (globalThis as { __WATCHER_CARDS__?: unknown }).__WATCHER_CARDS__;
+  let raw: unknown = (globalThis as { __OWLSH_CARDS__?: unknown }).__OWLSH_CARDS__;
   if (!raw && typeof document !== "undefined") {
-    const el = document.getElementById("watcher-cards");
+    const el = document.getElementById("owlsh-cards");
     if (el?.textContent) { try { raw = JSON.parse(el.textContent); } catch { /* ignore */ } }
   }
   if (!Array.isArray(raw)) return [];
@@ -221,7 +221,7 @@ interface ReportState extends Derived {
   /** Dismissed the "needs a write-up" gate for this session (chose run-only). Resets per session. */
   gateDismissed: boolean;
   /** The active session's full report; `report` is the (possibly trimmed) view. */
-  fullReport: WatcherReport;
+  fullReport: OwlshReport;
   /** Set when the active session is a defense (blue-team) debrief — never run through the offense
    *  pipeline. `report`/`fullReport`/derived offense state are left stale (and unused) while this is
    *  set; the debrief container branches on it before touching any of them. */
@@ -260,7 +260,7 @@ interface ReportState extends Derived {
   switchSession: (id: string) => void;
   /** Merge a session report written by the daemon (a spawned box) at runtime, with any captured
    *  SSH-session log files (folded in as on-target commands for the matching session). */
-  ingestLiveReport: (report: WatcherReport, sshFiles?: SshLogFile[]) => void;
+  ingestLiveReport: (report: OwlshReport, sshFiles?: SshLogFile[]) => void;
   dismissLiveBanner: () => void;
   /** Start (or restart) a scripted live-box demo — streams the chosen demo's raw commands into the live
    *  pipeline one at a time, then resolves and unlocks the intended-path comparison. Defaults to the
@@ -318,7 +318,7 @@ function persistOnboarded(): void {
   }
 }
 
-const PROGRESS_KEY = "watcher.onboardingProgress";
+const PROGRESS_KEY = "owlsh.onboardingProgress";
 
 function readOnboardingProgress(): { step: number; done: { demo: boolean; ai: boolean } } {
   try {
@@ -410,9 +410,9 @@ export const useReport = create<ReportState>((set, get) => ({
     // other alignment-derived metrics — so re-derive the whole block, not just coverage, or the Grade
     // would keep the stale efficiency while the KPI cards showed the improved one.
     const aligned2 = annotateObjectiveStatus(episodes, aligned, r.findings ?? []);
-    const scoped: WatcherReport = { ...r, episodes, golden_dag: aligned2 };
+    const scoped: OwlshReport = { ...r, episodes, golden_dag: aligned2 };
     const cm = computeMetrics(scoped);
-    const next: WatcherReport = {
+    const next: OwlshReport = {
       ...scoped,
       metrics: {
         ...r.metrics,

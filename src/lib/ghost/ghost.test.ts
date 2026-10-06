@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { computeGhost } from "./ghost";
-import type { WatcherReport, Episode, Finding, GoldenObjective } from "../../types/report";
+import type { OwlshReport, Episode, Finding, GoldenObjective } from "../../types/report";
 
 const ep = (o: Partial<Episode> & { seq: number }): Episode => ({ cmd: "", binary: "", duration_ms: 1000, gap_before_ms: 0, actor: "machine_bound", tactic: "TA0007", ...o });
-const rep = (episodes: Episode[], findings: Finding[], golden: GoldenObjective[]): WatcherReport => ({
+const rep = (episodes: Episode[], findings: Finding[], golden: GoldenObjective[]): OwlshReport => ({
   schema_version: "1.4", session: { uuid: "u", started_at: "2026-01-01T00:00:00Z", ended_at: "2026-01-01T00:30:00Z", target_scope: "t", shell: "bash", source: "local_pty" },
   episodes, phases: [], golden_dag: golden, findings,
   metrics: { efficiency_pct: 0, time_waster: { productive_ms: 0, detour_ms: 0, stuck_ms: 0, loop_ms: 0, t_active_ms: 0 }, stealth_score: 100, objective_coverage_pct: 0, technique_breadth: 0 },
@@ -93,7 +93,7 @@ function gEp(seq: number, binary: string, cmd: string, extra: Partial<Episode> =
 
 describe("computeGhost with write-up-free signals", () => {
   it("returns a non-null Ghost from signals alone when there is no golden path", () => {
-    const r = { golden_dag: [], episodes: [gEp(4, "smbclient", "smbclient -L //h/ -N", { exit_code: 0 })], findings: [] } as unknown as WatcherReport;
+    const r = { golden_dag: [], episodes: [gEp(4, "smbclient", "smbclient -L //h/ -N", { exit_code: 0 })], findings: [] } as unknown as OwlshReport;
     const g = computeGhost(r);
     expect(g).not.toBeNull();
     expect(g!.items.map((i) => i.objective)).toContain("audit_smb_shares");
@@ -101,13 +101,13 @@ describe("computeGhost with write-up-free signals", () => {
 
   it("suppresses a signal that a golden objective already covers", () => {
     const golden: GoldenObjective[] = [{ objective: "audit_share_permissions", tactic: "TA0007", satisfied_by: [], user_satisfied_by_seq: 5 }];
-    const r = { golden_dag: golden, episodes: [gEp(4, "smbclient", "smbclient -L //h/ -N", { exit_code: 0 }), gEp(5, "x", "x")], findings: [] } as unknown as WatcherReport;
+    const r = { golden_dag: golden, episodes: [gEp(4, "smbclient", "smbclient -L //h/ -N", { exit_code: 0 }), gEp(5, "x", "x")], findings: [] } as unknown as OwlshReport;
     const g = computeGhost(r);
     expect(g!.items.map((i) => i.objective)).not.toContain("audit_smb_shares");
   });
 
   it("returns null when neither golden nor signals produce items", () => {
-    const r = { golden_dag: [], episodes: [gEp(1, "nmap", "nmap host")], findings: [] } as unknown as WatcherReport;
+    const r = { golden_dag: [], episodes: [gEp(1, "nmap", "nmap host")], findings: [] } as unknown as OwlshReport;
     expect(computeGhost(r)).toBeNull();
   });
 });

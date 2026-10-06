@@ -1,4 +1,4 @@
-import type { WatcherReport, Episode } from "../../types/report";
+import type { OwlshReport, Episode } from "../../types/report";
 import { LOW_YIELD } from "../pipeline/align";
 
 export interface RabbitHole { start_seq: number; end_seq: number; binary: string; wasted_ms: number; }
@@ -20,7 +20,7 @@ function lowYield(e: Episode): boolean {
 const clamp = (n: number) => Math.max(0, Math.min(100, n));
 
 /** Deterministic focus discipline: sustained low-yield persistence on one surface = a rabbit hole. */
-export function computeFocus(report: WatcherReport): FocusResult {
+export function computeFocus(report: OwlshReport): FocusResult {
   const running = report.episodes.filter((e) => e.actor !== "think_pause" && e.actor !== "idle");
   const holes: RabbitHole[] = [];
   let i = 0;

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import fixture from "../../fixtures/session-htb-easy.json";
-import type { WatcherReport } from "../types/report";
+import type { OwlshReport } from "../types/report";
 import {
   computeMetrics,
   percentile,
@@ -16,7 +16,7 @@ import { fmtMinutes } from "./format";
 import { computeGrade, RUBRIC_V2 } from "./bridge/grade";
 import { computeGhost } from "./ghost/ghost";
 
-const report = fixture as unknown as WatcherReport;
+const report = fixture as unknown as OwlshReport;
 
 describe("percentile (deterministic, nearest-rank)", () => {
   it("returns 0 for empty input", () => {
@@ -171,7 +171,7 @@ describe("analysis signals wiring (schema v1.3)", () => {
     const m = computeMetrics(report);
     // splice in the computed v1.3 analysis fields explicitly — the fixture's own metrics never carry
     // them, so this is the "a live/newer report reaches grade.ts with these fields set" case.
-    const withAnalysis: WatcherReport = {
+    const withAnalysis: OwlshReport = {
       ...report,
       metrics: {
         ...report.metrics,
@@ -211,7 +211,7 @@ describe("ghost wiring (schema v1.4)", () => {
     // grade unchanged when the ghost block + the two summary-card metrics are actually present
     // (grade.ts must keep ignoring them — ghost never feeds the grade). Spreading `report`/`report.metrics`
     // alone would be vacuous — the fixture never carries these fields — so splice them in explicitly.
-    const withGhost: WatcherReport = {
+    const withGhost: OwlshReport = {
       ...report,
       metrics: {
         ...report.metrics,

@@ -1,12 +1,12 @@
 [package]
-name = "watcher-core"
+name = "owlsh-core"
 version = "0.1.0"
 license = "AGPL-3.0-only"
 edition = "2021"
-description = "The Watcher — shared daemon core: session lifecycle controller + re-redaction"
+description = "owlsh — shared daemon core: session lifecycle controller + re-redaction"
 
 [lib]
-name = "watcher_core"
+name = "owlsh_core"
 path = "src/lib.rs"
 
 [dependencies]

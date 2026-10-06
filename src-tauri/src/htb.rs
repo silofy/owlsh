@@ -1,5 +1,5 @@
 //! HackTheBox API integration — pull the official write-up for a *retired* box to seed the golden
-//! path. The API token is a bearer credential: it lives only in ~/.watcher/config.json on this
+//! path. The API token is a bearer credential: it lives only in ~/.owlsh/config.json on this
 //! machine (never in the JS bundle, never in the repo) and is never returned to the webview. Every
 //! call is the user's own authenticated, personal-use request against the HTB v4 API.
 
@@ -14,7 +14,7 @@ const API: &str = "https://labs.hackthebox.com/api/v4";
 
 fn config_path() -> PathBuf {
     let home = std::env::var("USERPROFILE").or_else(|_| std::env::var("HOME")).unwrap_or_default();
-    PathBuf::from(home).join(".watcher").join("config.json")
+    PathBuf::from(home).join(".owlsh").join("config.json")
 }
 
 /// Read the stored HTB token from a config file, if a non-empty one is present.
@@ -83,7 +83,7 @@ fn api_get(agent: &ureq::Agent, url: &str, token: &str) -> Result<ureq::Response
     agent
         .get(url)
         .set("Authorization", &format!("Bearer {token}"))
-        .set("User-Agent", "Watcher")
+        .set("User-Agent", "owlsh")
         .call()
         .map_err(|e| match e {
             ureq::Error::Status(401, _) => "HTB rejected the token (401) — regenerate it in your HTB profile and re-enter it.".into(),
@@ -141,7 +141,7 @@ mod tests {
     use super::*;
 
     fn temp(name: &str) -> PathBuf {
-        let p = std::env::temp_dir().join(format!("watcher-htb-{name}")).join("config.json");
+        let p = std::env::temp_dir().join(format!("owlsh-htb-{name}")).join("config.json");
         let _ = fs::remove_dir_all(p.parent().unwrap());
         p
     }

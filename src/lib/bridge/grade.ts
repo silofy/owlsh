@@ -20,7 +20,7 @@
  * verdict — rather than being averaged away. Pure and deterministic (browser-safe, no crypto).
  */
 import { independencePenalty } from "../widget/hints";
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 
 export const RUBRIC_V1 = {
   coverage: 0.3,
@@ -87,7 +87,7 @@ export function gradeColor(letter: string): string {
   return "var(--color-detour)";
 }
 
-export function computeGrade(report: WatcherReport): Grade {
+export function computeGrade(report: OwlshReport): Grade {
   const m = report.metrics;
   // v2 iff the report carries the methodology signal (schema v1.3+). Old reports stay on v1 — history frozen.
   const isV2 = m.methodology_coverage_pct != null;

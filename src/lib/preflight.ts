@@ -14,7 +14,7 @@ export function preflightMessage(state: PreflightState, opts: { port?: number } 
     case "deps_missing":
       return `burp-bridge needs Python 3.x and the mcp client. Install: pip install -r plugins/burp-bridge/requirements.txt`;
     case "empty_scope":
-      return `Burp scope is empty — Watcher will ingest all proxied traffic. Set a target scope in Burp to limit what's recorded.`;
+      return `Burp scope is empty — owlsh will ingest all proxied traffic. Set a target scope in Burp to limit what's recorded.`;
     case "detected":
       return `Burp MCP detected; add --web to record web traffic`;
   }

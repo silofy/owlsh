@@ -1,4 +1,4 @@
-import type { WatcherReport, Episode } from "../../types/report";
+import type { OwlshReport, Episode } from "../../types/report";
 import { analyzePrivesc, type PrivescPath, type PrivescSeverity } from "../analysis/privesc";
 import { matchTemplate, SEV_RANK, type Severity } from "./library";
 import { BINARY_TO_CWE } from "../pipeline/frameworks";
@@ -24,7 +24,7 @@ function confidenceToSeverity(c: PrivescSeverity): Severity {
   return c === "confirmed" ? "high" : c === "likely" ? "medium" : "info";
 }
 
-export function deriveReportFindings(report: WatcherReport): ReportFinding[] {
+export function deriveReportFindings(report: OwlshReport): ReportFinding[] {
   const episodes = report.episodes ?? [];
   const bySeq = new Map<number, Episode>(episodes.map((e) => [e.seq, e]));
   const affected = report.session?.target?.name ?? report.session?.target_scope ?? "the target";

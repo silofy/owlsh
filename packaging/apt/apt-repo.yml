@@ -1,10 +1,10 @@
-# Signed apt repository for the watcher-capture agent.
+# Signed apt repository for the owlsh agent.
 #
 # This workflow belongs in a DEDICATED repo (e.g. silofy/watcher-apt), NOT in
-# silofy/watcher — that repo's GitHub Pages already serves the demos, and a repo
+# silofy/owlsh — that repo's GitHub Pages already serves the demos, and a repo
 # only gets one Pages site. Running it here would clobber the demos.
 #
-# It pulls the latest .deb assets from silofy/watcher's releases (built by
+# It pulls the latest .deb assets from silofy/owlsh's releases (built by
 # release.yml), assembles a reprepro repo, signs it, and publishes it to this
 # repo's Pages at https://<owner>.github.io/<repo>/.
 #
@@ -13,25 +13,25 @@
 #      (from packaging/apt/conf/distributions) to the repo root.
 #   2. Generate a signing key and add its ARMORED PRIVATE key as the secret
 #      APT_GPG_PRIVATE_KEY:
-#        gpg --batch --quick-gen-key "The Watcher apt <you@example.com>" default sign never
+#        gpg --batch --quick-gen-key "owlsh apt <you@example.com>" default sign never
 #        gpg --armor --export-secret-keys <keyid>   # paste into the secret
 #   3. Settings → Pages → Source = "GitHub Actions".
 #   4. Run the workflow (Actions tab → Run workflow), or let a release trigger it
-#      (add a repository_dispatch from silofy/watcher, or rely on the daily schedule).
+#      (add a repository_dispatch from silofy/owlsh, or rely on the daily schedule).
 #
 # ── Users then install with ───────────────────────────────────────────────────
 #   curl -fsSL https://<owner>.github.io/<repo>/watcher-archive-keyring.asc \
-#     | sudo tee /usr/share/keyrings/watcher.asc >/dev/null
-#   echo "deb [signed-by=/usr/share/keyrings/watcher.asc] https://<owner>.github.io/<repo> stable main" \
-#     | sudo tee /etc/apt/sources.list.d/watcher.list
-#   sudo apt update && sudo apt install watcher-capture
+#     | sudo tee /usr/share/keyrings/owlsh.asc >/dev/null
+#   echo "deb [signed-by=/usr/share/keyrings/owlsh.asc] https://<owner>.github.io/<repo> stable main" \
+#     | sudo tee /etc/apt/sources.list.d/owlsh.list
+#   sudo apt update && sudo apt install owlsh
 
 name: Publish apt repo
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [watcher-release]
+    types: [owlsh-release]
   schedule:
     - cron: "17 6 * * *" # daily fallback so a new release is picked up without a manual run
 
@@ -45,7 +45,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  SOURCE_REPO: silofy/watcher # where the .deb release assets come from
+  SOURCE_REPO: silofy/owlsh # where the .deb release assets come from
   GH_TOKEN: ${{ github.token }}
 
 jobs:

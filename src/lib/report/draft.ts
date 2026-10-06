@@ -1,4 +1,4 @@
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 import { deriveReportFindings, type ReportFinding } from "./findings";
 import {
   headerSection, execSummarySection, engagementSection, scopeSection, methodologySection,
@@ -10,7 +10,7 @@ import {
  * and `opts.summary` let a caller inject model-polished pieces (see report/narrate.ts); with no
  * opts the whole draft is deterministic.
  */
-export function draftReport(report: WatcherReport, opts?: { findings?: ReportFinding[]; summary?: string }): string {
+export function draftReport(report: OwlshReport, opts?: { findings?: ReportFinding[]; summary?: string }): string {
   const findings = opts?.findings ?? deriveReportFindings(report);
   return [
     headerSection(report),

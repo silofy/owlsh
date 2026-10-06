@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import Ajv from "ajv/dist/2020";
 import addFormats from "ajv-formats";
-import schema from "../../../schema/watcher-report.schema.json";
+import schema from "../../../schema/owlsh-report.schema.json";
 import { parseEnvelopes, envelopesToRawCommands, assembleReport, reportFromNdjson } from "./ingest";
 import type { GoldenObjective, Session } from "../../types/report";
 
@@ -41,7 +41,7 @@ describe("envelope → RawCommand join (§3.3)", () => {
   it("pairs command + output by seq, re-redacting on the way in", () => {
     expect(raw).toHaveLength(2);
     // re-redaction is mandatory on this capture→report→disk path: the live IP is masked, never
-    // persisted verbatim (see redactText / watcher_core::redact).
+    // persisted verbatim (see redactText / owlsh_core::redact).
     expect(raw[0].cmd).toBe("nmap -sV x.x.x.x");
     expect(raw[0].output_digest).toBe("22,80 open");
   });

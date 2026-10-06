@@ -12,10 +12,10 @@ handshake**, then **§3.3 TelemetryEvents**.
    (`daemon: apply_capabilities`).
 2. **Mandatory re-scan on receipt** — the daemon re-redacts every event regardless of the declared
    `redaction`; the privacy guarantee lives in the core, never in the plugin.
-3. **Versioned JSON-Schema + conformance kit** — `schema/watcher-telemetry.schema.json` plus
+3. **Versioned JSON-Schema + conformance kit** — `schema/owlsh-telemetry.schema.json` plus
    `npm run conformance <stream.ndjson>` (and the `tests/conformance.test.ts` suite) so contributors
    self-validate before a PR.
-4. **Plugin manifest** — `schema/watcher-plugin.schema.json`: the daemon launches `exec` as a
+4. **Plugin manifest** — `schema/owlsh-plugin.schema.json`: the daemon launches `exec` as a
    supervised, least-privilege, token-gated child (see `examples/aws-cloudshell.manifest.json`).
 
 ## Plugin classes
@@ -28,11 +28,11 @@ handshake**, then **§3.3 TelemetryEvents**.
 
 ## Thin SDK (~50 lines)
 
-`sdk/watcher_sdk.py` handles the handshake + envelope framing. Go and Rust SDKs follow the same shape.
+`sdk/owlsh_sdk.py` handles the handshake + envelope framing. Go and Rust SDKs follow the same shape.
 
 ```bash
 # 1) run the daemon as a socket service
-watcher-daemon --listen 127.0.0.1:8799 --db engagement.db --key <k>
+owlsh-daemon --listen 127.0.0.1:8799 --db engagement.db --key <k>
 # 2) run a plugin against it
 python plugins/examples/cloudshell_plugin.py 8799
 # 3) self-validate a plugin's output before a PR

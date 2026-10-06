@@ -1,3 +1,4 @@
+import "./lib/migrateStorage"; // must run before the store reads its keys
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "@fontsource-variable/hanken-grotesk";

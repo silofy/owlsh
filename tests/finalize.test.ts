@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { finalizeLiveReport } from "../src/lib/finalize";
-import type { Episode, WatcherReport } from "../src/types/report";
+import type { Episode, OwlshReport } from "../src/types/report";
 
 const ep = (seq: number, binary: string, tactic: string, technique: string, duration_ms: number, gap_before_ms: number): Episode =>
   ({ seq, cmd: `${binary} target`, binary, duration_ms, gap_before_ms, exit_code: 0, actor: "machine_bound", tactic, technique, confidence: 1, context_path: "host" });
 
-function base(episodes: Episode[], recording = false): WatcherReport {
+function base(episodes: Episode[], recording = false): OwlshReport {
   return {
     schema_version: "1.0",
     session: { uuid: "x", started_at: "2026-06-18T10:00:00.000Z", ended_at: "2026-06-18T10:10:00.000Z", target_scope: "Box", context_path: "host", shell: "", source: "in_vm_daemon" },
@@ -16,7 +16,7 @@ function base(episodes: Episode[], recording = false): WatcherReport {
     coaching: { skill_radar: { recon: 0, web: 0, exploit: 0, privesc: 0, opsec: 0 }, next_steps: [{ action: "placeholder", why: "", category: "Recap", evidence_seq: null }] },
     redaction_profile: "full",
     recording,
-  } as WatcherReport;
+  } as OwlshReport;
 }
 
 describe("finalizeLiveReport", () => {

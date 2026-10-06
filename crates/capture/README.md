@@ -1,4 +1,4 @@
-# watcher-capture — cross-platform PTY capture POC
+# owlsh — cross-platform PTY capture POC
 
 A proof-of-concept for the Phase 2 capture daemon (brief §3.1), built to de-risk one
 question: **does Windows need WSL/a VM, or can we capture natively?** Answer: **natively.**
@@ -76,8 +76,8 @@ Passing `--platform` sets `provenance.platform` on every emitted envelope and (u
 is given explicitly) folds the platform into `context_path` as `cloud:<platform>:openvpn`.
 
 ```bash
-watcher-capture --attach --platform thm --target Blue   # neutral: THM box "Blue"
-watcher-capture --attach --machine Forge                # unchanged: HTB alias still works
+owlsh --attach --platform thm --target Blue   # neutral: THM box "Blue"
+owlsh --attach --machine Forge                # unchanged: HTB alias still works
 ```
 
 ## In-VM daemon (§5.2) — capturing inside a pixel-streamed box
@@ -88,7 +88,7 @@ host daemon:
 
 ```bash
 # same binary, built for Linux, run inside the Pwnbox shell:
-watcher-capture --forward <host:port> --source in_vm_daemon --context cloud:htb:pwnbox -- <commands>
+owlsh --forward <host:port> --source in_vm_daemon --context cloud:htb:pwnbox -- <commands>
 ```
 
 `--forward` opens a TCP connection to a daemon's `--listen` socket (the cross-platform stand-in for

@@ -1,21 +1,21 @@
 [package]
-name = "watcher-daemon"
+name = "owlsh-daemon"
 version = "0.1.0"
 license = "AGPL-3.0-only"
 edition = "2021"
-description = "The Watcher daemon — merges telemetry sources, re-redacts, owns session boundaries, persists to SQLCipher"
+description = "owlsh daemon — merges telemetry sources, re-redacts, owns session boundaries, persists to SQLCipher"
 
 [[bin]]
-name = "watcher-daemon"
+name = "owlsh-daemon"
 path = "src/main.rs"
 
 [lib]
-name = "watcher_daemon"
+name = "owlsh_daemon"
 path = "src/lib.rs"
 
 [dependencies]
-watcher-core = { path = "../core" }
-watcher-store = { path = "../store" }
+owlsh-core = { path = "../core" }
+owlsh-store = { path = "../store" }
 uuid = { version = "1", features = ["v4"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

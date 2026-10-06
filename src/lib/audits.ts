@@ -11,7 +11,7 @@
  *                 confirm on its own (unsatisfied objectives, unverifiable coverage when no write-up).
  *   - passed    : objectives you actually hit in this phase.
  */
-import type { CoachCategory, CoachingStep, Episode, WatcherReport } from "../types/report";
+import type { CoachCategory, CoachingStep, Episode, OwlshReport } from "../types/report";
 import { activeMs, wasteByTactic, type WasteBreakdown } from "./metrics";
 import { normalizeCoaching } from "./coaching";
 import { runWeaknesses } from "./pipeline/frameworks";
@@ -166,7 +166,7 @@ function tacticForStep(step: CoachingStep, bySeq: Map<number, Episode>, present:
  * that can't be tied to a single phase — so the Phase Audit is a complete home for every move and
  * nothing is lost when the standalone playbook goes away.
  */
-export function buildPhaseAudits(report: WatcherReport): { phases: PhaseAudit[]; general: AuditItem[] } {
+export function buildPhaseAudits(report: OwlshReport): { phases: PhaseAudit[]; general: AuditItem[] } {
   const { episodes, phases, golden_dag } = report;
   const bySeq = new Map(episodes.map((e) => [e.seq, e]));
   const present = new Set(phases.map((p) => p.mitre_tactic));

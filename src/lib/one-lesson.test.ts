@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { pickOneLesson } from "./one-lesson";
-import type { WatcherReport, Episode, Finding, GhostItem, CoachingStep } from "../types/report";
+import type { OwlshReport, Episode, Finding, GhostItem, CoachingStep } from "../types/report";
 
 const ep = (o: Partial<Episode> & { seq: number }): Episode => ({
   cmd: "",
@@ -15,10 +15,10 @@ const ep = (o: Partial<Episode> & { seq: number }): Episode => ({
 function rep(o: {
   episodes?: Episode[];
   findings?: Finding[];
-  golden_dag?: WatcherReport["golden_dag"];
-  ghost?: WatcherReport["ghost"];
+  golden_dag?: OwlshReport["golden_dag"];
+  ghost?: OwlshReport["ghost"];
   next_steps?: CoachingStep[];
-}): WatcherReport {
+}): OwlshReport {
   return {
     schema_version: "1.4",
     session: { uuid: "u", started_at: "2026-01-01T00:00:00Z", ended_at: "2026-01-01T00:20:00Z", target_scope: "t", shell: "bash", source: "local_pty" },

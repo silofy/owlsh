@@ -1,7 +1,7 @@
 from bridge import poll_once, run
 
 
-class FakeWatcher:
+class FakeOwlsh:
     def __init__(self): self.events = []
     def http_request(self, **kw): self.events.append(("req", kw["pair_id"]))
     def http_response(self, **kw): self.events.append(("resp", kw["pair_id"]))
@@ -28,7 +28,7 @@ def test_dedups_and_scopes():
         {"pair_id": "p2", "host": "other", "method": "GET", "url": "http://other/x",
          "req_headers": "", "req_body": "", "status": 200, "resp_headers": "", "resp_body": "", "mime": ""},
     ]
-    w = FakeWatcher(); seen = set()
+    w = FakeOwlsh(); seen = set()
     poll_once(history, w, scope={"target"}, seen=seen)
     pairs = {p for _, p in w.events}
     assert pairs == {"p1"}          # p1 emitted once (dedup), p2 out of scope
@@ -37,13 +37,13 @@ def test_dedups_and_scopes():
 
 def test_run_exits_after_consecutive_failure_threshold():
     client = AlwaysFailsClient()
-    watcher = FakeWatcher()
-    run(client, watcher, scope=set(), interval=0, max_consecutive_failures=3)
+    owlsh = FakeOwlsh()
+    run(client, owlsh, scope=set(), interval=0, max_consecutive_failures=3)
     # stopped after exactly the threshold, not hung forever
     assert client.calls == 3
     # finally ran cleanup — no orphaned process
-    assert ("end",) in watcher.events
-    assert ("close",) in watcher.events
+    assert ("end",) in owlsh.events
+    assert ("close",) in owlsh.events
 
 
 if __name__ == "__main__":

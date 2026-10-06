@@ -1,6 +1,6 @@
 /**
  * Capture → report CLI. Reads a newline-delimited telemetry stream (from
- * `watcher-capture`, or any §3.3 producer), runs it through the Phase 3 pipeline,
+ * `owlsh`, or any §3.3 producer), runs it through the Phase 3 pipeline,
  * assembles a full v1.0 report, validates it against the schema, and writes it out.
  *
  *   vite-node scripts/ingest-capture.tsx [--ndjson <path>] [--golden <path>] [--out <path>]
@@ -11,14 +11,14 @@ import { resolve, dirname, join } from "node:path";
 import { homedir } from "node:os";
 import Ajv from "ajv/dist/2020";
 import addFormats from "ajv-formats";
-import schema from "../schema/watcher-report.schema.json";
+import schema from "../schema/owlsh-report.schema.json";
 import { parseEnvelopes, envelopesToRawCommands, assembleReport } from "../src/lib/pipeline/ingest";
 import { sshSessionsFromDir } from "../src/lib/ssh/ingest";
 import type { GoldenObjective, Session } from "../src/types/report";
 
-/** Read the tap's captured SSH sessions from ~/.watcher/ssh (or --ssh-dir), if any. */
+/** Read the tap's captured SSH sessions from ~/.owlsh/ssh (or --ssh-dir), if any. */
 function loadSshSessions(): ReturnType<typeof sshSessionsFromDir> {
-  const dir = arg("ssh-dir", join(homedir(), ".watcher", "ssh"));
+  const dir = arg("ssh-dir", join(homedir(), ".owlsh", "ssh"));
   if (!existsSync(dir)) return [];
   const files = readdirSync(dir)
     .filter((n) => n.endsWith(".in") || n.endsWith(".out") || n.endsWith(".tm") || n.endsWith(".meta"))
@@ -48,35 +48,35 @@ const golden: GoldenObjective[] = goldenPath
   ? (JSON.parse(readFileSync(resolve(goldenPath), "utf8")) as GoldenObjective[])
   : DEFAULT_GOLDEN;
 
-/** Spawn the built `watcher-store --export` and capture its §3.3 NDJSON stdout. */
+/** Spawn the built `owlsh-store --export` and capture its §3.3 NDJSON stdout. */
 function ndjsonFromStore(): string {
   const db = arg("db", "");
   if (!db) { console.error("--from-store requires --db <path>"); process.exit(1); }
   const key = arg("key", "watcher-dev-key");
   const session = arg("session", "");
   const candidates = [
-    resolve("crates/store/target/release/watcher-store"),
-    resolve("crates/store/target/debug/watcher-store"),
-    resolve("target/release/watcher-store"),
-    resolve("target/debug/watcher-store"),
+    resolve("crates/store/target/release/owlsh-store"),
+    resolve("crates/store/target/debug/owlsh-store"),
+    resolve("target/release/owlsh-store"),
+    resolve("target/debug/owlsh-store"),
   ];
-  // cargo names the binary watcher-store.exe on Windows; check both forms.
+  // cargo names the binary owlsh-store.exe on Windows; check both forms.
   const bin = candidates
     .flatMap((c) => (process.platform === "win32" ? [c, `${c}.exe`] : [c]))
     .find((c) => existsSync(c));
-  if (!bin) { console.error("watcher-store not built. Run: cargo build -p watcher-store --release"); process.exit(1); }
+  if (!bin) { console.error("owlsh-store not built. Run: cargo build -p owlsh-store --release"); process.exit(1); }
   const a = ["--db", db, "--key", key, "--export"];
   if (session) a.push("--session", session);
   try {
     return execFileSync(bin, a, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
   } catch (e) {
-    console.error(`watcher-store --export failed (bad db/key?):\n${(e as Error).message}`);
+    console.error(`owlsh-store --export failed (bad db/key?):\n${(e as Error).message}`);
     process.exit(1);
   }
 }
 
 // Web capture streams to a separate sink (crates/capture/web-events.ndjson, teed there by the
-// Burp bridge — see plugins/sdk/watcher_sdk.py's ndjson_path) rather than into the terminal
+// Burp bridge — see plugins/sdk/owlsh_sdk.py's ndjson_path) rather than into the terminal
 // capture's stdout-redirected NDJSON. Fold it in here so live --web traffic renders in the report;
 // absent (no --web this run, or bridge never reached Burp), behavior is identical to today.
 let ndjsonText: string;

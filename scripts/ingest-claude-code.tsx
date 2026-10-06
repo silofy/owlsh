@@ -14,7 +14,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import Ajv from "ajv/dist/2020";
 import addFormats from "ajv-formats";
-import schema from "../schema/watcher-report.schema.json";
+import schema from "../schema/owlsh-report.schema.json";
 import { claudeCodeToRawCommands } from "../src/lib/ingest/claude-code";
 import { assembleReport } from "../src/lib/pipeline/ingest";
 import { HOST_METHODOLOGY } from "../src/lib/golden/methodology";

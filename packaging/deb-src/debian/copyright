@@ -1,7 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: watcher-capture
+Upstream-Name: owlsh
 Upstream-Contact: silofy <noreply@silofy.dev>
-Source: https://github.com/silofy/watcher
+Source: https://github.com/silofy/owlsh
 
 Files: *
 Copyright: 2026 silofy

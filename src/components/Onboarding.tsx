@@ -13,7 +13,7 @@ const isDesktop = () => typeof window !== "undefined" && "__TAURI_INTERNALS__" i
 const NUMERALS = ["①", "②", "③", "④", "⑤", "⑥"]; // ①②③④…
 
 const STEPS = [
-  { kicker: "The instrument", title: "Meet the Watcher" },
+  { kicker: "The instrument", title: "Meet owlsh" },
   { kicker: "Your own box", title: "Capture your first run" },
   { kicker: "Local AI", title: "Sharpen your coaching" },
   { kicker: "Preflight complete", title: "You're set" },
@@ -142,7 +142,7 @@ function ProgressRail({ step, stepDone }: { step: number; stepDone: boolean[] })
   );
 }
 
-// ── step ① Meet the Watcher ────────────────────────────────────────────────
+// ── step ① Meet owlsh ────────────────────────────────────────────────
 
 function StepMeet() {
   const { startLiveDemo, demo, markOnboardingStep } = useReport();
@@ -232,11 +232,11 @@ export function StepCapture() {
         window {"—"} each command streams into a live debrief here.
       </p>
 
-      <CommandRow cmd="curl -fsSL https://raw.githubusercontent.com/silofy/watcher/main/install.sh | sh" />
-      <CommandRow cmd="watcher-capture --attach --platform htb --target <box>" />
+      <CommandRow cmd="curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh" />
+      <CommandRow cmd="owlsh --attach --platform htb --target <box>" />
       <p className="text-xs text-faint">
         On Windows, install with{" "}
-        <code className="mono rounded bg-panel-2 px-1 py-0.5 text-fg">irm https://raw.githubusercontent.com/silofy/watcher/main/install.ps1 | iex</code>
+        <code className="mono rounded bg-panel-2 px-1 py-0.5 text-fg">irm https://raw.githubusercontent.com/silofy/owlsh/main/install.ps1 | iex</code>
         . Other platforms: <code className="mono rounded bg-panel-2 px-1 py-0.5 text-fg">--platform thm</code>.
       </p>
 
@@ -564,7 +564,7 @@ export function Onboarding() {
                 <ScanEye size={17} />
               </span>
               <div>
-                <div className="font-display text-[15px] font-semibold leading-tight text-fg">Watcher</div>
+                <div className="font-display text-[15px] font-semibold leading-tight text-fg">owlsh</div>
                 <div className="label text-[10px] text-faint">activation</div>
               </div>
             </div>
@@ -610,7 +610,7 @@ export function Onboarding() {
               <Ghost onClick={closeOnboarding}>Skip</Ghost>
               {isLast ? (
                 <Primary onClick={closeOnboarding}>
-                  Enter the Watcher <ArrowUpRight size={13} />
+                  Enter owlsh <ArrowUpRight size={13} />
                 </Primary>
               ) : (
                 <Primary onClick={() => setOnboardingStep(step + 1)}>Next {"→"}</Primary>

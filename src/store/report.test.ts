@@ -30,7 +30,7 @@ describe("onboarding wizard state", () => {
   });
 
   it("keeps the agreed storage key available for the store to persist", () => {
-    expect(ONBOARDED_KEY).toBe("watcher.onboarded");
+    expect(ONBOARDED_KEY).toBe("owlsh.onboarded");
   });
 });
 

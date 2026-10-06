@@ -1,16 +1,16 @@
 [package]
-name = "watcher-store"
+name = "owlsh-store"
 version = "0.1.0"
 license = "AGPL-3.0-only"
 edition = "2021"
-description = "The Watcher — encrypted SQLite store (SQLCipher), the daemon's single owner of telemetry (brief §8)"
+description = "owlsh — encrypted SQLite store (SQLCipher), the daemon's single owner of telemetry (brief §8)"
 
 [[bin]]
-name = "watcher-store"
+name = "owlsh-store"
 path = "src/main.rs"
 
 [lib]
-name = "watcher_store"
+name = "owlsh_store"
 path = "src/lib.rs"
 
 [dependencies]

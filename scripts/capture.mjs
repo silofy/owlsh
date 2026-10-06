@@ -14,7 +14,7 @@ export function withDefaultMode(args) {
 }
 
 export function binaryRelPath(platform) {
-  const exe = platform === "win32" ? "watcher-capture.exe" : "watcher-capture";
+  const exe = platform === "win32" ? "owlsh.exe" : "owlsh";
   return `crates/capture/target/release/${exe}`;
 }
 

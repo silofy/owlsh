@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "The Watcher",
+  "productName": "owlsh",
   "version": "0.1.0",
-  "identifier": "dev.thewatcher.report",
+  "identifier": "dev.owlsh.app",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "The Watcher — Session Report",
+        "title": "owlsh — Session Report",
         "width": 1320,
         "height": 920,
         "minWidth": 900,

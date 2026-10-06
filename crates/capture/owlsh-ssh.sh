@@ -1,12 +1,12 @@
-# watcher-ssh.sh — per-command capture of interactive SSH sessions, no hooks.
+# owlsh-ssh.sh — per-command capture of interactive SSH sessions, no hooks.
 #
-# The Watcher watches your LOCAL shell. When you `ssh` into a box and work interactively, the whole
+# owlsh watches your LOCAL shell. When you `ssh` into a box and work interactively, the whole
 # session is one opaque block to it (OSC-133 markers bracket the outer shell only). This wraps `ssh`
 # in `script`, which allocates a PTY and records the session's input/output/timing to files the app
 # ingests as ON-TARGET commands — so post-exploitation work lands in the debrief at full fidelity.
 #
 # Source it into the watched shell on capture start (the agent does this on --attach/--interactive),
-# or by hand:  source crates/capture/watcher-ssh.sh
+# or by hand:  source crates/capture/owlsh-ssh.sh
 #
 # Requires util-linux `script` >= 2.35 (Linux/WSL) for --log-in/--log-out/--log-timing.
 # macOS/BSD `script` uses different flags — a portable variant is TODO.
@@ -19,9 +19,9 @@ ssh() {
   # Tap every session. A one-shot `ssh host 'cmd'` passes its command as an argument (no interactive
   # keystrokes), so its --log-in transcript is empty and ingests to nothing — no double-counting with
   # the local capture. That means we don't need a fragile "is this interactive?" heuristic; always tap.
-  local dir="${WATCHER_HOME:-$HOME/.watcher}/ssh"
+  local dir="${OWLSH_HOME:-$HOME/.owlsh}/ssh"
   mkdir -p "$dir"
-  local id="${WATCHER_SESSION:-$$}-$(date +%s 2>/dev/null || echo 0)"
+  local id="${OWLSH_SESSION:-$$}-$(date +%s 2>/dev/null || echo 0)"
 
   # Recover the destination for the provenance label: first positional arg, skipping value-taking
   # options; strip any user@ prefix. Best-effort — a wrong label doesn't affect on-target detection.
@@ -46,7 +46,7 @@ ssh() {
       -c "command ssh $(printf '%q ' "$@")"
   else
     # no capable `script` — run normally rather than silently drop the session
-    echo "[watcher] script --log-in unavailable; this ssh session won't be captured per-command" >&2
+    echo "[owlsh] script --log-in unavailable; this ssh session won't be captured per-command" >&2
     command ssh "$@"
   fi
 }

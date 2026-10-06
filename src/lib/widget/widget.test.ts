@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest";
 import demo from "../../../fixtures/session-demo-full.json";
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 import { deriveWidgetState } from "./state";
 import { hintFor, nextTier, independencePenalty, type HintPull } from "./hints";
 import { renderWidget } from "./render";
 
-const report = demo as unknown as WatcherReport;
+const report = demo as unknown as OwlshReport;
 
 describe("deriveWidgetState", () => {
   const s = deriveWidgetState(report, Date.parse(report.session.ended_at));
@@ -55,7 +55,7 @@ describe("renderWidget", () => {
   it("draws a fixed-width box with the phase, stats and footer", () => {
     const lines = renderWidget(deriveWidgetState(report, Date.parse(report.session.ended_at)), { width: 44 });
     expect(new Set(lines.map((l) => l.length))).toEqual(new Set([44]));
-    expect(lines[0]).toContain("THE WATCHER · Abducted");
+    expect(lines[0]).toContain("OWLSH · Abducted");
     expect(lines.join("\n")).toContain("[h] hint");
   });
   it("shows a pulled hint and the running penalty", () => {

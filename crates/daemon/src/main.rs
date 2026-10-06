@@ -1,4 +1,4 @@
-//! watcher-daemon — the single SQLCipher owner. Two modes:
+//! owlsh-daemon — the single SQLCipher owner. Two modes:
 //!
 //!   --listen <addr>        long-running service: accept plugin/agent connections (newline-JSON
 //!                          §3.3 envelopes) on a TCP socket, persist live. The standalone daemon.
@@ -12,13 +12,13 @@ use std::sync::mpsc;
 use std::thread;
 
 use uuid::Uuid;
-use watcher_core::SessionConfig;
+use owlsh_core::SessionConfig;
 use std::sync::mpsc::Sender;
 
-use watcher_daemon::{
+use owlsh_daemon::{
     apply_capabilities, ingest_batch_summary, parse_event, parse_handshake, run_consumer,
 };
-use watcher_store::{open, RawEvent};
+use owlsh_store::{open, RawEvent};
 
 fn arg(name: &str) -> Option<String> {
     let a: Vec<String> = std::env::args().collect();
@@ -62,7 +62,7 @@ fn handle_connection<R: BufRead>(reader: R, tx: Sender<RawEvent>) {
 /// Long-running TCP service. One consumer owns the store; each connection is a source thread.
 fn serve(addr: &str, db: &str, key: &str) -> Result<(), Box<dyn std::error::Error>> {
     let listener = TcpListener::bind(addr)?;
-    eprintln!("[watcher-daemon] listening on {addr} → {db} (newline-JSON §3.3 envelopes)");
+    eprintln!("[owlsh-daemon] listening on {addr} → {db} (newline-JSON §3.3 envelopes)");
 
     let (tx, rx) = mpsc::channel::<RawEvent>();
     let conn = open(db, key)?;
@@ -94,13 +94,14 @@ fn batch(db: &str, key: &str) -> Result<(), Box<dyn std::error::Error>> {
     let mut conn = open(db, key)?;
     let s = ingest_batch_summary(&input, cfg(), gen(), &mut conn)?;
     eprintln!(
-        "[watcher-daemon] {db}: {} session(s), {} commands + {} outputs stored, {} re-redactions, {} flag nudge(s) (AES-256)",
+        "[owlsh-daemon] {db}: {} session(s), {} commands + {} outputs stored, {} re-redactions, {} flag nudge(s) (AES-256)",
         s.sessions, s.commands, s.outputs, s.redactions, s.nudges
     );
     Ok(())
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    owlsh_core::migrate_legacy_home();
     let db = arg("--db").ok_or("missing --db <path>")?;
     let key = arg("--key").unwrap_or_else(|| "watcher-dev-key".to_string());
 

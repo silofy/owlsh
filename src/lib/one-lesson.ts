@@ -1,4 +1,4 @@
-import type { WatcherReport } from "../types/report";
+import type { OwlshReport } from "../types/report";
 import { topUnmetCheck } from "./analysis/methodology";
 import { computeFocus } from "./analysis/focus";
 import { normalizeCoaching, stepText } from "./coaching";
@@ -22,7 +22,7 @@ export interface OneLesson {
  * Returns null when none apply — a clean run, or an old/live report with nothing to lead with.
  * The hero (App.tsx) omits itself gracefully in that case rather than show a recap stat.
  */
-export function pickOneLesson(report: WatcherReport): OneLesson | null {
+export function pickOneLesson(report: OwlshReport): OneLesson | null {
   const latePivots = (report.ghost?.items ?? []).filter((i) => i.verdict === "late_pivot");
   if (latePivots.length) {
     const worst = latePivots.reduce((a, b) => ((b.lag_ms ?? 0) > (a.lag_ms ?? 0) ? b : a));

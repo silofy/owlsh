@@ -1,5 +1,5 @@
 import type { PlatformAdapter } from "./types";
-import type { PlatformId, Target, WatcherReport } from "../../types/report";
+import type { PlatformId, Target, OwlshReport } from "../../types/report";
 import { htbAdapter } from "./htb";
 import { thmAdapter } from "./thm";
 import { offsecAdapter } from "./offsec";
@@ -43,7 +43,7 @@ export function resolveAdapter(ctx: DetectContext): PlatformAdapter {
 
 /** Neutral target identity for a report: an explicit session.target wins, otherwise it's resolved
  *  from the platform adapters (session.machine's presence is itself an HTB signal). */
-export function targetOf(report: WatcherReport): Target {
+export function targetOf(report: OwlshReport): Target {
   if (report.session.target) return report.session.target;
   const s = report.session;
   const ctx: DetectContext = {

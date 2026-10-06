@@ -9,7 +9,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { chromium } from "playwright";
 import demo from "../fixtures/session-demo-full.json";
-import type { WatcherReport } from "../src/types/report";
+import type { OwlshReport } from "../src/types/report";
 import { draftReport } from "../src/lib/report/draft";
 import { computeGrade } from "../src/lib/bridge/grade";
 
@@ -17,7 +17,7 @@ const out = process.argv[process.argv.length - 1];
 if (!out.endsWith(".pdf")) throw new Error("usage: demo-report-pdf.tsx -- <out.pdf>");
 
 // A public download is always the redacted, shareable profile.
-const report = { ...(demo as unknown as WatcherReport), redaction_profile: "public_safe" } as WatcherReport;
+const report = { ...(demo as unknown as OwlshReport), redaction_profile: "public_safe" } as OwlshReport;
 const md = draftReport(report);
 const i = md.indexOf("\n## ");
 const body = (i >= 0 ? md.slice(i + 1) : md).replace(/\*\*Severity\*\*:\s*([A-Za-z]+)/g, "**Severity**: `$1`");

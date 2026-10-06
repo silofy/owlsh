@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://thewatcher.dev/schema/watcher-plugin-1.0.json",
-  "title": "Watcher Plugin Manifest",
+  "$id": "https://theowlsh.dev/schema/owlsh-plugin-1.0.json",
+  "title": "owlsh Plugin Manifest",
   "description": "Describes a plugin for the daemon's supervised, least-privilege, token-gated process lifecycle (brief §5.4). The daemon launches `exec`, grants only the declared permissions, and ingests the plugin's telemetry (which it re-redacts on receipt regardless of the declared redaction).",
   "type": "object",
   "required": ["plugin", "version", "class", "capabilities", "exec"],

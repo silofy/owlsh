@@ -1,10 +1,10 @@
 # Capturing an HTB engagement
 
-The Watcher records the **commands** you run against a box. Machine *identity* (name, OS,
+owlsh records the **commands** you run against a box. Machine *identity* (name, OS,
 difficulty) comes from the `--machine` flag you pass when you start capturing. This document covers
 the two ways to capture the commands, matching the two ways people play HTB content.
 
-In both cases the rendezvous is the same: a session report JSON in `~/.watcher/sessions/`, which the
+In both cases the rendezvous is the same: a session report JSON in `~/.owlsh/sessions/`, which the
 desktop app polls and renders. The capture agent opens it and fills in the episodes.
 
 ---
@@ -22,12 +22,12 @@ Best when you attack from a local Kali/WSL/PowerShell over HTB's OpenVPN. Fully 
 
    Run from the repo root (works the same on macOS, Linux, and Windows). It builds the agent the
    first time, then attaches. To run the compiled binary directly instead:
-   `./crates/capture/target/release/watcher-capture --attach --machine Forge`
-   (Windows: `.\crates\capture\target\release\watcher-capture.exe`).
+   `./crates/capture/target/release/owlsh --attach --machine Forge`
+   (Windows: `.\crates\capture\target\release\owlsh.exe`).
 3. Hack as normal — `nmap`, `evil-winrm`, etc. Each completed command appears in the debrief within
    ~1–4 s. Type `exit` to stop.
 
-`--attach` first looks for a still-recording session in `~/.watcher/sessions/`. If one for the **same
+`--attach` first looks for a still-recording session in `~/.owlsh/sessions/`. If one for the **same
 box** is already live, it asks whether to join it as a second terminal or start a fresh engagement
 (`--new` forces a new one, no prompt); if there is none, it **self-starts a session** named by
 `--machine`. Either way it must run on the **same machine** as the desktop app (it reads that local
@@ -49,28 +49,28 @@ Pwnbox is delivered as a **VNC remote desktop** (`vnc.htb-cloud.com`), so there'
 to watch. Instead, run the agent **inside** Pwnbox and import the result.
 
 1. Install the agent inside Pwnbox. Pwnbox has internet, so it's one line: it downloads the static
-   Linux binary from the latest release, verifies its checksum, and installs `watcher-capture`:
+   Linux binary from the latest release, verifies its checksum, and installs `owlsh`:
 
    ```
-   curl -fsSL https://raw.githubusercontent.com/silofy/watcher/main/install.sh | sh
+   curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh
    ```
 
    Prefer to build it yourself? `crates/capture/build-in-pwnbox.sh` installs Rust and compiles from
    source inside Pwnbox, and `crates/capture/build-linux.ps1` cross-compiles the Linux binary from
    Windows via cargo-zigbuild.
-2. Capture into the export dir the Watcher pulls from, tagging the machine you're on:
+2. Capture into the export dir owlsh pulls from, tagging the machine you're on:
 
    ```
-   watcher-capture --export ~/.watcher-exports/checkpoint.json --machine Checkpoint --os Windows --difficulty Medium
+   owlsh --export ~/.owlsh-exports/checkpoint.json --machine Checkpoint --os Windows --difficulty Medium
    ```
 
    Hack as normal; type `exit` to finish.
-3. **Auto-pull (no manual copy).** Open **Pwnbox sync** in the Watcher's top bar, enter your
+3. **Auto-pull (no manual copy).** Open **Pwnbox sync** in owlsh's top bar, enter your
    Pwnbox SSH host / user / key (the same details HTB gives you for "Connect via SSH") and enable it.
-   The Watcher `scp`-pulls `~/.watcher-exports/*.json` into `~/.watcher/sessions/` every 15s and they
+   owlsh `scp`-pulls `~/.owlsh-exports/*.json` into `~/.owlsh/sessions/` every 15s and they
    appear in History automatically. Direct PC↔Pwnbox over your SSH key — nothing through a third party.
 
-   (Manual fallback: download the JSON yourself and drop it into `~/.watcher/sessions/`.)
+   (Manual fallback: download the JSON yourself and drop it into `~/.owlsh/sessions/`.)
 
 ---
 

@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { buildPhaseAudits, humanizeObjective } from "./audits";
 import fixture from "../../fixtures/session-htb-easy.json";
-import type { WatcherReport } from "../types/report";
+import type { OwlshReport } from "../types/report";
 
-const report = fixture as unknown as WatcherReport;
+const report = fixture as unknown as OwlshReport;
 
 describe("humanizeObjective", () => {
   it("maps known slugs to clean names, title-cases the rest", () => {

@@ -214,6 +214,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "owlsh-core"
+version = "0.1.0"
+dependencies = [
+ "regex",
+]
+
+[[package]]
+name = "owlsh-daemon"
+version = "0.1.0"
+dependencies = [
+ "owlsh-core",
+ "owlsh-store",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "uuid",
+]
+
+[[package]]
+name = "owlsh-store"
+version = "0.1.0"
+dependencies = [
+ "rusqlite",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "pin-project-lite"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -468,34 +496,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "23939e44bb9a5d7576fa2b563dc2e136628f1224e88a8deed09e04858b77871f"
 dependencies = [
  "unicode-ident",
-]
-
-[[package]]
-name = "watcher-core"
-version = "0.1.0"
-dependencies = [
- "regex",
-]
-
-[[package]]
-name = "watcher-daemon"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde_json",
- "tempfile",
- "uuid",
- "watcher-core",
- "watcher-store",
-]
-
-[[package]]
-name = "watcher-store"
-version = "0.1.0"
-dependencies = [
- "rusqlite",
- "serde",
- "serde_json",
 ]
 
 [[package]]

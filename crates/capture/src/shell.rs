@@ -65,7 +65,7 @@ impl ShellProfile for WindowsShell {
         }
     }
     fn demo_commands(&self) -> Vec<String> {
-        ["whoami", "echo watcher-capture-poc", "Get-Location"]
+        ["whoami", "echo owlsh-poc", "Get-Location"]
             .iter()
             .map(|s| s.to_string())
             .collect()
@@ -98,7 +98,7 @@ impl ShellProfile for UnixShell {
         CommandBuilder::new(shell)
     }
     fn demo_commands(&self) -> Vec<String> {
-        ["whoami", "echo watcher-capture-poc", "pwd", "id"]
+        ["whoami", "echo owlsh-poc", "pwd", "id"]
             .iter()
             .map(|s| s.to_string())
             .collect()
@@ -111,7 +111,7 @@ impl ShellProfile for UnixShell {
     }
     fn ssh_tap_command(&self, session_uuid: &str) -> Option<String> {
         Some(format!(
-            "export WATCHER_SESSION='{session_uuid}'; . \"$HOME/.watcher/watcher-ssh.sh\" 2>/dev/null"
+            "export OWLSH_SESSION='{session_uuid}'; . \"$HOME/.owlsh/owlsh-ssh.sh\" 2>/dev/null"
         ))
     }
 }

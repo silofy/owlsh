@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { HintPull, WatcherReport } from "../types/report";
+import type { HintPull, OwlshReport } from "../types/report";
 import { deriveWidgetState } from "../lib/widget/state";
 import { hintFor, nextTier, independencePenalty } from "../lib/widget/hints";
 import { headline, WIDGET_SIZES, type WidgetSize } from "../lib/widget/render";
@@ -14,7 +14,7 @@ import demo from "../../fixtures/session-demo-full.json";
  */
 /** Window size per widget size (logical px). */
 const WINDOW_PX: Record<WidgetSize, [number, number]> = { small: [300, 150], medium: [360, 330], large: [390, 500] };
-const SIZE_KEY = "watcher.widget.size";
+const SIZE_KEY = "owlsh.widget.size";
 
 function initialSize(): WidgetSize {
   try {
@@ -28,7 +28,7 @@ function initialSize(): WidgetSize {
 
 export function WidgetWindow() {
   const desktop = isDesktop();
-  const [report, setReport] = useState<WatcherReport | null>(desktop ? null : (demo as unknown as WatcherReport));
+  const [report, setReport] = useState<OwlshReport | null>(desktop ? null : (demo as unknown as OwlshReport));
   const [path, setPath] = useState<string | null>(null);
   const [hint, setHint] = useState<string | null>(null);
   const [localPulls, setLocalPulls] = useState<HintPull[]>([]);
@@ -61,7 +61,7 @@ export function WidgetWindow() {
         const { invoke } = await import("@tauri-apps/api/core");
         const r = (await invoke("latest_session")) as { path: string; json: string } | null;
         if (alive && r) {
-          setReport(JSON.parse(r.json) as WatcherReport);
+          setReport(JSON.parse(r.json) as OwlshReport);
           setPath(r.path);
         }
       } catch {
@@ -120,7 +120,7 @@ export function WidgetWindow() {
       <div data-tauri-drag-region className="flex cursor-move select-none items-center gap-2 border-b border-edge px-3 py-2">
         <span data-tauri-drag-region className="h-2 w-2 bg-signal" aria-hidden="true" />
         <span data-tauri-drag-region className="label truncate text-muted">
-          The Watcher{s ? ` · ${s.target}` : ""}
+          owlsh{s ? ` · ${s.target}` : ""}
         </span>
         <div className="ml-auto flex items-center gap-0.5" role="group" aria-label="Widget size">
           {WIDGET_SIZES.map((z) => (
@@ -146,7 +146,7 @@ export function WidgetWindow() {
       {!s ? (
         <div className="flex flex-1 flex-col justify-center gap-2 px-4 text-muted">
           <span>Waiting for a capture…</span>
-          <span className="text-faint">Start one with watcher-capture --attach</span>
+          <span className="text-faint">Start one with owlsh --attach</span>
         </div>
       ) : (
         <div className="flex flex-1 flex-col gap-2.5 overflow-hidden px-3.5 py-3">

@@ -1,11 +1,11 @@
-"""The Watcher — thin Python plugin SDK (brief §5.4).
+"""owlsh — thin Python plugin SDK (brief §5.4).
 
 A plugin is any process that emits valid TelemetryEvents to the daemon's local socket. This SDK
 handles the capability handshake and the §3.3 envelope framing so a typical wrapper is ~tens of
 lines. Go and Rust SDKs follow the same shape.
 
-    from watcher_sdk import Watcher
-    w = Watcher("aws-cloudshell", context_template="cloud:aws:cloudshell:us-east-1", has_stdin=True)
+    from owlsh_sdk import owlsh
+    w = owlsh("aws-cloudshell", context_template="cloud:aws:cloudshell:us-east-1", has_stdin=True)
     w.session_start("AWS CloudShell")
     w.command("aws s3 ls"); w.output("2024-... my-bucket")
     w.session_end(); w.close()
@@ -16,7 +16,7 @@ import time
 import uuid
 
 
-class Watcher:
+class owlsh:
     def __init__(self, plugin, *, host="127.0.0.1", port=8799, klass="source",
                  has_exit_codes=False, has_stdin=False, boundary_confidence="inferred",
                  redaction="none", context_template=None, ndjson_path=None):
@@ -26,7 +26,7 @@ class Watcher:
         self.ndjson_path = ndjson_path
         self.sock = socket.create_connection((host, port))
         hs = {
-            "watcher_handshake": "1.0",
+            "owlsh_handshake": "1.0",
             "plugin": plugin,
             "class": klass,
             "capabilities": {

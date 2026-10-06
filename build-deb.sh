@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build a static (musl) .deb for the watcher-capture agent.
+# Build a static (musl) .deb for the owlsh agent.
 #
 # The agent is pure Rust with no GUI/WebKit dependencies, so a musl-static build
 # yields ONE binary with no runtime Depends that runs on Kali, Parrot / HTB Pwnbox
@@ -16,7 +16,7 @@
 #   ./build-deb.sh                           # amd64 (x86_64-unknown-linux-musl)
 #   TARGET=aarch64-unknown-linux-musl ./build-deb.sh   # arm64 (needs a cross linker)
 #
-# Output: target/<triple>/debian/watcher-capture_<version>_<arch>.deb
+# Output: target/<triple>/debian/owlsh_<version>_<arch>.deb
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -31,7 +31,7 @@ rustup target add "$TARGET" >/dev/null
 # cargo-deb builds the release binary for the given target and assembles the .deb
 # (the binary is taken from [[bin]] automatically; Cargo.toml's [package.metadata.deb]
 # adds the man page, license and metadata).
-cargo deb -p watcher-capture --target "$TARGET"
+cargo deb -p owlsh --target "$TARGET"
 
 echo
 echo ">> built:"

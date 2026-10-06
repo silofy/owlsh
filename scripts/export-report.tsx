@@ -9,7 +9,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { attachHints, HINTS_SUFFIX } from "../src/lib/widget/hints";
 import { resolve, dirname } from "node:path";
 import { draftReport } from "../src/lib/report/draft";
-import type { WatcherReport } from "../src/types/report";
+import type { OwlshReport } from "../src/types/report";
 
 const root = resolve(import.meta.dirname, "..");
 const args = process.argv.slice(2);
@@ -23,7 +23,7 @@ const outPath = resolve(root, argOf("--out", "dist/report.md"));
 
 // merge any live-widget hint pulls from the sidecar so the drafted report reflects the same grade
 const hintsPath = reportPath + HINTS_SUFFIX;
-const report = attachHints(JSON.parse(readFileSync(reportPath, "utf8")) as WatcherReport, existsSync(hintsPath) ? JSON.parse(readFileSync(hintsPath, "utf8")) : null);
+const report = attachHints(JSON.parse(readFileSync(reportPath, "utf8")) as OwlshReport, existsSync(hintsPath) ? JSON.parse(readFileSync(hintsPath, "utf8")) : null);
 const md = draftReport(report);
 mkdirSync(dirname(outPath), { recursive: true });
 writeFileSync(outPath, md, "utf8");

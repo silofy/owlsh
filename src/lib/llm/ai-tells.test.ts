@@ -10,7 +10,7 @@ import { HUMANIZE_STYLE } from "./style";
 import { narrateReport } from "../report/narrate";
 import { narrateGhost } from "../ghost/narrate";
 import type { GhostResult } from "../ghost/ghost";
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 
 const EM = "—";
 const hasTell = (s: string) => /[‒–—―]/.test(s);
@@ -45,7 +45,7 @@ describe("AI-tell gate", () => {
       findings: [],
       episodes: [],
       golden_dag: [],
-    } as unknown as WatcherReport;
+    } as unknown as OwlshReport;
     const { findings, summary } = await narrateReport(report, sloppyProvider);
     if (summary) expect(hasTell(summary)).toBe(false);
     for (const f of findings) expect(hasTell(f.description)).toBe(false);

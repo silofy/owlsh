@@ -180,7 +180,7 @@ function DefenseDebrief({ report }: { report: DefenseReport }) {
 
       <footer className="flex items-center justify-between py-6 text-xs text-faint">
         <span className="mono">defense debrief · {report.session.uuid.slice(0, 8)}</span>
-        <span>The Watcher — capture safely, process privately, coach honestly.</span>
+        <span>owlsh — capture safely, process privately, coach honestly.</span>
       </footer>
     </div>
   );
@@ -211,7 +211,7 @@ export function App() {
                 <span className="flex h-5 w-5 items-center justify-center rounded-[5px] bg-signal/15 text-signal">
                   <ScanEye size={13} />
                 </span>
-                <span className="font-display font-semibold tracking-tight text-fg">The Watcher</span>
+                <span className="font-display font-semibold tracking-tight text-fg">owlsh</span>
               </div>
               <nav className="flex items-stretch gap-7">
                 <Tab id="debrief" label="Debrief" />
@@ -382,7 +382,7 @@ export function App() {
                 <span className="mono">
                   schema v{report.schema_version} · {session.uuid.slice(0, 8)}
                 </span>
-                <span>The Watcher — capture safely, process privately, coach honestly.</span>
+                <span>owlsh — capture safely, process privately, coach honestly.</span>
               </footer>
             </div>
           )}

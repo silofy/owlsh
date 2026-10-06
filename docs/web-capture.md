@@ -1,6 +1,6 @@
 # Recording web traffic with Burp Suite
 
-The Watcher can record HTTP exchanges proxied through **Burp Suite** and grade them alongside your terminal commands on the same run timeline — the same **MITRE tactic/technique + CWE** analysis applied to web attacks as to shell commands.
+owlsh can record HTTP exchanges proxied through **Burp Suite** and grade them alongside your terminal commands on the same run timeline — the same **MITRE tactic/technique + CWE** analysis applied to web attacks as to shell commands.
 
 Everything is **optional** and **off by default**. To enable web capture, you pass `--web` to the capture agent — and nothing is recorded until you do.
 
@@ -8,7 +8,7 @@ Everything is **optional** and **off by default**. To enable web capture, you pa
 
 ## What it does
 
-When you enable `--web`, the Watcher spawns a Python bridge that polls Burp's **MCP Server** extension for proxy history. Each HTTP exchange (request + response) is streamed into the same run session as your terminal commands. The analysis layer grades each exchange deterministically:
+When you enable `--web`, owlsh spawns a Python bridge that polls Burp's **MCP Server** extension for proxy history. Each HTTP exchange (request + response) is streamed into the same run session as your terminal commands. The analysis layer grades each exchange deterministically:
 
 - **MITRE ATT&CK technique** — reconnaissance, lateral movement, data exfiltration, etc.
 - **CWE weakness class** — SQLi, XSS, authentication bypass, insecure deserialization, etc.
@@ -29,9 +29,9 @@ Before you can use `--web`, you need:
 ### Burp Suite: Community vs. Pro
 
 - **Burp Community Edition:** proxy history is available via the MCP Server, but limited to a **single snapshot** (the current state of the proxy history at query time). Once history is cleared, it's gone.
-- **Burp Professional:** proxy history is **persistent** across queries; the Watcher can detect new exchanges incrementally and avoid re-processing the same traffic.
+- **Burp Professional:** proxy history is **persistent** across queries; owlsh can detect new exchanges incrementally and avoid re-processing the same traffic.
 
-Both work with the Watcher. Community users will see all current traffic when they enable `--web`; Pro users will see traffic accumulated continuously throughout the session.
+Both work with owlsh. Community users will see all current traffic when they enable `--web`; Pro users will see traffic accumulated continuously throughout the session.
 
 ### Python setup
 
@@ -51,7 +51,7 @@ Download Burp Suite from [PortSwigger's website](https://portswigger.net/burp) a
 
 - See **[PortSwigger's MCP Server documentation](https://portswigger.net/burp/documentation)** for step-by-step instructions on installing the BApp and enabling the MCP Server extension. (Search the BApp Store for "MCP Server".)
 - Note the endpoint where the MCP Server listens — by default, `127.0.0.1:9876`.
-- Set a **target scope** in Burp so only your target traffic is recorded. The Watcher will ingest everything in Burp's scope.
+- Set a **target scope** in Burp so only your target traffic is recorded. owlsh will ingest everything in Burp's scope.
 
 ### 2. Install the bridge's Python dependencies
 
@@ -63,10 +63,10 @@ This installs the `mcp` package, which the bridge uses to talk to Burp.
 
 ### 3. Run the capture agent with `--web`
 
-Start capturing with the Watcher, adding `--web` to enable web capture:
+Start capturing with owlsh, adding `--web` to enable web capture:
 
 ```sh
-watcher-capture --attach --platform htb --target Forge --web
+owlsh --attach --platform htb --target Forge --web
 ```
 
 The capture agent will spawn the bridge as a background process. As soon as Burp sees traffic from your target, the exchanges will be ingested and graded.
@@ -79,7 +79,7 @@ The capture agent will spawn the bridge as a background process. As soon as Burp
 
 ### Scope-limited capture
 
-The Watcher only ingests HTTP exchanges for hosts in **Burp's target scope**. If you set a scope in Burp (which you should), only traffic to those hosts is recorded.
+owlsh only ingests HTTP exchanges for hosts in **Burp's target scope**. If you set a scope in Burp (which you should), only traffic to those hosts is recorded.
 
 ### Web-aware redaction
 
@@ -114,12 +114,12 @@ When you pass `--web`, the capture agent checks whether Burp and Python are read
 - Install Python 3 from [python.org](https://www.python.org/) if you don't have it.
 - Run `pip install -r plugins/burp-bridge/requirements.txt` to install the bridge's dependencies.
 
-### "Burp scope is empty — Watcher will ingest all proxied traffic. Set a target scope in Burp to limit what's recorded."
+### "Burp scope is empty — owlsh will ingest all proxied traffic. Set a target scope in Burp to limit what's recorded."
 
-**What it means:** Burp's target scope is empty, so the Watcher will capture **all** traffic passing through Burp's proxy, not just your target.
+**What it means:** Burp's target scope is empty, so owlsh will capture **all** traffic passing through Burp's proxy, not just your target.
 
 **What to do:**
-- This is a **nudge**, not a failure. The Watcher will still record the traffic.
+- This is a **nudge**, not a failure. owlsh will still record the traffic.
 - To limit recording to your target, set a scope in Burp: **Target → Scope** and add the target domain/IP.
 
 ### "Burp MCP detected; add --web to record web traffic"

@@ -14,7 +14,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import Ajv from "ajv/dist/2020";
 import addFormats from "ajv-formats";
-import schema from "../schema/watcher-report.schema.json";
+import schema from "../schema/owlsh-report.schema.json";
 import { harToRawCommands } from "../src/lib/ingest/http-proxy";
 import { assembleReport } from "../src/lib/pipeline/ingest";
 import { WEB_METHODOLOGY } from "../src/lib/golden/methodology";

@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
 import fixture from "../../../fixtures/session-htb-easy.json";
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 import { minimizedBundle } from "./bundle";
 import { buildAttestation, verifyAttestation, verifyChain, generateDeviceKey, hashOf } from "./attest";
 
-const report = fixture as unknown as WatcherReport;
+const report = fixture as unknown as OwlshReport;
 
 describe("manager-profile minimization", () => {
   const bundle = minimizedBundle(report);

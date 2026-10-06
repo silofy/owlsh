@@ -15,11 +15,11 @@ export default defineConfig({
     target: "es2022",
     outDir: "dist-embed",
     cssCodeSplit: false,
-    lib: { entry: resolve(__dirname, "embed/index.tsx"), name: "WatcherEmbed", fileName: () => "watcher-embed.js", formats: ["iife"] },
+    lib: { entry: resolve(__dirname, "embed/index.tsx"), name: "OwlshEmbed", fileName: () => "owlsh-embed.js", formats: ["iife"] },
     rollupOptions: {
       output: {
         inlineDynamicImports: true,
-        assetFileNames: "watcher-embed.[ext]",
+        assetFileNames: "owlsh-embed.[ext]",
         banner: "window.process=window.process||{env:{NODE_ENV:'production'}};window.global=window.global||window;",
       },
     },

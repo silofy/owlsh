@@ -18,7 +18,7 @@ describe("capture wrapper arg handling", () => {
   });
 
   it("resolves the platform binary path", () => {
-    expect(binaryRelPath("win32")).toBe("crates/capture/target/release/watcher-capture.exe");
-    expect(binaryRelPath("linux")).toBe("crates/capture/target/release/watcher-capture");
+    expect(binaryRelPath("win32")).toBe("crates/capture/target/release/owlsh.exe");
+    expect(binaryRelPath("linux")).toBe("crates/capture/target/release/owlsh");
   });
 });

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { alignInvestigation } from "./align";
 import type { Incident } from "./types";
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 
 const incident: Incident = {
   target_scope: "Abducted",
@@ -18,7 +18,7 @@ const run = {
     { seq: 1, cmd: "grep -ri CVE-2026-4480 /var/log", binary: "grep", started_at_ms: 0, output_digest: "match: samba print injection CVE-2026-4480" },
     { seq: 2, cmd: "ls -la /home", binary: "ls", started_at_ms: 5000, output_digest: "nothing useful" },
   ],
-} as unknown as WatcherReport;
+} as unknown as OwlshReport;
 
 describe("alignInvestigation", () => {
   it("marks an artifact found when a run episode surfaces its indicator, and flags noise", () => {

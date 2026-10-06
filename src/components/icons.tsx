@@ -120,7 +120,7 @@ export function Crosshair(props: IconProps) {
   );
 }
 
-/** The brand mark — a scanning eye, for "The Watcher" in the nav. */
+/** The brand mark — a scanning eye, for "owlsh" in the nav. */
 export function ScanEye(props: IconProps) {
   return (
     <IconBase {...props}>

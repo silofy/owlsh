@@ -1,6 +1,6 @@
 /**
- * Pwnbox SSH sync config + invoker. The Watcher scp-pulls the in-Pwnbox agent's exports into
- * ~/.watcher/sessions/, where the existing live-bridge poll picks them up. Tauri-only; config lives
+ * Pwnbox SSH sync config + invoker. owlsh scp-pulls the in-Pwnbox agent's exports into
+ * ~/.owlsh/sessions/, where the existing live-bridge poll picks them up. Tauri-only; config lives
  * in localStorage (a host/user/key pointer — no secret material beyond a key PATH).
  */
 export interface PwnboxConfig {
@@ -12,8 +12,8 @@ export interface PwnboxConfig {
   remoteDir?: string;
 }
 
-const KEY = "watcher.pwnbox";
-const DEFAULT: PwnboxConfig = { enabled: false, host: "", user: "", remoteDir: "~/.watcher-exports" };
+const KEY = "owlsh.pwnbox";
+const DEFAULT: PwnboxConfig = { enabled: false, host: "", user: "", remoteDir: "~/.owlsh-exports" };
 
 export function loadPwnboxConfig(): PwnboxConfig {
   try {

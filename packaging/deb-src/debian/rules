@@ -14,8 +14,8 @@ override_dh_auto_build:
 	cargo build --release --offline --locked --manifest-path crates/capture/Cargo.toml
 
 override_dh_auto_install:
-	install -D -m0755 crates/capture/target/release/watcher-capture \
-	  debian/watcher-capture/usr/bin/watcher-capture
+	install -D -m0755 crates/capture/target/release/owlsh \
+	  debian/owlsh/usr/bin/owlsh
 
 # No test suite is run at package-build time (offline, no network fixtures).
 override_dh_auto_test:

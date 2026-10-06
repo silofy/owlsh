@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 import fixture from "../../fixtures/session-htb-easy.json";
-import type { WatcherReport } from "../types/report";
+import type { OwlshReport } from "../types/report";
 import { redactReport, redactText } from "./redact";
 
-const report = fixture as unknown as WatcherReport;
+const report = fixture as unknown as OwlshReport;
 
 describe("redactText", () => {
   it("masks IPv4 addresses", () => {
@@ -12,7 +12,7 @@ describe("redactText", () => {
   it("masks flag hashes", () => {
     expect(redactText("flag: 0123456789abcdef0123456789abcdef")).toBe("flag: [redacted-flag]");
   });
-  it("masks key=value credentials (mirrors watcher_core::redact_body)", () => {
+  it("masks key=value credentials (mirrors owlsh_core::redact_body)", () => {
     expect(redactText("mysql config: password=Winter2023!")).toBe("mysql config: password=[redacted]");
     expect(redactText("api_key: sk-live-abc123")).toBe("api_key=[redacted]");
     expect(redactText("token=eyJhbGciOi")).toBe("token=[redacted]");

@@ -82,7 +82,7 @@ pub fn cloud_generate(provider: String, model: String, system: String, prompt: S
             let auth = format!("Bearer {key}");
             let mut headers: Vec<(&str, &str)> = vec![("authorization", &auth)];
             if openrouter {
-                headers.push(("x-title", "The Watcher")); // app attribution on OpenRouter's dashboard
+                headers.push(("x-title", "owlsh")); // app attribution on OpenRouter's dashboard
             }
             let out = post_json(&agent, url, &headers, &body)?;
             let v = parse(&out)?;

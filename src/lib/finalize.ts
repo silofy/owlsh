@@ -1,7 +1,7 @@
 /**
  * Finalize a captured live session into a structured debrief.
  *
- * A capture agent (watcher-capture --attach / --export) writes a session with episodes but no phase
+ * A capture agent (owlsh --attach / --export) writes a session with episodes but no phase
  * map or real metrics. This runs the same deterministic pipeline the curated reports use — phase
  * derivation + metrics — plus a skill radar, so a real engagement renders as a graded debrief rather
  * than a raw command list. Golden-DAG alignment is deliberately skipped: there's no per-machine
@@ -9,7 +9,7 @@
  *
  * Idempotent and cheap (a handful of episodes), so it's safe to run on every poll/ingest.
  */
-import type { CoachingStep, Episode, SkillRadar, WatcherReport } from "../types/report";
+import type { CoachingStep, Episode, SkillRadar, OwlshReport } from "../types/report";
 import { normalizeCoaching } from "./coaching";
 import { derivePhases, alignEpisodes, segmentEpisodes } from "./pipeline";
 import { ingestSshSession } from "./ssh/ingest";
@@ -41,7 +41,7 @@ function deriveSkillRadar(episodes: Episode[]): SkillRadar {
   return radar;
 }
 
-export function finalizeLiveReport(r: WatcherReport, sshSessions: SshSessionInput[] = []): WatcherReport {
+export function finalizeLiveReport(r: OwlshReport, sshSessions: SshSessionInput[] = []): OwlshReport {
   if (!r.episodes?.length && sshSessions.length === 0) return r;
 
   // Fold captured SSH sessions in as on-target commands (their per-command work was one opaque block
@@ -54,7 +54,7 @@ export function finalizeLiveReport(r: WatcherReport, sshSessions: SshSessionInpu
   // low-yield output, with NO golden reference. (Layer 2 — straying from the intended path — needs a
   // write-up-sourced golden DAG and is added separately.)
   const { episodes } = alignEpisodes(withSsh, r.golden_dag ?? []);
-  const aligned: WatcherReport = { ...r, episodes };
+  const aligned: OwlshReport = { ...r, episodes };
 
   const startMs = Date.parse(r.session.started_at) || 0;
   const phases = derivePhases(episodes, startMs);

@@ -1,4 +1,4 @@
-import type { WatcherReport, Finding } from "../../types/report";
+import type { OwlshReport, Finding } from "../../types/report";
 
 /**
  * Deterministic privilege-escalation path analysis.
@@ -202,7 +202,7 @@ const normBin = (p: string) => {
   return b;
 };
 
-// Watcher's demo/live output packs logical lines onto one string with " · "; split on both so the
+// owlsh's demo/live output packs logical lines onto one string with " · "; split on both so the
 // same line matchers work on compressed fixtures and raw multi-line capture alike.
 const toLines = (text: string): string[] => text.split(/\n|·/).map((l) => l.trim()).filter(Boolean);
 
@@ -210,7 +210,7 @@ const PERM_LINE = /^[-dlbcps][rwxsStT-]{9}\b/;
 const isSuidSweep = (cmd: string) => /\bfind\b[^\n]*-perm[^\n]*\b(?:-?4000|\/[0-6]?4000|[-/]4000)\b/.test(cmd) || /-perm\s+-?4000/.test(cmd);
 const isSgidSweep = (cmd: string) => /\bfind\b[^\n]*-perm[^\n]*\b(?:-?2000|\/2000)\b/.test(cmd);
 
-function collectSignals(report: WatcherReport): Signals {
+function collectSignals(report: OwlshReport): Signals {
   const s: Signals = {
     user: "current-user", groups: [], kernel: null, sudoVersion: null, sudoAll: false, ldPreload: false,
     sudoBins: new Map(), suid: new Map(), sgid: new Map(), caps: [], writable: new Map(), nfs: new Map(), rooted_seq: null,
@@ -311,7 +311,7 @@ function gtfoRef(bin: string, ctx: "suid" | "sudo" | "capabilities" | "") {
   return `https://gtfobins.github.io/gtfobins/${page}/` + (ctx && ctx !== "capabilities" ? `#${ctx}` : ctx === "capabilities" ? "#capabilities" : "");
 }
 
-export function analyzePrivesc(report: WatcherReport): PrivescResult {
+export function analyzePrivesc(report: OwlshReport): PrivescResult {
   const s = collectSignals(report);
   const paths: PrivescPath[] = [];
   const add = (p: PrivescPath) => paths.push(p);

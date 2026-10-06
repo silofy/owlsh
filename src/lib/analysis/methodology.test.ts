@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { computeMethodology, topUnmetCheck } from "./methodology";
-import type { WatcherReport, Episode, Finding } from "../../types/report";
+import type { OwlshReport, Episode, Finding } from "../../types/report";
 
 const ep = (o: Partial<Episode> & { seq: number }): Episode => ({ cmd: "", binary: "", duration_ms: 0, gap_before_ms: 0, actor: "machine_bound", tactic: "TA0007", ...o });
-const rep = (episodes: Episode[], findings: Finding[], golden: WatcherReport["golden_dag"] = []): WatcherReport => ({
+const rep = (episodes: Episode[], findings: Finding[], golden: OwlshReport["golden_dag"] = []): OwlshReport => ({
   schema_version: "1.3", session: { uuid: "u", started_at: "2026-01-01T00:00:00Z", ended_at: "2026-01-01T00:10:00Z", target_scope: "t", shell: "bash", source: "local_pty" },
   episodes, phases: [], golden_dag: golden, findings,
   metrics: { efficiency_pct: 0, time_waster: { productive_ms: 0, detour_ms: 0, stuck_ms: 0, loop_ms: 0, t_active_ms: 0 }, stealth_score: 100, objective_coverage_pct: 0, technique_breadth: 0 },
@@ -36,7 +36,7 @@ describe("computeMethodology", () => {
   });
 
   it("priv_enum reports the real foothold seq, not a fabricated one, and is done once linpeas runs", () => {
-    const golden: WatcherReport["golden_dag"] = [
+    const golden: OwlshReport["golden_dag"] = [
       { objective: "Get a foothold", tactic: "TA0002", satisfied_by: [], user_satisfied_by_seq: 5 },
     ];
     const r = rep([ep({ seq: 5, cmd: "id", binary: "id", tactic: "TA0002" })], [], golden);
@@ -98,7 +98,7 @@ describe("topUnmetCheck", () => {
   });
 
   it("returns null when every applicable check is done", () => {
-    const golden: WatcherReport["golden_dag"] = [
+    const golden: OwlshReport["golden_dag"] = [
       { objective: "Get a foothold", tactic: "TA0002", satisfied_by: [], user_satisfied_by_seq: 5 },
     ];
     const r = rep(

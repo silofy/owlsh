@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { analyzePrivesc } from "./privesc";
-import type { WatcherReport, Episode, Finding } from "../../types/report";
+import type { OwlshReport, Episode, Finding } from "../../types/report";
 
 const ep = (o: Partial<Episode> & { seq: number }): Episode => ({ cmd: "", binary: "x", duration_ms: 1000, gap_before_ms: 0, actor: "machine_bound", tactic: "TA0004", ...o });
-const rep = (episodes: Episode[], findings: Finding[] = []): WatcherReport => ({
+const rep = (episodes: Episode[], findings: Finding[] = []): OwlshReport => ({
   schema_version: "1.4", session: { uuid: "u", started_at: "2026-01-01T00:00:00Z", ended_at: "2026-01-01T00:20:00Z", target_scope: "t", shell: "bash", source: "local_pty" },
   episodes, phases: [], golden_dag: [], findings,
   metrics: { efficiency_pct: 0, time_waster: { productive_ms: 0, detour_ms: 0, stuck_ms: 0, loop_ms: 0, t_active_ms: 0 }, stealth_score: 100, objective_coverage_pct: 0, technique_breadth: 0 },

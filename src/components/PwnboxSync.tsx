@@ -109,7 +109,7 @@ export function PwnboxSync() {
             <ol className="space-y-2 text-sm text-muted">
               <li className="flex gap-2">
                 <span className="text-faint">1.</span>
-                <span>Run the <span className="text-fg">Watcher agent</span> in your Pwnbox terminal.</span>
+                <span>Run the <span className="text-fg">owlsh agent</span> in your Pwnbox terminal.</span>
               </li>
               <li className="flex gap-2">
                 <span className="text-faint">2.</span>

@@ -17,7 +17,7 @@ describe("report renders end-to-end", () => {
 
   it("includes the core report sections", () => {
     for (const title of [
-      "The Watcher",
+      "owlsh",
       "How the run unfolded",
       "Stealth &amp; Noise",
       "Command Log",

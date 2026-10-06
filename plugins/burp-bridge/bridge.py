@@ -1,4 +1,4 @@
-"""Burp -> Watcher bridge: poll Burp's MCP proxy history, emit web telemetry.
+"""Burp -> owlsh bridge: poll Burp's MCP proxy history, emit web telemetry.
 
 Run standalone (spawned by `--web`, crates/capture/src/main.rs::spawn_web_bridge):
 
@@ -33,10 +33,10 @@ def _msg_unreachable(port: int = DEFAULT_PORT) -> str:
 
 
 def _msg_empty_scope() -> str:
-    return "Burp scope is empty — Watcher will ingest all proxied traffic. Set a target scope in Burp to limit what's recorded."
+    return "Burp scope is empty — owlsh will ingest all proxied traffic. Set a target scope in Burp to limit what's recorded."
 
 
-def poll_once(history, watcher, scope, seen):
+def poll_once(history, owlsh, scope, seen):
     """Emit unseen, in-scope exchanges once. Pure over its inputs for testability."""
     for ex in history:
         pid = ex["pair_id"]
@@ -45,9 +45,9 @@ def poll_once(history, watcher, scope, seen):
         if scope and ex.get("host") not in scope:
             continue
         seen.add(pid)
-        watcher.http_request(pair_id=pid, method=ex["method"], url=ex["url"],
+        owlsh.http_request(pair_id=pid, method=ex["method"], url=ex["url"],
                              req_headers=ex.get("req_headers", ""), req_body=ex.get("req_body", ""))
-        watcher.http_response(pair_id=pid, status=ex.get("status", 0),
+        owlsh.http_response(pair_id=pid, status=ex.get("status", 0),
                               resp_headers=ex.get("resp_headers", ""), resp_body=ex.get("resp_body", ""),
                               mime=ex.get("mime", ""))
 
@@ -55,26 +55,26 @@ def poll_once(history, watcher, scope, seen):
 DEFAULT_MAX_CONSECUTIVE_FAILURES = 5
 
 
-def run(client, watcher, scope, interval=2.0, max_consecutive_failures=None):
+def run(client, owlsh, scope, interval=2.0, max_consecutive_failures=None):
     """Poll until the daemon or Burp goes away, then let `finally` clean up.
 
     A dead daemon socket (this run's session already ended) or an unreachable Burp both manifest
     as repeated poll failures, not a single one-off blip — so this only stops on N CONSECUTIVE
-    failures, configurable via `max_consecutive_failures` or the WATCHER_BRIDGE_MAX_FAILURES env
+    failures, configurable via `max_consecutive_failures` or the OWLSH_BRIDGE_MAX_FAILURES env
     var, defaulting to DEFAULT_MAX_CONSECUTIVE_FAILURES. A successful poll resets the counter. A
-    failure of the SDK send itself (watcher.http_request/http_response raising — the daemon socket
+    failure of the SDK send itself (owlsh.http_request/http_response raising — the daemon socket
     closed) counts the same as a Burp-side failure: both are "this run is over" signals.
     """
     if max_consecutive_failures is None:
-        max_consecutive_failures = int(os.environ.get("WATCHER_BRIDGE_MAX_FAILURES", DEFAULT_MAX_CONSECUTIVE_FAILURES))
+        max_consecutive_failures = int(os.environ.get("OWLSH_BRIDGE_MAX_FAILURES", DEFAULT_MAX_CONSECUTIVE_FAILURES))
     seen, cursor = set(), 0
     consecutive_failures = 0
-    watcher.session_start("Burp web capture")
+    owlsh.session_start("Burp web capture")
     try:
         while True:
             try:
                 history, cursor = client.history_since(cursor)
-                poll_once(history, watcher, scope, seen)
+                poll_once(history, owlsh, scope, seen)
                 consecutive_failures = 0
             except Exception as e:  # never crash the run — degrade, but track for the stop condition
                 consecutive_failures += 1
@@ -84,7 +84,7 @@ def run(client, watcher, scope, interval=2.0, max_consecutive_failures=None):
                     break
             time.sleep(interval)
     finally:
-        watcher.session_end(); watcher.close()
+        owlsh.session_end(); owlsh.close()
 
 
 def _arg_or_env(argv, flag, env_name, default=None):
@@ -153,17 +153,17 @@ def _connect_session(port: int):
 
 def main(argv=None) -> int:
     """Entry point for running the bridge standalone. Reads --platform/--scope from argv or the
-    matching WATCHER_* env vars, then joins the run started by --attach. Degrades gracefully
+    matching OWLSH_* env vars, then joins the run started by --attach. Degrades gracefully
     (message + exit 0, no traceback) when the mcp client isn't installed or Burp isn't reachable —
     both are ordinary states (fresh checkout, Burp not open yet) that must never surface as a crash
     in what is always a fire-and-forget child process."""
     argv = sys.argv[1:] if argv is None else argv
-    platform = _arg_or_env(argv, "--platform", "WATCHER_PLATFORM", "local")
-    scope = _parse_scope(_arg_or_env(argv, "--scope", "WATCHER_SCOPE", ""))
-    port = int(_arg_or_env(argv, "--port", "WATCHER_BURP_MCP_PORT", str(DEFAULT_PORT)))
+    platform = _arg_or_env(argv, "--platform", "OWLSH_PLATFORM", "local")
+    scope = _parse_scope(_arg_or_env(argv, "--scope", "OWLSH_SCOPE", ""))
+    port = int(_arg_or_env(argv, "--port", "OWLSH_BURP_MCP_PORT", str(DEFAULT_PORT)))
     # NDJSON tee sink — lets ingest-capture.tsx fold live --web traffic into the rendered report
     # (the daemon socket/SQLCipher path below is unaffected; this is purely additive).
-    ndjson_out = _arg_or_env(argv, "--ndjson-out", "WATCHER_WEB_NDJSON",
+    ndjson_out = _arg_or_env(argv, "--ndjson-out", "OWLSH_WEB_NDJSON",
                               os.path.join("crates", "capture", "web-events.ndjson"))
 
     try:
@@ -182,10 +182,10 @@ def main(argv=None) -> int:
     print(f"[burp-bridge] joining platform={platform} scope={sorted(scope) or 'all hosts'}")
     try:
         client = _connect_session(port)
-        from watcher_sdk import Watcher  # plugins/sdk — see cloudshell_plugin.py for the pattern
-        watcher = Watcher("burp-bridge", context_template="web:burp", has_stdin=False,
+        from owlsh_sdk import owlsh  # plugins/sdk — see cloudshell_plugin.py for the pattern
+        owlsh = owlsh("burp-bridge", context_template="web:burp", has_stdin=False,
                           ndjson_path=ndjson_out)
-        run(client, watcher, scope)
+        run(client, owlsh, scope)
     except Exception as e:  # any setup/session failure — degrade, never crash the caller
         print(f"[burp-bridge] {_msg_unreachable(port)} ({e})")
         return 0

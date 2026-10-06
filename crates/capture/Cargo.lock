@@ -322,6 +322,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
 
 [[package]]
+name = "owlsh"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "crossterm",
+ "owlsh-core",
+ "portable-pty",
+ "serde",
+ "serde_json",
+ "uuid",
+ "vte",
+]
+
+[[package]]
+name = "owlsh-core"
+version = "0.1.0"
+dependencies = [
+ "regex",
+]
+
+[[package]]
 name = "parking_lot"
 version = "0.12.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -747,27 +768,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "23939e44bb9a5d7576fa2b563dc2e136628f1224e88a8deed09e04858b77871f"
 dependencies = [
  "unicode-ident",
-]
-
-[[package]]
-name = "watcher-capture"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "crossterm",
- "portable-pty",
- "serde",
- "serde_json",
- "uuid",
- "vte",
- "watcher-core",
-]
-
-[[package]]
-name = "watcher-core"
-version = "0.1.0"
-dependencies = [
- "regex",
 ]
 
 [[package]]

@@ -1,7 +1,7 @@
 /** Opt-in, graded hints. The widget never volunteers these: the operator pulls one when stuck, and
  *  each pull is recorded and costs independence. Prompts are generic methodology — they point at
  *  *process* (what kind of thing to re-check), never at a box-specific answer. */
-import type { HintPull, WatcherReport } from "../../types/report";
+import type { HintPull, OwlshReport } from "../../types/report";
 
 export type HintTier = HintPull["tier"];
 export type { HintPull };
@@ -11,7 +11,7 @@ export type { HintPull };
 export const HINTS_SUFFIX = ".hints";
 
 /** The report with its sidecar hint pulls attached (no-op when there are none). */
-export function attachHints(report: WatcherReport, pulls: HintPull[] | null | undefined): WatcherReport {
+export function attachHints(report: OwlshReport, pulls: HintPull[] | null | undefined): OwlshReport {
   return pulls && pulls.length ? { ...report, hints: pulls } : report;
 }
 

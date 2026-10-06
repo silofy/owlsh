@@ -9,14 +9,14 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import Ajv from "ajv/dist/2020";
 import addFormats from "ajv-formats";
-import schema from "../schema/watcher-attestation.schema.json";
-import type { WatcherReport } from "../src/types/report";
+import schema from "../schema/owlsh-attestation.schema.json";
+import type { OwlshReport } from "../src/types/report";
 import { computeGrade } from "../src/lib/bridge/grade";
 import { minimizedBundle } from "../src/lib/bridge/bundle";
 import { buildAttestation, generateDeviceKey, verifyAttestation, verifyChain } from "../src/lib/bridge/attest";
 
 const path = resolve(process.argv[2] ?? "fixtures/session-htb-easy.json");
-const report = JSON.parse(readFileSync(path, "utf8")) as WatcherReport;
+const report = JSON.parse(readFileSync(path, "utf8")) as OwlshReport;
 
 const grade = computeGrade(report);
 const bundle = minimizedBundle(report, grade);

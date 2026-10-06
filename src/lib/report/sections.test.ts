@@ -2,9 +2,9 @@ import { describe, it, expect } from "vitest";
 import { headerSection, findingsSection, walkthroughSection, appendixSection, severityLabel } from "./sections";
 import { deriveReportFindings } from "./findings";
 import demo from "../../../fixtures/session-demo-full.json";
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 
-const report = demo as unknown as WatcherReport;
+const report = demo as unknown as OwlshReport;
 
 describe("sections", () => {
   it("header names the target and warns of unredacted detail under the full profile", () => {
@@ -16,7 +16,7 @@ describe("sections", () => {
   });
 
   it("header states a masked-for-sharing guarantee under the public_safe profile", () => {
-    const publicSafeReport: WatcherReport = { ...report, redaction_profile: "public_safe" };
+    const publicSafeReport: OwlshReport = { ...report, redaction_profile: "public_safe" };
     const h = headerSection(publicSafeReport);
     expect(h).toMatch(/masked/i);
     expect(h).not.toMatch(/do not share/i);
@@ -46,7 +46,7 @@ describe("sections", () => {
   });
 
   it("appendix ledger masks cred/hash regardless of masked flag", () => {
-    const testReport: WatcherReport = {
+    const testReport: OwlshReport = {
       ...report,
       findings: [
         { id: "test-cred", kind: "cred", value: "password=SuperSecret1", source_seq: 1, masked: false },

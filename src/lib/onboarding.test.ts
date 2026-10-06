@@ -16,7 +16,7 @@ describe("shouldOpenOnboarding", () => {
   });
 
   it("uses the agreed storage key and value", () => {
-    expect(ONBOARDED_KEY).toBe("watcher.onboarded");
+    expect(ONBOARDED_KEY).toBe("owlsh.onboarded");
     expect(ONBOARDED_VALUE).toBe("1");
   });
 });

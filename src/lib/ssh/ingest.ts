@@ -51,15 +51,15 @@ export function scrubUnechoed(commands: string[], outputLog?: string): string[] 
   });
 }
 
-/** One file the capture tap wrote under ~/.watcher/ssh (an `<id>.in` transcript or `<id>.meta`). */
+/** One file the capture tap wrote under ~/.owlsh/ssh (an `<id>.in` transcript or `<id>.meta`). */
 export interface SshLogFile {
   name: string;
   content: string;
 }
 
 /**
- * Turn the tap's `~/.watcher/ssh` files into session inputs. Each `<id>.in` transcript is paired with
- * its `<id>.meta` sidecar (JSON: target, startedAtMs) written by watcher-ssh.sh. Missing meta degrades
+ * Turn the tap's `~/.owlsh/ssh` files into session inputs. Each `<id>.in` transcript is paired with
+ * its `<id>.meta` sidecar (JSON: target, startedAtMs) written by owlsh-ssh.sh. Missing meta degrades
  * gracefully — the provenance still marks it on-target, it just loses the host label and precise time.
  */
 export function sshSessionsFromDir(files: SshLogFile[]): Array<SshIngestOptions & { inputLog: string }> {

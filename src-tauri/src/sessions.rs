@@ -1,5 +1,5 @@
 //! Live-session bridge (the read side). The daemon writes per-spawn report JSON into
-//! ~/.watcher/sessions/; the webview polls this command and merges new/updated sessions into the
+//! ~/.owlsh/sessions/; the webview polls this command and merges new/updated sessions into the
 //! report — so a box you spawn in the browser appears in the window without a manual step.
 
 use std::fs;
@@ -7,12 +7,12 @@ use std::path::PathBuf;
 
 fn sessions_dir() -> PathBuf {
     let home = std::env::var("USERPROFILE").or_else(|_| std::env::var("HOME")).unwrap_or_default();
-    PathBuf::from(home).join(".watcher").join("sessions")
+    PathBuf::from(home).join(".owlsh").join("sessions")
 }
 
 fn ssh_dir() -> PathBuf {
     let home = std::env::var("USERPROFILE").or_else(|_| std::env::var("HOME")).unwrap_or_default();
-    PathBuf::from(home).join(".watcher").join("ssh")
+    PathBuf::from(home).join(".owlsh").join("ssh")
 }
 
 /// One file the SSH capture tap wrote — an `<id>.in` transcript or its `<id>.meta` sidecar.

@@ -6,7 +6,7 @@
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import type { WatcherReport } from "../src/types/report";
+import type { OwlshReport } from "../src/types/report";
 import { probeHardware, selectTier, resolveProvider, refineClassification } from "../src/lib/llm";
 
 const hw = probeHardware();
@@ -18,7 +18,7 @@ console.log(`Hardware: ${hw.ramGb} GB RAM · ${hw.cores} cores · GPU ${hw.hasGp
 console.log(`Model tier: ${tier.name} → ${tier.model} ${tier.quant} (num_ctx ${tier.numCtx}) — ${tier.strategy}`);
 console.log(`Provider: ${provider.name}${provider.name === "rules-only" ? " (no Ollama at 127.0.0.1:11434 — deterministic only)" : ""}`);
 
-const report = JSON.parse(readFileSync(resolve("fixtures/session-htb-easy.json"), "utf8")) as WatcherReport;
+const report = JSON.parse(readFileSync(resolve("fixtures/session-htb-easy.json"), "utf8")) as OwlshReport;
 const ep = report.episodes.find((e) => e.binary === "nmap")!;
 const refined = await refineClassification(provider, ep);
 console.log(`\nSample refinement (#${ep.seq} ${ep.binary}):`);

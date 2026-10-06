@@ -2,9 +2,9 @@ import { describe, it, expect } from "vitest";
 import { draftReport } from "./draft";
 import { deriveReportFindings } from "./findings";
 import demo from "../../../fixtures/session-demo-full.json";
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 
-const report = demo as unknown as WatcherReport;
+const report = demo as unknown as OwlshReport;
 
 describe("draftReport", () => {
   const md = draftReport(report);

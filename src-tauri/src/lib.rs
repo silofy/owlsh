@@ -1,4 +1,4 @@
-// The Watcher desktop shell. A thin window around the React report, plus commands the webview
+// owlsh desktop shell. A thin window around the React report, plus commands the webview
 // invokes — here, managing the offline LLM (Ollama) sidecar (brief §5.1).
 
 mod cloud;
@@ -20,7 +20,7 @@ fn open_widget(app: tauri::AppHandle) -> Result<(), String> {
         return Ok(());
     }
     tauri::WebviewWindowBuilder::new(&app, "widget", tauri::WebviewUrl::App("index.html?widget=1".into()))
-        .title("The Watcher — widget")
+        .title("owlsh — widget")
         .inner_size(360.0, 330.0)
         .min_inner_size(300.0, 240.0)
         .always_on_top(true)
@@ -32,7 +32,18 @@ fn open_widget(app: tauri::AppHandle) -> Result<(), String> {
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
+/// One-time move of the pre-rename data folder `~/.watcher` → `~/.owlsh` (same as owlsh_core's).
+fn migrate_legacy_home() {
+    let Some(home) = std::env::var_os("USERPROFILE").or_else(|| std::env::var_os("HOME")) else { return };
+    let home = std::path::PathBuf::from(home);
+    let (old, new) = (home.join(".watcher"), home.join(".owlsh"));
+    if old.is_dir() && !new.exists() {
+        let _ = std::fs::rename(&old, &new);
+    }
+}
+
 pub fn run() {
+    migrate_legacy_home();
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             llm::ollama_status,
@@ -56,5 +67,5 @@ pub fn run() {
             pwnbox::pull_pwnbox
         ])
         .run(tauri::generate_context!())
-        .expect("error while running The Watcher");
+        .expect("error while running owlsh");
 }

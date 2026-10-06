@@ -34,7 +34,7 @@ const APT = `sudo apt update && sudo apt install -y libwebkit2gtk-4.1-dev build-
 
 const missing = [];
 
-console.log("\nThe Watcher — desktop prerequisites\n");
+console.log("\nowlsh — desktop prerequisites\n");
 console.log(ok(`Node ${process.version}`));
 
 // Rust — a hard requirement on every platform (Tauri, plus the capture/store/daemon crates).

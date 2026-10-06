@@ -1,25 +1,25 @@
 /**
  * Defense debrief CLI. Grades an analyst investigation against an incident.
  *   vite-node scripts/ingest-defense.tsx --incident <attacker capture> --run <analyst session> [--out <path>]
- * Each input may be a raw capture (auto-detected adapter) or an already-assembled Watcher report JSON.
+ * Each input may be a raw capture (auto-detected adapter) or an already-assembled owlsh report JSON.
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { reportFromCapture } from "../src/lib/ingest/detect";
 import { assembleDefenseReport } from "../src/lib/defense/assemble";
-import type { WatcherReport } from "../src/types/report";
+import type { OwlshReport } from "../src/types/report";
 
 function arg(name: string, fallback: string): string {
   const i = process.argv.indexOf(`--${name}`);
   return i >= 0 && i + 1 < process.argv.length ? process.argv[i + 1] : fallback;
 }
 
-function loadReport(path: string): WatcherReport {
+function loadReport(path: string): OwlshReport {
   const text = readFileSync(resolve(path), "utf8").replace(/^﻿/, "");
   const fromCapture = reportFromCapture(text, path);
   if (fromCapture) return fromCapture;
-  const rep = JSON.parse(text) as WatcherReport;
-  if (!rep?.session?.uuid || !Array.isArray(rep.episodes)) throw new Error(`${path}: not a capture or a Watcher report`);
+  const rep = JSON.parse(text) as OwlshReport;
+  if (!rep?.session?.uuid || !Array.isArray(rep.episodes)) throw new Error(`${path}: not a capture or an owlsh report`);
   return rep;
 }
 

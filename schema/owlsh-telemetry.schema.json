@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://thewatcher.dev/schema/watcher-telemetry-1.0.json",
-  "title": "Watcher Telemetry Message",
+  "$id": "https://theowlsh.dev/schema/owlsh-telemetry-1.0.json",
+  "title": "owlsh Telemetry Message",
   "description": "The wire contract for the open plugin API (brief §5.4). A plugin is any process that emits valid messages to the daemon's local socket: a leading capability Handshake, then a stream of TelemetryEvents (the §3.3 envelope). One message is either a Handshake or a TelemetryEvent.",
   "oneOf": [{ "$ref": "#/$defs/Handshake" }, { "$ref": "#/$defs/TelemetryEvent" }],
 
@@ -46,10 +46,10 @@
     "Handshake": {
       "type": "object",
       "description": "The first message on a plugin connection: declares fidelity so the core knows what it is ingesting (brief §5.4).",
-      "required": ["watcher_handshake", "plugin", "class", "capabilities"],
+      "required": ["owlsh_handshake", "plugin", "class", "capabilities"],
       "additionalProperties": false,
       "properties": {
-        "watcher_handshake": { "type": "string", "description": "Protocol version, e.g. \"1.0\"." },
+        "owlsh_handshake": { "type": "string", "description": "Protocol version, e.g. \"1.0\"." },
         "plugin": { "type": "string", "description": "Plugin identifier, e.g. aws-cloudshell." },
         "class": { "type": "string", "enum": ["source", "context_resolver", "transform"] },
         "capabilities": {

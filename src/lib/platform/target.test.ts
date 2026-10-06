@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { targetOf } from "./index";
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 
-const base = (over: Partial<WatcherReport["session"]>): WatcherReport => ({
+const base = (over: Partial<OwlshReport["session"]>): OwlshReport => ({
   schema_version: "1.2",
   session: { uuid: "x", started_at: "2026-01-01T00:00:00Z", ended_at: "2026-01-01T00:01:00Z", target_scope: "HTB::Forge (Medium)", shell: "bash", source: "local_pty", ...over },
   episodes: [], phases: [], golden_dag: [],

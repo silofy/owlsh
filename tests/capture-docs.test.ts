@@ -9,14 +9,14 @@ const read = (rel: string) => readFileSync(resolve(root, rel), "utf8");
 // Every place that tells a user how to capture — installed app users have no repo checkout, so
 // these must lead with the one-line installer, never with repo-relative paths.
 const surfaces = ["README.md", "crates/capture/CAPTURE.md", "src/components/Install.tsx", "src/components/Onboarding.tsx"];
-const INSTALL_SH = "https://raw.githubusercontent.com/silofy/watcher/main/install.sh";
+const INSTALL_SH = "https://raw.githubusercontent.com/silofy/owlsh/main/install.sh";
 
 describe("capture setup surfaces lead with the one-line installer", () => {
   for (const rel of surfaces) {
-    it(`${rel} documents install.sh and the installed watcher-capture command`, () => {
+    it(`${rel} documents install.sh and the installed owlsh command`, () => {
       const text = read(rel);
       expect(text).toContain(INSTALL_SH);
-      expect(text).toMatch(/watcher-capture --(attach|export)/);
+      expect(text).toMatch(/owlsh --(attach|export)/);
     });
 
     it(`${rel} never points at the old repo-only binary path`, () => {
@@ -32,11 +32,11 @@ describe("capture setup surfaces lead with the one-line installer", () => {
   it("install.sh and the release workflow agree on asset names", () => {
     const sh = read("install.sh");
     const release = read(".github/workflows/release.yml");
-    for (const asset of ["watcher-capture-linux-x86_64", "watcher-capture-linux-aarch64", "watcher-capture-macos-universal"]) {
+    for (const asset of ["owlsh-linux-x86_64", "owlsh-linux-aarch64", "owlsh-macos-universal"]) {
       expect(sh).toContain(asset);
       expect(release).toContain(asset);
     }
-    expect(read("install.ps1")).toContain("watcher-capture-windows-x86_64.exe");
-    expect(release).toContain("watcher-capture-windows-x86_64.exe");
+    expect(read("install.ps1")).toContain("owlsh-windows-x86_64.exe");
+    expect(release).toContain("owlsh-windows-x86_64.exe");
   });
 });

@@ -10,7 +10,7 @@
  */
 import { readFileSync, writeFileSync, existsSync, watchFile } from "node:fs";
 import { resolve } from "node:path";
-import type { WatcherReport } from "../src/types/report";
+import type { OwlshReport } from "../src/types/report";
 import { deriveWidgetState } from "../src/lib/widget/state";
 import { renderWidget, WIDGET_SIZES, type WidgetSize } from "../src/lib/widget/render";
 import { hintFor, nextTier, independencePenalty, HINTS_SUFFIX, type HintPull } from "../src/lib/widget/hints";
@@ -24,7 +24,7 @@ const hintsPath = path + HINTS_SUFFIX; // not .json — the app reads every .jso
 
 let pulls: HintPull[] = existsSync(hintsPath) ? JSON.parse(readFileSync(hintsPath, "utf8")) : [];
 let lastHint: string | null = null;
-let report: WatcherReport | null = null;
+let report: OwlshReport | null = null;
 
 const C = { dim: "\x1b[2m", mint: "\x1b[38;2;47;230;176m", coral: "\x1b[38;2;239;106;85m", reset: "\x1b[0m" };
 function colour(line: string): string {

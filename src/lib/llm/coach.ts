@@ -6,7 +6,7 @@
  * Privacy: only commands/output you already captured are read, by a model on your machine.
  */
 import type { LlmProvider } from "./provider";
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 
 export interface CoachStep {
   seq: number;
@@ -47,7 +47,7 @@ export function buildCoachPrompt(machine: string, steps: CoachStep[]): string {
 }
 
 /** Returns seq → refined suggestion. Empty when no model / nothing usable came back. */
-export async function refineCoaching(report: WatcherReport, steps: CoachStep[], provider: LlmProvider): Promise<Map<number, string>> {
+export async function refineCoaching(report: OwlshReport, steps: CoachStep[], provider: LlmProvider): Promise<Map<number, string>> {
   const out = new Map<number, string>();
   if (steps.length === 0) return out;
   const machine = report.session.machine?.name ?? report.session.target_scope ?? "the box";

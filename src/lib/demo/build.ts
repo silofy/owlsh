@@ -1,5 +1,5 @@
 import type { RawCommand } from "../pipeline/types";
-import type { GoldenObjective, Session, WatcherReport } from "../../types/report";
+import type { GoldenObjective, Session, OwlshReport } from "../../types/report";
 import { assembleReport } from "../pipeline/ingest";
 
 export interface Step { cmd: string; gap: number; dur: number; out: string; lines: number; volume?: number }
@@ -12,7 +12,7 @@ export interface DemoDef {
   session: Session;
   golden: GoldenObjective[];
   raw: RawCommand[];
-  report: WatcherReport;
+  report: OwlshReport;
 }
 
 /** Cumulative-timestamp expansion of scripted steps into the RawCommand stream. */

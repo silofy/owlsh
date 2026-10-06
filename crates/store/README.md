@@ -1,4 +1,4 @@
-# watcher-store — encrypted SQLite store (SQLCipher)
+# owlsh-store — encrypted SQLite store (SQLCipher)
 
 The daemon's single owner of telemetry (brief §8). **SQLCipher** gives transparent AES-256-CBC
 page encryption with HMAC-SHA512 — the whole file is opaque at rest, indexes and WAL included —

@@ -2,10 +2,10 @@ import { describe, it, expect } from "vitest";
 import { narrateGhost } from "./narrate";
 import { computeGhost, type GhostResult } from "./ghost";
 import { NullProvider, type GenOptions, type LlmProvider } from "../llm/provider";
-import type { WatcherReport, Episode, Finding, GoldenObjective } from "../../types/report";
+import type { OwlshReport, Episode, Finding, GoldenObjective } from "../../types/report";
 
 const ep = (o: Partial<Episode> & { seq: number }): Episode => ({ cmd: "", binary: "", duration_ms: 1000, gap_before_ms: 0, actor: "machine_bound", tactic: "TA0007", ...o });
-const rep = (episodes: Episode[], findings: Finding[], golden: GoldenObjective[]): WatcherReport => ({
+const rep = (episodes: Episode[], findings: Finding[], golden: GoldenObjective[]): OwlshReport => ({
   schema_version: "1.4", session: { uuid: "u", started_at: "2026-01-01T00:00:00Z", ended_at: "2026-01-01T00:30:00Z", target_scope: "t", shell: "bash", source: "local_pty" },
   episodes, phases: [], golden_dag: golden, findings,
   metrics: { efficiency_pct: 0, time_waster: { productive_ms: 0, detour_ms: 0, stuck_ms: 0, loop_ms: 0, t_active_ms: 0 }, stealth_score: 100, objective_coverage_pct: 0, technique_breadth: 0 },

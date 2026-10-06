@@ -4,7 +4,7 @@
  * to before sync, and the unit the attestation signs. Pure and browser-safe (no crypto, no raw
  * commands or output text).
  */
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 import { redactText } from "../redact";
 import { computeGrade, type Grade } from "./grade";
 
@@ -38,7 +38,7 @@ export interface AttestationContent {
 }
 
 /** Build the minimized, manager-profile content for a report (no raw telemetry). */
-export function minimizedBundle(report: WatcherReport, grade: Grade = computeGrade(report)): AttestationContent {
+export function minimizedBundle(report: OwlshReport, grade: Grade = computeGrade(report)): AttestationContent {
   const m = report.metrics;
   return {
     schema_version: "1.0",

@@ -1,4 +1,4 @@
-import type { WatcherReport, Episode, GoldenObjective } from "../../types/report";
+import type { OwlshReport, Episode, GoldenObjective } from "../../types/report";
 import type { GhostDiffItem } from "./ghost";
 import { analyzePrivesc } from "../analysis/privesc";
 import type { PrivescResult } from "../analysis/privesc";
@@ -47,7 +47,7 @@ function isAuthAttempt(ep: Episode): boolean {
  * redaction) and stays silent whenever any pivot was attempted, so it fires only for the
  * unambiguous "dumped creds, never pivoted" case.
  */
-export function detectCredNotReused(report: WatcherReport): GhostDiffItem[] {
+export function detectCredNotReused(report: OwlshReport): GhostDiffItem[] {
   const findings = report.findings ?? [];
   const episodes = report.episodes ?? [];
   const creds = findings.filter((f) => f.kind === "cred").sort((a, b) => a.source_seq - b.source_seq);
@@ -83,7 +83,7 @@ function isShareAudit(ep: Episode): boolean {
  * Enumerated, never audited: an anonymous/null SMB listing succeeded but the shares' permissions
  * were never audited. Mirrors the run's own "next step you skipped" coaching signal.
  */
-export function detectEnumNotAudited(report: WatcherReport): GhostDiffItem[] {
+export function detectEnumNotAudited(report: OwlshReport): GhostDiffItem[] {
   const episodes = report.episodes ?? [];
   const listing = episodes.find(isNullSmbListing);
   if (!listing) return [];
@@ -114,19 +114,19 @@ export function slowLineItem(slow: NonNullable<PrivescResult["slow_line"]>, epis
 }
 
 /** Privesc slow-line: adapts analyzePrivesc's slow_line signal into a Ghost item. */
-export function detectPrivescSlowLine(report: WatcherReport): GhostDiffItem[] {
+export function detectPrivescSlowLine(report: OwlshReport): GhostDiffItem[] {
   const pr = analyzePrivesc(report);
   return pr.slow_line ? [slowLineItem(pr.slow_line, report.episodes ?? [])] : [];
 }
 
-const DETECTORS: ((report: WatcherReport) => GhostDiffItem[])[] = [
+const DETECTORS: ((report: OwlshReport) => GhostDiffItem[])[] = [
   detectCredNotReused,
   detectEnumNotAudited,
   detectPrivescSlowLine,
 ];
 
 /** All write-up-free signal items for a report (pre-dedupe). */
-export function computeSignalGhost(report: WatcherReport): GhostDiffItem[] {
+export function computeSignalGhost(report: OwlshReport): GhostDiffItem[] {
   return DETECTORS.flatMap((d) => d(report));
 }
 

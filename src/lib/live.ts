@@ -10,7 +10,7 @@
 /** No heartbeat for this long ⇒ the capture is considered dead, not live. */
 export const RECORDING_STALE_MS = 2 * 60 * 1000;
 
-/** Minimal shape needed to judge liveness — any WatcherReport satisfies it structurally. */
+/** Minimal shape needed to judge liveness — any OwlshReport satisfies it structurally. */
 interface Liveish {
   recording?: boolean;
   session: { started_at: string; ended_at: string };

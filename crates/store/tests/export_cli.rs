@@ -5,7 +5,7 @@ fn export_cli_prints_ndjson() {
     let dir = tempfile::tempdir().unwrap();
     let db = dir.path().join("t.db");
     let db = db.to_str().unwrap();
-    let bin = env!("CARGO_BIN_EXE_watcher-store");
+    let bin = env!("CARGO_BIN_EXE_owlsh-store");
 
     // ingest a command via stdin
     let stream = r#"{"source":"local_pty","session_uuid":"s1","seq":1,"ts_utc_us":100,"kind":"command","payload":{"cmd":"whoami"},"provenance":{"platform":"htb"}}"#;
@@ -29,7 +29,7 @@ fn bad_ndjson_path_fails_before_creating_db() {
     let dir = tempfile::tempdir().unwrap();
     let db = dir.path().join("never-created.db");
     let db = db.to_str().unwrap();
-    let bin = env!("CARGO_BIN_EXE_watcher-store");
+    let bin = env!("CARGO_BIN_EXE_owlsh-store");
 
     let missing = dir.path().join("does-not-exist.ndjson");
     let out = Command::new(bin)

@@ -1,12 +1,12 @@
 import { describe, it, expect } from "vitest";
 import fixture from "../../../fixtures/session-htb-easy.json";
-import type { Episode, GoldenObjective, WatcherReport } from "../../types/report";
+import type { Episode, GoldenObjective, OwlshReport } from "../../types/report";
 import { selectTier, probeHardware } from "./hardware";
 import { CLASSIFY_GBNF, CLASSIFY_SCHEMA, EQUIV_SCHEMA, TACTICS } from "./grammar";
 import { NullProvider, type GenOptions, type LlmProvider } from "./provider";
 import { refineClassification, judgeEquivalence, refineReport, OVERRIDE_THRESHOLD } from "./refine";
 
-const report = fixture as unknown as WatcherReport;
+const report = fixture as unknown as OwlshReport;
 const nmap = report.episodes.find((e) => e.binary === "nmap")! as Episode;
 const services = report.golden_dag.find((o) => o.objective === "enumerate_services")! as GoldenObjective;
 

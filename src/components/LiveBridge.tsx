@@ -3,7 +3,7 @@ import { useReport } from "../store/report";
 import { MachineAvatar } from "./MachineAvatar";
 import { DIFFICULTY_COLOR } from "../lib/machine";
 import { loadPwnboxConfig } from "../lib/pwnbox";
-import type { WatcherReport } from "../types/report";
+import type { OwlshReport } from "../types/report";
 import type { SshLogFile } from "../lib/ssh/ingest";
 
 function isTauri(): boolean {
@@ -11,7 +11,7 @@ function isTauri(): boolean {
 }
 
 /** Poll the daemon's live-session files (written when you spawn a box). Tauri-only; no-op in dev browser. */
-async function fetchLiveSessions(): Promise<WatcherReport[]> {
+async function fetchLiveSessions(): Promise<OwlshReport[]> {
   if (!isTauri()) return [];
   try {
     const { invoke } = await import("@tauri-apps/api/core");
@@ -19,18 +19,18 @@ async function fetchLiveSessions(): Promise<WatcherReport[]> {
     return raw
       .map((s) => {
         try {
-          return JSON.parse(s.replace(/^﻿/, "")) as WatcherReport;
+          return JSON.parse(s.replace(/^﻿/, "")) as OwlshReport;
         } catch {
           return null;
         }
       })
-      .filter((r): r is WatcherReport => r != null);
+      .filter((r): r is OwlshReport => r != null);
   } catch {
     return [];
   }
 }
 
-/** The tap's captured SSH-session files (~/.watcher/ssh). Tauri-only; empty in dev browser. */
+/** The tap's captured SSH-session files (~/.owlsh/ssh). Tauri-only; empty in dev browser. */
 async function fetchSshLogs(): Promise<SshLogFile[]> {
   if (!isTauri()) return [];
   try {

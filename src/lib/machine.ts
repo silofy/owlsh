@@ -1,5 +1,5 @@
 /** Machine identity helpers — a thin legacy shim over the neutral platform/Target identity. */
-import type { WatcherReport } from "../types/report";
+import type { OwlshReport } from "../types/report";
 import { targetOf } from "./platform";
 
 export interface MachineMeta {
@@ -16,7 +16,7 @@ export interface MachineMeta {
  * working; down-maps the neutral Target to the old HTB-shaped MachineMeta. `retired` is read straight
  * off `session.machine` since Target (schema v1.2) doesn't carry it.
  */
-export function machineOf(report: WatcherReport): MachineMeta {
+export function machineOf(report: OwlshReport): MachineMeta {
   const t = targetOf(report);
   return {
     name: t.name,

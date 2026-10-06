@@ -3,10 +3,10 @@ import { narrateReport } from "./narrate";
 import { draftReport } from "./draft";
 import { deriveReportFindings } from "./findings";
 import demo from "../../../fixtures/session-demo-full.json";
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 import type { LlmProvider } from "../llm/provider";
 
-const report = demo as unknown as WatcherReport;
+const report = demo as unknown as OwlshReport;
 const nullProvider: LlmProvider = { name: "test-null", async available() { return false; }, async generateJson() { return null; } };
 
 describe("narrateReport", () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { deriveIncident } from "./incident";
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 
 const attacker = {
   session: { target_scope: "HTB :: Abducted", target: { name: "Abducted" } },
@@ -12,7 +12,7 @@ const attacker = {
   findings: [{ id: "vuln:CVE-2026-4480", kind: "vuln", value: "CVE-2026-4480", source_seq: 7 }],
   phases: [],
   golden_dag: [],
-} as unknown as WatcherReport;
+} as unknown as OwlshReport;
 
 describe("deriveIncident", () => {
   it("turns malicious steps into weighted artifacts with discriminating indicators", () => {

@@ -4,7 +4,7 @@
  * schema-valid report. This is the seam where a live ConPTY/openpty capture becomes the
  * same document the Phase 1 UI renders — capture → report, end to end.
  */
-import type { Coaching, CoachingStep, GoldenObjective, Metrics, Session, WatcherReport } from "../../types/report";
+import type { Coaching, CoachingStep, GoldenObjective, Metrics, Session, OwlshReport } from "../../types/report";
 import { round, type ComputedMetrics } from "../metrics";
 import { redactText } from "../redact";
 import { classifyCoaching } from "../coaching";
@@ -127,7 +127,7 @@ export function envelopesToRawCommands(events: TelemetryEvent[]): RawCommand[] {
 
 function deriveCoaching(
   golden: GoldenObjective[],
-  episodes: WatcherReport["episodes"],
+  episodes: OwlshReport["episodes"],
   metrics: ComputedMetrics,
 ): Coaching {
   const eff = metrics.efficiency_by_tactic;
@@ -190,7 +190,7 @@ export interface AssembleOptions {
 }
 
 /** Run the pipeline over raw commands and assemble a complete, schema-valid report. */
-export function assembleReport(raw: RawCommand[], opts: AssembleOptions): WatcherReport {
+export function assembleReport(raw: RawCommand[], opts: AssembleOptions): OwlshReport {
   const sessionStartMs = Date.parse(opts.session.started_at);
   // fold captured SSH sessions in as on-target commands, interleaved by time so phases stay ordered
   const sshRaw = (opts.ssh ?? []).flatMap((s) => ingestSshSession(s.inputLog, s));
@@ -203,7 +203,7 @@ export function assembleReport(raw: RawCommand[], opts: AssembleOptions): Watche
   const profile = opts.redaction_profile ?? "full";
   const findings = extractFindings(episodes, profile);
   const annotatedGolden = annotateObjectiveStatus(episodes, golden, findings);
-  const ghost = computeGhost({ golden_dag: annotatedGolden, episodes, findings } as WatcherReport);
+  const ghost = computeGhost({ golden_dag: annotatedGolden, episodes, findings } as OwlshReport);
 
   const m: Metrics = {
     efficiency_pct: round(metrics.efficiency_pct),
@@ -222,7 +222,7 @@ export function assembleReport(raw: RawCommand[], opts: AssembleOptions): Watche
     ghost_human_wins: ghost?.human_wins ?? null,
   };
 
-  const rep: WatcherReport = {
+  const rep: OwlshReport = {
     schema_version: "1.4",
     session: opts.session,
     episodes,
@@ -242,6 +242,6 @@ export function assembleReport(raw: RawCommand[], opts: AssembleOptions): Watche
 }
 
 /** Convenience: NDJSON capture stream → full report in one call. */
-export function reportFromNdjson(ndjson: string, opts: AssembleOptions): WatcherReport {
+export function reportFromNdjson(ndjson: string, opts: AssembleOptions): OwlshReport {
   return assembleReport(envelopesToRawCommands(parseEnvelopes(ndjson)), opts);
 }

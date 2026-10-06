@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { computeFocus } from "./focus";
 import { wasteBreakdown } from "../metrics";
-import type { WatcherReport, Episode } from "../../types/report";
+import type { OwlshReport, Episode } from "../../types/report";
 
 const ep = (o: Partial<Episode> & { seq: number }): Episode => ({ cmd: "", binary: "sqlmap", duration_ms: 60000, gap_before_ms: 0, actor: "machine_bound", tactic: "TA0001", ...o });
-const rep = (episodes: Episode[], tActive = 300000): WatcherReport => ({
+const rep = (episodes: Episode[], tActive = 300000): OwlshReport => ({
   schema_version: "1.3", session: { uuid: "u", started_at: "2026-01-01T00:00:00Z", ended_at: "2026-01-01T00:20:00Z", target_scope: "t", shell: "bash", source: "local_pty" },
   episodes, phases: [], golden_dag: [], findings: [],
   metrics: { efficiency_pct: 0, time_waster: { productive_ms: 0, detour_ms: 0, stuck_ms: 0, loop_ms: 0, t_active_ms: tActive }, stealth_score: 100, objective_coverage_pct: 0, technique_breadth: 0 },

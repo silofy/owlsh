@@ -1,17 +1,17 @@
 [package]
-name = "watcher-capture"
+name = "owlsh"
 version = "0.1.0"
 license = "AGPL-3.0-only"
 edition = "2021"
-description = "The Watcher — cross-platform PTY capture proof-of-concept (ConPTY on Windows, openpty on Unix)"
+description = "owlsh — cross-platform PTY capture proof-of-concept (ConPTY on Windows, openpty on Unix)"
 
 [[bin]]
-name = "watcher-capture"
+name = "owlsh"
 path = "src/main.rs"
 
 [dependencies]
 # Shared session controller + re-redaction.
-watcher-core = { path = "../core" }
+owlsh-core = { path = "../core" }
 # One PTY abstraction over Windows ConPTY and Unix openpty/forkpty (the WezTerm crate).
 portable-pty = "0.8"
 # Userspace VT parser — strips control sequences to clean text (brief §3.1 uses vte).
@@ -38,8 +38,8 @@ section = "utils"
 priority = "optional"
 extended-description = """\
 Records a shell session through a userspace PTY (openpty on Unix) and exports a \
-graded-debrief capture for The Watcher. No eBPF, ptrace or kernel hooks. Streams \
+graded-debrief capture for owlsh. No eBPF, ptrace or kernel hooks. Streams \
 to the running app live, or writes a session file for later import."""
 assets = [
-  ["watcher-capture.1", "usr/share/man/man1/", "644"],
+  ["owlsh.1", "usr/share/man/man1/", "644"],
 ]

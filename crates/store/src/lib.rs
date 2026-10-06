@@ -1,4 +1,4 @@
-//! The Watcher encrypted store (brief §8). SQLCipher gives transparent AES-256 page
+//! owlsh encrypted store (brief §8). SQLCipher gives transparent AES-256 page
 //! encryption — the whole file (indexes, WAL included) is opaque at rest. The daemon is
 //! the single owner of this DB; both capture agents feed it the §3.3 telemetry envelope,
 //! and it re-redacts on receipt (never trusts an upstream's scrubbing).

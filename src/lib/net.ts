@@ -48,7 +48,7 @@ export async function fetchWriteupFrom0xdf(box: string): Promise<string> {
 }
 
 /**
- * HTB App Token — a bearer credential stored only by the native side (~/.watcher/config.json), never
+ * HTB App Token — a bearer credential stored only by the native side (~/.owlsh/config.json), never
  * held in the JS bundle or returned to the webview. The UI only ever learns whether one is set.
  */
 export async function hasHtbToken(): Promise<boolean> {

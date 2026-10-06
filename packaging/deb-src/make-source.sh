@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Assemble and build the Debian SOURCE package for watcher-capture — the artifact
+# Assemble and build the Debian SOURCE package for owlsh — the artifact
 # for a Kali "New Tool Request" (and an HTB/Pwnbox/Parrot inclusion pitch).
 #
-# It builds a minimal upstream tree (the agent + the watcher-core lib it
+# It builds a minimal upstream tree (the agent + the owlsh-core lib it
 # path-depends on + the licence), VENDORS the whole crate graph so the build is
 # fully offline (as Debian/Kali build daemons require), drops in debian/, and runs
 # dpkg-buildpackage. Run on a Debian/Kali host.
@@ -18,7 +18,7 @@ here="$(cd "$(dirname "$0")" && pwd)"
 repo="$(cd "$here/../.." && pwd)"
 cd "$repo"
 
-PKG=watcher-capture
+PKG=owlsh
 VERSION=0.1.0
 BUILD="$(mktemp -d)"
 SRC="$BUILD/${PKG}-${VERSION}"

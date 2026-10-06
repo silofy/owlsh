@@ -1,4 +1,4 @@
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 import { computeFocus } from "../analysis/focus";
 
 /** What the live widget shows. Derived purely from the run so far — it mirrors the operator's own
@@ -23,7 +23,7 @@ const SECRET_KINDS = new Set(["cred", "hash"]);
 
 const STALE_MS = 10 * 60_000; // no new finding for this long → "widen the search?"
 
-export function deriveWidgetState(report: WatcherReport, nowMs: number = Date.now()): WidgetState {
+export function deriveWidgetState(report: OwlshReport, nowMs: number = Date.now()): WidgetState {
   const eps = [...report.episodes].sort((a, b) => a.seq - b.seq);
   const last = eps[eps.length - 1];
   const labelByTactic = new Map((report.phases ?? []).map((p) => [p.mitre_tactic, p.label]));

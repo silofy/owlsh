@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://thewatcher.dev/schema/watcher-attestation-1.0.json",
-  "title": "Watcher Enterprise Attestation",
+  "$id": "https://theowlsh.dev/schema/owlsh-attestation-1.0.json",
+  "title": "owlsh Enterprise Attestation",
   "description": "The signed, hash-chained, manager-profile bundle that crosses to the institution (brief §6.4). Carries scores and evidence digests only — never raw telemetry — so it survives FERPA/GDPR scrutiny while remaining auditable and tamper-evident.",
   "type": "object",
   "required": ["content", "prev_hash", "hash", "signature", "pubkey"],

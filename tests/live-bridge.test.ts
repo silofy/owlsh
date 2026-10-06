@@ -1,14 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { useReport } from "../src/store/report";
 import fixture from "../fixtures/session-htb-easy.json";
-import type { WatcherReport } from "../src/types/report";
+import type { OwlshReport } from "../src/types/report";
 
 /**
  * The live bridge: a box spawned in the browser is written by the daemon and merged into the store
  * at runtime (no rebuild). These exercise the read side end-to-end — ingest → banner → open.
  */
-function liveReport(uuid: string, name: string): WatcherReport {
-  const r = JSON.parse(JSON.stringify(fixture)) as WatcherReport;
+function liveReport(uuid: string, name: string): OwlshReport {
+  const r = JSON.parse(JSON.stringify(fixture)) as OwlshReport;
   r.session.uuid = uuid;
   r.session.target_scope = `HTB :: ${name}`;
   r.session.machine = { name, os: "Linux", difficulty: "Easy", avatar: null, points: 20, retired: true };

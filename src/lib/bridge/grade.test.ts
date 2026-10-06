@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 import fixture from "../../../fixtures/session-htb-easy.json";
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 import { computeGrade, RUBRIC, RUBRIC_V1, RUBRIC_V2, INDEPENDENCE_GATE } from "./grade";
 
-const report = fixture as unknown as WatcherReport;
+const report = fixture as unknown as OwlshReport;
 
 describe("v1 rubric (frozen — reports with no methodology signal)", () => {
   it("weights sum to 1.0", () => {
@@ -107,7 +107,7 @@ describe("v2 rubric (candidate C — reports carrying the methodology signal)", 
   });
 
   it("a report with methodology_coverage_pct and focus_discipline_pct grades as version 2, with all eight components", () => {
-    const withAnalysis: WatcherReport = {
+    const withAnalysis: OwlshReport = {
       ...report,
       metrics: { ...report.metrics, methodology_coverage_pct: 80, focus_discipline_pct: 90 },
     };
@@ -126,7 +126,7 @@ describe("v2 rubric (candidate C — reports carrying the methodology signal)", 
   });
 
   it("matches a hand-computed candidate-C weighted sum", () => {
-    const withAnalysis: WatcherReport = {
+    const withAnalysis: OwlshReport = {
       ...report,
       metrics: { ...report.metrics, methodology_coverage_pct: 80, focus_discipline_pct: 90 },
     };
@@ -148,7 +148,7 @@ describe("v2 rubric (candidate C — reports carrying the methodology signal)", 
   });
 
   it("a report with methodology_coverage_pct = 0 still grades as version 2 (0 is a legit measured value, not absence)", () => {
-    const zeroMethodology: WatcherReport = {
+    const zeroMethodology: OwlshReport = {
       ...report,
       metrics: { ...report.metrics, methodology_coverage_pct: 0, focus_discipline_pct: 90 },
     };
@@ -158,11 +158,11 @@ describe("v2 rubric (candidate C — reports carrying the methodology signal)", 
   });
 
   it("discriminates on methodology — a higher methodology score scores higher, all else equal", () => {
-    const low: WatcherReport = {
+    const low: OwlshReport = {
       ...report,
       metrics: { ...report.metrics, methodology_coverage_pct: 30, focus_discipline_pct: 90 },
     };
-    const high: WatcherReport = {
+    const high: OwlshReport = {
       ...report,
       metrics: { ...report.metrics, methodology_coverage_pct: 95, focus_discipline_pct: 90 },
     };
@@ -174,7 +174,7 @@ describe("v2 rubric (candidate C — reports carrying the methodology signal)", 
   });
 
   it("independence gate still routes low independence to the integrity queue under v2", () => {
-    const withAnalysis: WatcherReport = {
+    const withAnalysis: OwlshReport = {
       ...report,
       metrics: { ...report.metrics, methodology_coverage_pct: 80, focus_discipline_pct: 90, independence: { ...report.metrics.independence!, score: 20 } },
     };
@@ -203,7 +203,7 @@ describe("v2 rubric (candidate C — reports carrying the methodology signal)", 
 });
 
 describe("live-widget hint pulls", () => {
-  const unmeasured = (): WatcherReport => {
+  const unmeasured = (): OwlshReport => {
     const r = structuredClone(report);
     delete (r.metrics as { independence?: unknown }).independence;
     return r;

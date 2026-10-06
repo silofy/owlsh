@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Build the Watcher capture agent INSIDE Pwnbox (Parrot OS) and print how to use it.
+# Build owlsh capture agent INSIDE Pwnbox (Parrot OS) and print how to use it.
 #
 # Prereq: the `crates/capture/` and `crates/core/` crate folders, in their original relative layout
 # (crates/capture/Cargo.toml references ../core). Get them into Pwnbox however you like — HTB's file
@@ -20,10 +20,10 @@ fi
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "[*] Building watcher-capture (release)…"
+echo "[*] Building owlsh (release)…"
 cargo build --release --manifest-path "$HERE/Cargo.toml"
 
-BIN="$HERE/target/release/watcher-capture"
+BIN="$HERE/target/release/owlsh"
 echo
 echo "[+] Built: $BIN"
 echo
@@ -31,5 +31,5 @@ echo "    Capture a box (hack as normal, type 'exit' to finish):"
 echo "      $BIN --export ~/session.json --machine <Name> --os <Linux|Windows> --difficulty <Easy|Medium|Hard>"
 echo
 echo "    Then download ~/session.json to your PC and drop it into:"
-echo "      ~/.watcher/sessions/      (Windows: %USERPROFILE%\\.watcher\\sessions\\)"
-echo "    It appears in The Watcher's History as a graded debrief."
+echo "      ~/.owlsh/sessions/      (Windows: %USERPROFILE%\\.owlsh\\sessions\\)"
+echo "    It appears in owlsh's History as a graded debrief."

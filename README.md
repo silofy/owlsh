@@ -1,10 +1,12 @@
 <div align="center">
 
-# The Watcher
+# owlsh
 
 **A local-first flight-data-recorder for security practice.**
 
 Record your run against any box, then get a graded debrief: what you achieved, where you wasted time, and the one thing to fix next. Now grades defenders, too.
+
+<sub>Formerly <b>The Watcher</b>. Existing sessions, settings and plugins carry over automatically.</sub>
 
 [Features](#features) · [Install](#install) · [Usage](#usage) · [How it works](#how-it-works) · [Testing](TESTING.md)
 
@@ -21,7 +23,7 @@ Record your run against any box, then get a graded debrief: what you achieved, w
   </tr>
   <tr>
     <td width="50%"><img src="docs/screenshots/grade.png" alt="Explainable rubric: radar plus seven weighted metrics"><br><b>A grade you can defend</b> — seven weighted metrics across ATT&amp;CK, the Kill Chain and CWE.</td>
-    <td width="50%"><img src="docs/screenshots/report.png" alt="OSCP/CPTS-style report with executive summary"><br><b>The report writes itself</b> — an OSCP/CPTS-style write-up with a CISO summary, exported as Markdown or PDF. <a href="https://watcher-site-six.vercel.app/assets/watcher-sample-report-abducted.pdf">Sample PDF</a>.</td>
+    <td width="50%"><img src="docs/screenshots/report.png" alt="OSCP/CPTS-style report with executive summary"><br><b>The report writes itself</b> — an OSCP/CPTS-style write-up with a CISO summary, exported as Markdown or PDF. <a href="https://watcher-site-six.vercel.app/assets/owlsh-sample-report-abducted.pdf">Sample PDF</a>.</td>
   </tr>
   <tr>
     <td colspan="2"><img src="docs/screenshots/widget.png" alt="The live widget in a tmux split beside your shell"><br><b>A coach beside your shell</b> — the live widget mirrors your run in a tmux pane and flags loose ends. Hints are opt-in and cost you independence.</td>
@@ -30,7 +32,7 @@ Record your run against any box, then get a graded debrief: what you achieved, w
 
 ---
 
-The Watcher records the commands you run against a target — on Hack The Box, TryHackMe, OffSec, Immersive Labs, or a local CTF — and turns the run into a graded debrief. Every run is read through three frameworks at once: **MITRE ATT&CK** (*what* you did), the **Unified Kill Chain** (the *order*, so backtracking is measurable), and **CWE** (the *weakness class*, so SQLi and XXE count as two skills). Everything runs on your machine — no account, no telemetry, no cloud.
+owlsh records the commands you run against a target — on Hack The Box, TryHackMe, OffSec, Immersive Labs, or a local CTF — and turns the run into a graded debrief. Every run is read through three frameworks at once: **MITRE ATT&CK** (*what* you did), the **Unified Kill Chain** (the *order*, so backtracking is measurable), and **CWE** (the *weakness class*, so SQLi and XXE count as two skills). Everything runs on your machine — no account, no telemetry, no cloud.
 
 ## Features
 
@@ -45,7 +47,7 @@ The Watcher records the commands you run against a target — on Hack The Box, T
 
 ## Install
 
-**Desktop app** — grab the installer for your OS from the **[latest release](https://github.com/silofy/watcher/releases/latest)** (`.dmg`, `.msi`/`.exe`, `.AppImage`/`.deb`/`.rpm`). Builds aren't signed yet: on macOS right-click → **Open**, on Windows SmartScreen → **More info** → **Run anyway**. Each release lists `SHA256SUMS` to verify a download.
+**Desktop app** — grab the installer for your OS from the **[latest release](https://github.com/silofy/owlsh/releases/latest)** (`.dmg`, `.msi`/`.exe`, `.AppImage`/`.deb`/`.rpm`). Builds aren't signed yet: on macOS right-click → **Open**, on Windows SmartScreen → **More info** → **Run anyway**. Each release lists `SHA256SUMS` to verify a download.
 
 ### Capture agent
 
@@ -53,21 +55,21 @@ One static binary (musl), no Rust toolchain, no runtime deps — it runs on Kali
 
 ```sh
 # 1. One-line installer — downloads the prebuilt binary, verifies it against SHA256SUMS, installs to ~/.local/bin
-curl -fsSL https://raw.githubusercontent.com/silofy/watcher/main/install.sh | sh    # Kali · Parrot · Pwnbox · macOS
-irm https://raw.githubusercontent.com/silofy/watcher/main/install.ps1 | iex         # Windows
+curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh    # Kali · Parrot · Pwnbox · macOS
+irm https://raw.githubusercontent.com/silofy/owlsh/main/install.ps1 | iex         # Windows
 ```
 
 ```sh
-# 2. Debian package — grab watcher-capture_<ver>_amd64.deb (or _arm64.deb) from the latest release:
-#    https://github.com/silofy/watcher/releases/latest
-sudo dpkg -i watcher-capture_*.deb
+# 2. Debian package — grab owlsh_<ver>_amd64.deb (or _arm64.deb) from the latest release:
+#    https://github.com/silofy/owlsh/releases/latest
+sudo dpkg -i owlsh_*.deb
 ```
 
 ```sh
 # 3. apt (once the signed repo is published — see packaging/apt/)
-curl -fsSL https://silofy.github.io/watcher-apt/watcher-archive-keyring.asc | sudo tee /usr/share/keyrings/watcher.asc >/dev/null
-echo "deb [signed-by=/usr/share/keyrings/watcher.asc] https://silofy.github.io/watcher-apt stable main" | sudo tee /etc/apt/sources.list.d/watcher.list
-sudo apt update && sudo apt install watcher-capture
+curl -fsSL https://silofy.github.io/watcher-apt/watcher-archive-keyring.asc | sudo tee /usr/share/keyrings/owlsh.asc >/dev/null
+echo "deb [signed-by=/usr/share/keyrings/owlsh.asc] https://silofy.github.io/watcher-apt stable main" | sudo tee /etc/apt/sources.list.d/owlsh.list
+sudo apt update && sudo apt install owlsh
 ```
 
 Then capture, which differs by where you're working:
@@ -75,14 +77,14 @@ Then capture, which differs by where you're working:
 - **Kali or Parrot (your own VM, over VPN)** — capture live; each command streams straight into the desktop app:
 
   ```sh
-  watcher-capture --attach --platform htb --target <box>
+  owlsh --attach --platform htb --target <box>
   ```
   If `~/.local/bin` isn't on your `PATH`, the installer prints the one line to add it. Add `--web` to fold in Burp traffic (see [Usage](#usage)).
 
 - **HTB Pwnbox (cloud)** — the browser-streamed VM has no local desktop app, so install the agent *inside* Pwnbox, capture to a file, and open it on your own machine:
 
   ```sh
-  watcher-capture --export ~/.watcher-exports/run.json --platform htb --target <box>
+  owlsh --export ~/.owlsh-exports/run.json --platform htb --target <box>
   ```
   Then drop `run.json` into **History → Import session** in the app (it can also pull the file over SSH automatically — the setup wizard walks you through it).
 
@@ -108,14 +110,14 @@ When the run ends, the live panel settles into a single-column, lesson-first rep
 With the [capture agent](#install) installed, record a run (it streams into the app live; type `exit` to stop):
 
 ```sh
-watcher-capture --attach --platform htb --target <box>   # --platform: htb | thm | offsec | immersive | local
+owlsh --attach --platform htb --target <box>   # --platform: htb | thm | offsec | immersive | local
 ```
 
-The Watcher grades a run from any of these sources too — each feeds the same engine and is tagged by source in the debrief. Use the CLI, or **History → Import session** in the app (or drag a file onto it):
+owlsh grades a run from any of these sources too — each feeds the same engine and is tagged by source in the debrief. Use the CLI, or **History → Import session** in the app (or drag a file onto it):
 
 | Source | Command |
 | --- | --- |
-| Terminal (PTY) | `watcher-capture --attach --platform htb --target <box>` |
+| Terminal (PTY) | `owlsh --attach --platform htb --target <box>` |
 | Claude Code transcript | `npm run ingest:claude-code -- --transcript <session.jsonl>` |
 | HTTP proxy (HAR) | `npm run ingest:http-proxy -- --har <capture.har>` |
 | Sysmon / EDR | `npm run ingest:sysmon -- --events <sysmon.json>` |
@@ -140,11 +142,11 @@ npm run report -- --report <path>   # from your own report JSON
 
 **Web traffic (optional)** — with **Burp Suite** and its **MCP Server** extension running, add `--web` to any capture to fold HTTP attacks (SQLi → CWE-89, IDOR → CWE-639, traversal → CWE-22) onto the same timeline. Off by default, in-scope traffic only, with auth headers/cookies/tokens stripped before anything is stored. Full setup: **[docs/web-capture.md](docs/web-capture.md)**.
 
-**Pwnbox** (no local terminal to watch)? Install the agent there and capture to a file the app pulls over SSH: `watcher-capture --export ~/.watcher-exports/run.json --platform htb --target <box>`. Full capture guide: **[crates/capture/CAPTURE.md](crates/capture/CAPTURE.md)**.
+**Pwnbox** (no local terminal to watch)? Install the agent there and capture to a file the app pulls over SSH: `owlsh --export ~/.owlsh-exports/run.json --platform htb --target <box>`. Full capture guide: **[crates/capture/CAPTURE.md](crates/capture/CAPTURE.md)**.
 
 ## How it works
 
-A small Rust agent captures your shell through a normal PTY (ConPTY on Windows, openpty on Unix) — **no eBPF, ptrace, or kernel hooks**. The capture is processed **deterministically** (segmentation, MITRE tagging, golden-path diff, metrics) into one versioned JSON report (`schema/watcher-report.schema.json`) that the UI renders. An optional model — local Ollama or an opt-in cloud model — only sharpens the coaching text, never the numbers. A run saved to the optional encrypted store can be rebuilt into the same report ([docs/store-report.md](docs/store-report.md)).
+A small Rust agent captures your shell through a normal PTY (ConPTY on Windows, openpty on Unix) — **no eBPF, ptrace, or kernel hooks**. The capture is processed **deterministically** (segmentation, MITRE tagging, golden-path diff, metrics) into one versioned JSON report (`schema/owlsh-report.schema.json`) that the UI renders. An optional model — local Ollama or an opt-in cloud model — only sharpens the coaching text, never the numbers. A run saved to the optional encrypted store can be rebuilt into the same report ([docs/store-report.md](docs/store-report.md)).
 
 ## Privacy
 
@@ -152,4 +154,4 @@ By default your session never leaves the machine, and redaction runs before anyt
 
 ## License
 
-[AGPL-3.0](LICENSE). Use, study and modify The Watcher freely; if you distribute a modified version, or run one as a network service, publish your changes under the same license.
+[AGPL-3.0](LICENSE). Use, study and modify owlsh freely; if you distribute a modified version, or run one as a network service, publish your changes under the same license.

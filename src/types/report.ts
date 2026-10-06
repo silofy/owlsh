@@ -1,5 +1,5 @@
 /**
- * TypeScript mirror of schema/watcher-report.schema.json (v1.0).
+ * TypeScript mirror of schema/owlsh-report.schema.json (v1.0).
  * The schema is the source of truth; these types are for editor ergonomics.
  * tests/schema.test.ts validates the fixture against the schema so drift is caught.
  */
@@ -248,7 +248,7 @@ export interface HintPull {
   phase: string;
 }
 
-export interface WatcherReport {
+export interface OwlshReport {
   schema_version: "1.0" | "1.1" | "1.2" | "1.3" | "1.4";
   session: Session;
   episodes: Episode[];

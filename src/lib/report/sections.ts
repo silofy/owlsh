@@ -1,4 +1,4 @@
-import type { WatcherReport, Finding } from "../../types/report";
+import type { OwlshReport, Finding } from "../../types/report";
 import type { ReportFinding } from "./findings";
 import type { Severity } from "./library";
 import { fmtClock } from "../format";
@@ -19,7 +19,7 @@ function fence(lines: string[]): string {
   return "```\n" + lines.join("\n") + "\n```";
 }
 
-export function headerSection(report: WatcherReport): string {
+export function headerSection(report: OwlshReport): string {
   const t = report.session?.target;
   const name = t?.name ?? report.session?.target_scope ?? "Engagement";
   const platform = t?.platform ?? "";
@@ -40,7 +40,7 @@ export function headerSection(report: WatcherReport): string {
   ].join("\n");
 }
 
-export function execSummarySection(report: WatcherReport, findings: ReportFinding[], summary?: string): string {
+export function execSummarySection(report: OwlshReport, findings: ReportFinding[], summary?: string): string {
   if (summary) return `## Executive summary\n\n${summary}`;
   const t = report.session?.target;
   const name = t?.name ?? report.session?.target_scope ?? "The target";
@@ -65,7 +65,7 @@ export function execSummarySection(report: WatcherReport, findings: ReportFindin
 
 /** A plain-language, command-free account of the engagement for a non-operator reader (the "CISO
  *  view"): what was accomplished in each phase, derived from the objectives reached. */
-export function engagementSection(report: WatcherReport): string {
+export function engagementSection(report: OwlshReport): string {
   const reached = new Map<string, string[]>();
   for (const o of report.golden_dag ?? []) {
     if (o.status === "reached" || o.status === "proven") {
@@ -91,7 +91,7 @@ export function engagementSection(report: WatcherReport): string {
   ].join("\n");
 }
 
-export function scopeSection(report: WatcherReport): string {
+export function scopeSection(report: OwlshReport): string {
   const t = report.session?.target;
   return [
     "## Scope",
@@ -103,7 +103,7 @@ export function scopeSection(report: WatcherReport): string {
   ].join("\n");
 }
 
-export function methodologySection(report: WatcherReport): string {
+export function methodologySection(report: OwlshReport): string {
   const phases = (report.phases ?? []).map((p) => p.label);
   return [
     "## Methodology",
@@ -159,7 +159,7 @@ export function findingsSection(findings: ReportFinding[]): string {
   return "## Findings\n\n" + summary + "\n\n" + blocks.join("\n\n");
 }
 
-export function walkthroughSection(report: WatcherReport): string {
+export function walkthroughSection(report: OwlshReport): string {
   const episodes = [...(report.episodes ?? [])].sort((a, b) => a.seq - b.seq);
   const labelByTactic = new Map((report.phases ?? []).map((p) => [p.mitre_tactic, p.label]));
   const out: string[] = ["## Walkthrough", ""];
@@ -172,7 +172,7 @@ export function walkthroughSection(report: WatcherReport): string {
   return out.join("\n");
 }
 
-export function appendixSection(report: WatcherReport): string {
+export function appendixSection(report: OwlshReport): string {
   const episodes = [...(report.episodes ?? [])].sort((a, b) => a.seq - b.seq);
   const t0 = episodes[0]?.started_at_ms ?? 0;
   const log = episodes.map((e) => `| ${e.seq} | ${e.started_at_ms ? fmtClock(e.started_at_ms - t0) : "—"} | \`${e.cmd}\` |`).join("\n");

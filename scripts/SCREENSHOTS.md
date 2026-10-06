@@ -67,7 +67,7 @@ GIF encoding — a different pipeline from the single-shot PNGs above. Don't mis
 `npm run screenshots` pass as having refreshed it.
 
 It was last refreshed by hand (2026-09-23, editorial-dark redesign): with `npm run dev` running,
-Playwright opened `/?demo=live` at a 1180×760 viewport (DPR 1) with `watcher.onboarded=1` preset in
+Playwright opened `/?demo=live` at a 1180×760 viewport (DPR 1) with `owlsh.onboarded=1` preset in
 localStorage and the `[data-demo-pill]` hidden, then screenshotted `#summary` (the Live Ops panel)
 once per demo tick (2 s, `DEMO_TICK_MS`) until the run resolved: 26 frames. Pillow encoded them at
 220 ms per frame (1.8 s hold on the last), one adaptive 256-colour palette per frame with dithering

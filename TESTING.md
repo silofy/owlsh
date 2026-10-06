@@ -1,4 +1,4 @@
-# The Watcher — tester guide
+# owlsh — tester guide
 
 A local-first flight-data-recorder for offensive practice. It records the commands you run against a
 box and turns them into a graded debrief: a **Lighthouse-style audit per MITRE phase** (objectives hit,
@@ -52,7 +52,7 @@ on **Windows** the Microsoft C++ Build Tools (the linker) + WebView2 (preinstall
 **Linux** `webkit2gtk`; on **macOS** Xcode Command Line Tools. See
 <https://tauri.app/start/prerequisites/>. **No Perl/NASM/SQLCipher** for this path.
 
-From the unzipped folder (or `git clone <repo> && cd watcher`):
+From the unzipped folder (or `git clone <repo> && cd owlsh`):
 
 ```sh
 npm install
@@ -80,11 +80,11 @@ cd crates/capture && cargo build --release
 With the desktop app open and HTB's VPN connected, start a watched shell:
 
 ```sh
-./target/release/watcher-capture --attach --machine Abducted
+./target/release/owlsh --attach --machine Abducted
 ```
 
 Hack as normal — each completed command shows up in the debrief in ~1–4 s. Type `exit` to stop; it
-closes the session itself. Runs on the same machine as the app (reads `~/.watcher/sessions/`).
+closes the session itself. Runs on the same machine as the app (reads `~/.owlsh/sessions/`).
 
 For the **intended-path comparison** (coverage, "what you'd do differently"), open *What you'd do
 differently → Reference path → Add write-up* and paste any write-up — parsed locally (keyword fallback
@@ -114,4 +114,4 @@ outbound egress. Setup: [`docs/web-capture.md`](docs/web-capture.md).
   new egress — its bridge talks only to a local Burp MCP endpoint on `127.0.0.1`.)
 - No persistence, no privilege escalation, no AV-evasion, no kernel/EDR hooks.
 - The AES-256 SQLCipher store is an *optional* daemon path; this tester flow never starts it and writes
-  only plain session JSON under `~/.watcher/sessions/`.
+  only plain session JSON under `~/.owlsh/sessions/`.

@@ -88,7 +88,7 @@ export function WriteupGate() {
 
       <h2 className="font-display text-2xl font-semibold text-fg">One step before your debrief</h2>
       <p className="mt-2 text-sm leading-relaxed text-muted">
-        The Watcher grades your run against the {target.kind}'s <span className="text-fg">intended path</span> — coverage, where you went off-route, what you'd do differently. That path is
+        owlsh grades your run against the {target.kind}'s <span className="text-fg">intended path</span> — coverage, where you went off-route, what you'd do differently. That path is
         extracted from a <span className="text-fg">write-up</span>. Give it one to unlock the full report.
       </p>
 

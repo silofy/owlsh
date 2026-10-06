@@ -17,7 +17,7 @@ import { ArrowUpRight, Flag, ScanEye } from "./icons";
 const ACTOR_TEXT: Record<string, string> = { machine_bound: "machine bound", human_active: "typed by hand", think_pause: "thinking", idle: "idle" };
 import { KillChainTrajectory } from "./KillChainTrajectory";
 import { AnimatedNumber } from "./AnimatedNumber";
-import type { Episode, WatcherReport } from "../types/report";
+import type { Episode, OwlshReport } from "../types/report";
 import type { TimedEpisode, Timeline } from "../lib/scale";
 
 /**
@@ -190,7 +190,7 @@ function DeviationGlance({ episodes, lostPct }: { episodes: Episode[]; lostPct: 
 }
 
 /** The resolved-mode recap for the tall tile — the run's headline moments, each linking to its detail. */
-function KeyMoments({ report, timeline, loudestBinary, loudestSeq, onReveal }: { report: WatcherReport; timeline: Timeline; loudestBinary: string | null; loudestSeq: number | null; onReveal: (seq: number) => void }) {
+function KeyMoments({ report, timeline, loudestBinary, loudestSeq, onReveal }: { report: OwlshReport; timeline: Timeline; loudestBinary: string | null; loudestSeq: number | null; onReveal: (seq: number) => void }) {
   const flags = detectFlags(report.episodes);
   const userSeq = flags.user ?? flags.system; // rooting implies user-level access
   const at = (seq: number | null) => {

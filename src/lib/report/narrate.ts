@@ -1,4 +1,4 @@
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 import type { LlmProvider } from "../llm/provider";
 import { HUMANIZE_STYLE } from "../llm/style";
 import { stripAiTells } from "../ingest/text-filter";
@@ -12,7 +12,7 @@ import { deriveReportFindings, type ReportFinding } from "./findings";
  * or un-redacted is sent — the model sees only fields already in the deterministic draft.
  */
 export async function narrateReport(
-  report: WatcherReport,
+  report: OwlshReport,
   provider: LlmProvider,
 ): Promise<{ findings: ReportFinding[]; summary?: string }> {
   const findings = deriveReportFindings(report);

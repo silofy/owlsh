@@ -23,7 +23,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     // Keep the console breadcrumb too — the boundary is a fallback UI, not a reason to swallow it.
-    console.error("The Watcher crashed while rendering:", error, info.componentStack);
+    console.error("owlsh crashed while rendering:", error, info.componentStack);
     this.setState({ info });
   }
 
@@ -35,7 +35,7 @@ export class ErrorBoundary extends Component<Props, State> {
       <div className="min-h-full bg-ink px-5 py-10 text-fg">
         <div className="mx-auto flex max-w-2xl flex-col gap-4">
           <div>
-            <span className="label text-signal">The Watcher hit a render error</span>
+            <span className="label text-signal">owlsh hit a render error</span>
             <p className="mt-2 text-lg font-semibold leading-snug">
               The report couldn't be drawn. The capture is safe — this is a display bug.
             </p>

@@ -6,7 +6,7 @@ describe("WidgetWindow (browser preview of the floating widget)", () => {
   const html = renderToStaticMarkup(<WidgetWindow />);
 
   it("shows the demo run's target, phase and stats", () => {
-    expect(html).toContain("The Watcher · Abducted");
+    expect(html).toContain("owlsh · Abducted");
     expect(html).toContain("stealth");
     expect(html).toContain("finds");
   });

@@ -12,7 +12,7 @@
  * Waste buckets are disjoint, with precedence detour > loop > stuck, so no
  * millisecond is counted twice.
  */
-import type { Episode, WatcherReport } from "../types/report";
+import type { Episode, OwlshReport } from "../types/report";
 import { ukcCoverage, ukcProgression, weaknessBreadth } from "./pipeline/frameworks";
 import { isOnTarget } from "./pipeline/mitre";
 import { computeMethodology } from "./analysis/methodology";
@@ -197,7 +197,7 @@ export interface ComputedMetrics {
 }
 
 /** The single deterministic computation the UI and the conformance test both call. */
-export function computeMetrics(report: WatcherReport): ComputedMetrics {
+export function computeMetrics(report: OwlshReport): ComputedMetrics {
   const { episodes, golden_dag } = report;
   const waste = wasteBreakdown(episodes);
 

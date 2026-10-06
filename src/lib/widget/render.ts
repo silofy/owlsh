@@ -43,7 +43,7 @@ export function renderWidget(
     if (line.trim()) out.push(line.trim());
     return out;
   };
-  const title = size === "small" ? ` WATCHER · ${s.target} ` : ` THE WATCHER · ${s.target} `;
+  const title = size === "small" ? ` OWLSH · ${s.target} ` : ` OWLSH · ${s.target} `;
   const lines = [`┌${title}${"─".repeat(Math.max(0, W - 2 - title.length))}┐`];
   const clock = dur(s.elapsedMs);
   lines.push(row(s.phase.toUpperCase().slice(0, Math.max(1, inner - clock.length - 1)).padEnd(inner - clock.length) + clock));

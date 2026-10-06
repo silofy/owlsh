@@ -1,7 +1,7 @@
 /**
  * Plugin conformance checker (brief §5.4). A contributor runs this against their plugin's output
  * to self-validate BEFORE opening a PR: the first message must be a capability Handshake, the rest
- * must be valid §3.3 TelemetryEvents, per schema/watcher-telemetry.schema.json.
+ * must be valid §3.3 TelemetryEvents, per schema/owlsh-telemetry.schema.json.
  *
  *   vite-node scripts/conformance.tsx [path-to-plugin-stream.ndjson]
  */
@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import Ajv from "ajv/dist/2020";
 import addFormats from "ajv-formats";
-import schema from "../schema/watcher-telemetry.schema.json";
+import schema from "../schema/owlsh-telemetry.schema.json";
 
 const ajv = new Ajv({ allErrors: true, strict: false });
 addFormats(ajv);
@@ -43,7 +43,7 @@ lines.forEach(({ i, l }, idx) => {
 /* eslint-disable no-console */
 if (errors.length === 0) {
   console.log(`✓ conformant: ${file}`);
-  console.log(`  1 handshake + ${lines.length - 1} envelope(s) valid against watcher-telemetry v1.0`);
+  console.log(`  1 handshake + ${lines.length - 1} envelope(s) valid against owlsh-telemetry v1.0`);
 } else {
   console.error(`✗ non-conformant: ${file}`);
   for (const e of errors) console.error(`  ${e}`);

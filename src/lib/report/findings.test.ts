@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { deriveReportFindings } from "./findings";
 import demo from "../../../fixtures/session-demo-full.json";
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 
-const report = demo as unknown as WatcherReport;
+const report = demo as unknown as OwlshReport;
 
 describe("deriveReportFindings (Abducted fixture)", () => {
   const findings = deriveReportFindings(report);
@@ -38,7 +38,7 @@ describe("deriveReportFindings fallback", () => {
       episodes: [{ seq: 1, cmd: "searchsploit foo", binary: "searchsploit", tactic: "TA0001", output_digest: "CVE-1999-9999 found", duration_ms: 0, gap_before_ms: 0, actor: "human_active" }],
       findings: [{ id: "vuln:CVE-1999-9999", kind: "vuln", value: "CVE-1999-9999", source_seq: 1, used_by_seq: [] }],
       phases: [], metrics: {}, golden_dag: [],
-    } as unknown as WatcherReport;
+    } as unknown as OwlshReport;
     const f = deriveReportFindings(r);
     expect(f).toHaveLength(1);
     expect(f[0].severity).toBe("unset");

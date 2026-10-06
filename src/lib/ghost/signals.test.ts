@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { detectCredNotReused, detectEnumNotAudited, computeSignalGhost, slowLineItem, detectPrivescSlowLine, dedupeSignals } from "./signals";
-import type { WatcherReport, Episode, Finding, GoldenObjective } from "../../types/report";
+import type { OwlshReport, Episode, Finding, GoldenObjective } from "../../types/report";
 import type { GhostDiffItem } from "./ghost";
 
 function ep(seq: number, binary: string, cmd: string, extra: Partial<Episode> = {}): Episode {
@@ -9,8 +9,8 @@ function ep(seq: number, binary: string, cmd: string, extra: Partial<Episode> = 
 function cred(source_seq: number): Finding {
   return { id: `cred:${source_seq}`, kind: "cred", value: "password: [redacted]", source_seq, used_by_seq: [] };
 }
-function report(episodes: Episode[], findings: Finding[]): WatcherReport {
-  return { episodes, findings } as WatcherReport;
+function report(episodes: Episode[], findings: Finding[]): OwlshReport {
+  return { episodes, findings } as OwlshReport;
 }
 
 describe("detectCredNotReused", () => {

@@ -1,4 +1,4 @@
-# Cross-compile watcher-capture to a Linux x86_64 binary from Windows (no WSL, no Docker).
+# Cross-compile owlsh to a Linux x86_64 binary from Windows (no WSL, no Docker).
 #
 # Uses cargo-zigbuild with zig as the cross-linker. The catch on this machine is the SPACE in the
 # user-profile path ("Tiago Peter"): zig's linker breaks on unquoted spaced paths, so EVERY path the
@@ -27,9 +27,9 @@ Remove-Item Env:\ZIG_COMMAND -ErrorAction SilentlyContinue
 & "$env:USERPROFILE\.cargo\bin\cargo.exe" zigbuild --release --target x86_64-unknown-linux-gnu --manifest-path "$here\Cargo.toml"
 if ($LASTEXITCODE -ne 0) { throw "cross-build failed" }
 
-$bin = "C:\wbtarget\x86_64-unknown-linux-gnu\release\watcher-capture"
+$bin = "C:\wbtarget\x86_64-unknown-linux-gnu\release\owlsh"
 $dist = Join-Path $here "dist"
 New-Item -ItemType Directory -Force -Path $dist | Out-Null
-Copy-Item $bin (Join-Path $dist "watcher-capture-linux-x86_64") -Force
-Write-Host "[+] Linux binary -> $dist\watcher-capture-linux-x86_64"
-Write-Host "    Transfer to Pwnbox, then: chmod +x watcher-capture-linux-x86_64 && ./watcher-capture-linux-x86_64 --export ..."
+Copy-Item $bin (Join-Path $dist "owlsh-linux-x86_64") -Force
+Write-Host "[+] Linux binary -> $dist\owlsh-linux-x86_64"
+Write-Host "    Transfer to Pwnbox, then: chmod +x owlsh-linux-x86_64 && ./owlsh-linux-x86_64 --export ..."

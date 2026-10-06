@@ -3,14 +3,14 @@
  *
  * Given the raw text of a dropped file, work out which capture format it is
  * (HTTP proxy HAR, Sysmon/EDR export, or a Claude Code transcript), run the
- * matching adapter to RawCommand[], and assemble a full WatcherReport the app can
+ * matching adapter to RawCommand[], and assemble a full OwlshReport the app can
  * open. Detection is by trying each adapter in a non-overlapping order and taking
  * the first that yields commands — a HAR is strict JSON with log.entries, a Sysmon
  * export has Event ID 1 records, a transcript is JSONL of tool-call messages, so
  * none matches another's input. Everything here is browser-safe (no Node deps).
  */
 import type { RawCommand } from "../pipeline/types";
-import type { Session, WatcherReport } from "../../types/report";
+import type { Session, OwlshReport } from "../../types/report";
 import { assembleReport } from "../pipeline/ingest";
 import { HOST_METHODOLOGY, WEB_METHODOLOGY } from "../golden/methodology";
 import { harToRawCommands } from "./http-proxy";
@@ -63,7 +63,7 @@ export function detectCapture(text: string, filename = ""): DetectedCapture | nu
 }
 
 /** Detect the format, run the adapter, and assemble a full report — or null if unrecognized. */
-export function reportFromCapture(text: string, filename = ""): WatcherReport | null {
+export function reportFromCapture(text: string, filename = ""): OwlshReport | null {
   const d = detectCapture(text, filename);
   if (!d) return null;
   const session: Session = {

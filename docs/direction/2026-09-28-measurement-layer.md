@@ -1,11 +1,11 @@
-# The Watcher, beyond offensive — the measurement layer
+# owlsh, beyond offensive — the measurement layer
 
 **Date:** 2026-09-28 · **Status:** direction note, for reaction
 **Origin:** user-testing feedback — skepticism about the "no eBPF/ptrace/kernel hooks" stance, plus a request to capture what AI harnesses (Claude Code / Codex) actually did.
 
 ## Thesis in one line
 
-The Watcher's product is not *offensive capture*. It is an engine that **grades and coaches a technical performance against a rubric and the optimal line.** That engine is domain-agnostic — so the growth path is more *sources* and more *domains*, not more kernel.
+owlsh's product is not *offensive capture*. It is an engine that **grades and coaches a technical performance against a rubric and the optimal line.** That engine is domain-agnostic — so the growth path is more *sources* and more *domains*, not more kernel.
 
 ## The architectural key: pluggable capture adapters
 
@@ -25,7 +25,7 @@ So every new source is just an adapter that emits `RawCommand[]`. It never has t
 ## Why "not an EDR" is the point, not a gap
 
 - **EDR / syscall tracers** answer *"what did this process do to the system?"* — defense, forensics, detection. Kernel-priv, heavy, noisy for our question.
-- **The Watcher** answers *"how good was my run, and how do I improve?"* — the decisions live in the session, not the syscalls. An EDR would bury methodology under telemetry.
+- **owlsh** answers *"how good was my run, and how do I improve?"* — the decisions live in the session, not the syscalls. An EDR would bury methodology under telemetry.
 
 Zero-privilege, install-in-seconds, safe on any lab box is the moat for the *learner/operator* buyer. Don't trade it away.
 
@@ -42,13 +42,13 @@ Zero-privilege, install-in-seconds, safe on any lab box is the moat for the *lea
 
 ## Positioning
 
-> The Watcher is the deliberate-practice and performance-grading layer for security work — offense today, defense/DFIR next — with every telemetry source (PTY · AI harness · EDR/Sysmon · HTTP proxy) as a pluggable adapter into one grading engine.
+> owlsh is the deliberate-practice and performance-grading layer for security work — offense today, defense/DFIR next — with every telemetry source (PTY · AI harness · EDR/Sysmon · HTTP proxy) as a pluggable adapter into one grading engine.
 
 You don't hook the kernel. You hook the harness.
 
 ## Next steps
 
-1. Finish the Claude Code adapter (`transcript → RawCommand[]`), behind a `watcher ingest --claude-code <session.jsonl>` surface; reuse `redact.ts` for output digests.
+1. Finish the Claude Code adapter (`transcript → RawCommand[]`), behind a `owlsh ingest --claude-code <session.jsonl>` surface; reuse `redact.ts` for output digests.
 2. Reframe site/README copy so "no kernel hooks" reads as frictionless-by-design.
 3. Spike a second adapter to validate the pattern breadth — HTTP proxy (offense) or a Sysmon export (defense).
 4. Decide the defense wedge (DFIR practice vs. SOC training) before building domain rubrics.

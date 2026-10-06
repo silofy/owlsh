@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { computeMetrics } from "./metrics";
-import type { WatcherReport } from "../types/report";
+import type { OwlshReport } from "../types/report";
 
-const minimalV11: WatcherReport = {
+const minimalV11: OwlshReport = {
   schema_version: "1.1",
   session: {
     uuid: "00000000-0000-4000-8000-000000000000",

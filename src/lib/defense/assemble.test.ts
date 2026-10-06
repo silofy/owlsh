@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { assembleDefenseReport } from "./assemble";
-import type { WatcherReport } from "../../types/report";
+import type { OwlshReport } from "../../types/report";
 
 const attacker = {
   session: { target_scope: "HTB :: Abducted", target: { name: "Abducted" }, source: "plugin", shell: "sysmon" },
@@ -9,13 +9,13 @@ const attacker = {
   ],
   findings: [{ id: "vuln:CVE-2026-4480", kind: "vuln", value: "CVE-2026-4480", source_seq: 7 }],
   phases: [], golden_dag: [],
-} as unknown as WatcherReport;
+} as unknown as OwlshReport;
 
 const run = {
   session: { target_scope: "Investigation", source: "plugin", shell: "claude-code", started_at: "2026-09-28T00:00:00Z", uuid: "r" },
   episodes: [{ seq: 1, cmd: "grep CVE-2026-4480 /var/log/samba", binary: "grep", started_at_ms: 0, output_digest: "found CVE-2026-4480" }],
   findings: [], phases: [], golden_dag: [],
-} as unknown as WatcherReport;
+} as unknown as OwlshReport;
 
 describe("assembleDefenseReport", () => {
   it("produces a defense report the debrief can read", () => {

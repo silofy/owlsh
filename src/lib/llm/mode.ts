@@ -6,7 +6,7 @@ import type { CloudName } from "./cloud";
 
 export type CoachMode = "rules" | "local" | CloudName;
 
-const KEY = "watcher.coachMode";
+const KEY = "owlsh.coachMode";
 
 export function getCoachMode(): CoachMode {
   try {

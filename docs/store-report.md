@@ -1,6 +1,6 @@
 # Rebuilding a run from the encrypted store
 
-The Watcher can persist a run to an optional encrypted **SQLCipher store**, and later rebuild the exact same graded report straight from that store — without the original capture stream. This is useful when you need to re-grade a run, preserve it long-term, or recover a report if the original session file is lost.
+owlsh can persist a run to an optional encrypted **SQLCipher store**, and later rebuild the exact same graded report straight from that store — without the original capture stream. This is useful when you need to re-grade a run, preserve it long-term, or recover a report if the original session file is lost.
 
 The store is **optional** — you enable it with `--store` when you start a capture. If you don't pass `--store`, the run is processed and reported as normal, and nothing is written to the store.
 
@@ -13,7 +13,7 @@ The store holds a versioned, compressed snapshot of every event in a run: comman
 ```
 Encrypted Store (SQLCipher)
         ↓
-   watcher-store --export
+   owlsh-store --export
         ↓
      §3.3 NDJSON
         ↓
@@ -26,14 +26,14 @@ The round-trip property is verified by Rust tests: a run ingested into the store
 
 ---
 
-## The CLI: `watcher-store`
+## The CLI: `owlsh-store`
 
-The compiled `watcher-store` binary (built from `crates/store`) offers three modes:
+The compiled `owlsh-store` binary (built from `crates/store`) offers three modes:
 
 ### Ingest a capture
 
 ```sh
-watcher-store --db <path> --key <passphrase> --ndjson <capture.ndjson>
+owlsh-store --db <path> --key <passphrase> --ndjson <capture.ndjson>
 ```
 
 Reads an NDJSON stream from a file and stores it in the encrypted database.
@@ -41,12 +41,12 @@ Reads an NDJSON stream from a file and stores it in the encrypted database.
 ### Export to §3.3 NDJSON
 
 ```sh
-watcher-store --db <path> --key <passphrase> --export [--session <uuid>]
+owlsh-store --db <path> --key <passphrase> --export [--session <uuid>]
 ```
 
 Writes the stored events back as §3.3 NDJSON to stdout. If `--session` is omitted, the most-recently-started session is exported. Pass `--session <uuid>` to export a specific session.
 
-On Windows, the binary is named `watcher-store.exe`.
+On Windows, the binary is named `owlsh-store.exe`.
 
 ---
 
@@ -56,13 +56,13 @@ The npm script builds the store crate (if needed) and pipes its export directly 
 
 ```sh
 # Build the store crate once (if not already built)
-cargo build -p watcher-store --release
+cargo build -p owlsh-store --release
 
 # Then rebuild a report from the store
 npm run report:from-store -- --db <path> --key <passphrase> [--session <uuid>] [--out dist/report-from-store.json]
 ```
 
-By default, the report is written to `dist/report-from-store.json`. The script looks for the built binary in `crates/store/target/release/watcher-store` (or fallback locations) — if it's not found, it exits with a helpful error message.
+By default, the report is written to `dist/report-from-store.json`. The script looks for the built binary in `crates/store/target/release/owlsh-store` (or fallback locations) — if it's not found, it exits with a helpful error message.
 
 ---
 
@@ -75,10 +75,10 @@ If you prefer to build the store crate and export manually:
 cd crates/store && cargo build --release
 
 # Ingest a capture
-./target/release/watcher-store --db /tmp/run.db --key testkey --ndjson some-capture.ndjson
+./target/release/owlsh-store --db /tmp/run.db --key testkey --ndjson some-capture.ndjson
 
 # Export and pipe into the report generator
-./target/release/watcher-store --db /tmp/run.db --key testkey --export | \
+./target/release/owlsh-store --db /tmp/run.db --key testkey --export | \
   npx vite-node scripts/ingest-capture.tsx --ndjson /dev/stdin --out dist/report-from-store.json
 ```
 
@@ -101,7 +101,7 @@ This walkthrough demonstrates the round-trip property in action: ingest a sample
 ### 1. Build the store crate (one-time setup)
 
 ```sh
-cargo build -p watcher-store --release
+cargo build -p owlsh-store --release
 ```
 
 ### 2. Create a sample NDJSON stream with an HTTP exchange
@@ -118,7 +118,7 @@ Save this to a file (e.g., `sample-capture.ndjson`) to ingest a capture containi
 ### 3. Ingest into a throwaway store
 
 ```sh
-./target/release/watcher-store --db /tmp/demo.db --key demo-key --ndjson sample-capture.ndjson
+./target/release/owlsh-store --db /tmp/demo.db --key demo-key --ndjson sample-capture.ndjson
 ```
 
 The database is encrypted with the key `demo-key`. The ingest succeeds silently.
@@ -126,7 +126,7 @@ The database is encrypted with the key `demo-key`. The ingest succeeds silently.
 ### 4. Export and observe the reconstructed events
 
 ```sh
-./target/release/watcher-store --db /tmp/demo.db --key demo-key --export
+./target/release/owlsh-store --db /tmp/demo.db --key demo-key --export
 ```
 
 You should see the reconstructed §3.3 NDJSON stream printed to stdout. Look for:
@@ -145,7 +145,7 @@ To generate a full graded report from the exported NDJSON:
 npm run report:from-store -- --db /tmp/demo.db --key demo-key --out /tmp/demo-report.json
 ```
 
-Open `/tmp/demo-report.json` in the Watcher UI (or view it as JSON). The report should contain:
+Open `/tmp/demo-report.json` in owlsh UI (or view it as JSON). The report should contain:
 
 - The executed command as an episode.
 - The HTTP exchange (POST to `/api`) as a web episode.
@@ -159,5 +159,5 @@ This confirms that the round-trip works: the store preserved the events, the exp
 
 - **Encryption:** The store uses SQLCipher with the key you provide. The same key is required to export.
 - **Session selection:** If `--session` is omitted, the most-recently-started session is exported. Pass `--session <uuid>` to export a specific session.
-- **Windows:** The binary is `watcher-store.exe`; all commands above work as-is on Windows (PowerShell and Bash via Git Bash).
+- **Windows:** The binary is `owlsh-store.exe`; all commands above work as-is on Windows (PowerShell and Bash via Git Bash).
 - **Errors:** If the key is wrong, the export will fail with a decryption error. If the database is corrupted or the path doesn't exist, you'll see a clear error message.

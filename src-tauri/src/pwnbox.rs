@@ -1,5 +1,5 @@
 //! Pwnbox SSH auto-pull. You hack in Pwnbox (a cloud box behind NAT), the in-Pwnbox agent writes
-//! exports to a folder there, and The Watcher `scp`-pulls them into ~/.watcher/sessions/ on a timer.
+//! exports to a folder there, and owlsh `scp`-pulls them into ~/.owlsh/sessions/ on a timer.
 //! From there the existing live-bridge poll ingests them — no manual file move, nothing through a
 //! third party. Auth reuses the user's own SSH key (the way HTB Pwnbox SSH already works).
 
@@ -10,7 +10,7 @@ use std::process::Command;
 
 fn sessions_dir() -> PathBuf {
     let home = std::env::var("USERPROFILE").or_else(|_| std::env::var("HOME")).unwrap_or_default();
-    PathBuf::from(home).join(".watcher").join("sessions")
+    PathBuf::from(home).join(".owlsh").join("sessions")
 }
 
 fn json_names(dir: &PathBuf) -> HashSet<String> {
@@ -30,6 +30,9 @@ fn json_names(dir: &PathBuf) -> HashSet<String> {
 /// scp every export from Pwnbox into the local sessions dir; return the names that are newly here.
 /// `identity`/`port`/`remote_dir` are optional; auth is non-interactive (BatchMode) so a missing key
 /// fails fast instead of hanging on a prompt.
+/// Where pre-rename capture agents wrote their exports.
+const LEGACY_EXPORTS: &str = "~/.watcher-exports";
+
 #[tauri::command]
 pub fn pull_pwnbox(
     host: String,
@@ -45,7 +48,8 @@ pub fn pull_pwnbox(
     let _ = fs::create_dir_all(&dest);
     let before = json_names(&dest);
 
-    let remote_dir = remote_dir.unwrap_or_else(|| "~/.watcher-exports".to_string());
+    let custom_dir = remote_dir.is_some();
+    let remote_dir = remote_dir.unwrap_or_else(|| "~/.owlsh-exports".to_string());
     let target = format!("{user}@{host}:{remote_dir}/*.json");
 
     let mut cmd = Command::new("scp");
@@ -63,6 +67,10 @@ pub fn pull_pwnbox(
         let err = String::from_utf8_lossy(&out.stderr);
         // an empty export dir / no matches yet is normal, not an error
         if err.contains("No such file") || err.contains("not a regular file") || err.contains("matching") {
+            // an agent installed before the rename still exports to ~/.watcher-exports
+            if !custom_dir {
+                return pull_pwnbox(host, user, port, identity, Some(LEGACY_EXPORTS.to_string()));
+            }
             return Ok(vec![]);
         }
         return Err(err.trim().to_string());

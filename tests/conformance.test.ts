@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import Ajv from "ajv/dist/2020";
 import addFormats from "ajv-formats";
-import schema from "../schema/watcher-telemetry.schema.json";
-import pluginSchema from "../schema/watcher-plugin.schema.json";
+import schema from "../schema/owlsh-telemetry.schema.json";
+import pluginSchema from "../schema/owlsh-plugin.schema.json";
 import exampleManifest from "../plugins/examples/aws-cloudshell.manifest.json";
 
 const ajv = new Ajv({ allErrors: true, strict: false });
@@ -12,7 +12,7 @@ const vHandshake = ajv.getSchema(`${schema.$id}#/$defs/Handshake`)!;
 const vEvent = ajv.getSchema(`${schema.$id}#/$defs/TelemetryEvent`)!;
 
 const HANDSHAKE = {
-  watcher_handshake: "1.0",
+  owlsh_handshake: "1.0",
   plugin: "aws-cloudshell",
   class: "source",
   capabilities: { has_exit_codes: false, has_stdin: true, boundary_confidence: "inferred", redaction: "none" },

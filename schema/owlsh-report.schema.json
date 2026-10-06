@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://thewatcher.dev/schema/watcher-report-1.0.json",
-  "title": "Watcher Session Report",
-  "description": "The schema-versioned JSON document that every Watcher backend module produces and the report UI consumes. This is the same blob embedded in the portable HTML export (brief §6.3, <script id=\"watcher-data\">) and the unit the Enterprise Bridge signs.",
+  "$id": "https://theowlsh.dev/schema/owlsh-report-1.0.json",
+  "title": "owlsh Session Report",
+  "description": "The schema-versioned JSON document that every owlsh backend module produces and the report UI consumes. This is the same blob embedded in the portable HTML export (brief §6.3, <script id=\"owlsh-data\">) and the unit the Enterprise Bridge signs.",
   "type": "object",
   "required": ["schema_version", "session", "episodes", "phases", "golden_dag", "metrics", "coaching", "redaction_profile"],
   "additionalProperties": false,

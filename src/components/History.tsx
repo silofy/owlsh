@@ -3,7 +3,7 @@ import { useReport, type SessionCard } from "../store/report";
 import { MachineAvatar } from "./MachineAvatar";
 import { DIFFICULTY_COLOR } from "../lib/machine";
 import { targetOf, platformLabel } from "../lib/platform";
-import type { WatcherReport } from "../types/report";
+import type { OwlshReport } from "../types/report";
 import { reportFromCapture } from "../lib/ingest/detect";
 import { Check } from "./icons";
 
@@ -105,7 +105,7 @@ export function History() {
       Date.parse(b.ended_at) - Date.parse(a.ended_at),
   );
 
-  function open(rep: WatcherReport) {
+  function open(rep: OwlshReport) {
     ingestLiveReport(rep);
     switchSession(`${targetOf(rep).platform}:${rep.session.uuid}`);
   }
@@ -121,14 +121,14 @@ export function History() {
     } catch {
       /* fall through to the report-JSON path */
     }
-    // An already-assembled Watcher report JSON (from the agent / Pwnbox).
+    // An already-assembled owlsh report JSON (from the agent / Pwnbox).
     try {
-      const rep = JSON.parse(text) as WatcherReport;
+      const rep = JSON.parse(text) as OwlshReport;
       if (rep?.session?.uuid && Array.isArray(rep.episodes)) return open(rep);
     } catch {
       /* not JSON */
     }
-    setErr(`"${file.name}" isn't a recognized session. Import a Watcher report JSON, a Claude Code transcript (.jsonl), a HAR file, or a Sysmon export.`);
+    setErr(`"${file.name}" isn't a recognized session. Import an owlsh report JSON, a Claude Code transcript (.jsonl), a HAR file, or a Sysmon export.`);
   }
 
   return (
@@ -154,7 +154,7 @@ export function History() {
           type="button"
           onClick={() => fileRef.current?.click()}
           className="label rounded-full border border-signal/50 px-3 py-1.5 text-signal transition-colors hover:bg-signal/15"
-          title="Import a run: a Watcher report JSON, a Claude Code transcript (.jsonl), a HAR export, or a Sysmon log"
+          title="Import a run: an owlsh report JSON, a Claude Code transcript (.jsonl), a HAR export, or a Sysmon log"
         >
           Import session ↑
         </button>
@@ -166,7 +166,7 @@ export function History() {
         <div className="rounded-lg border border-dashed border-edge bg-panel px-6 py-16 text-center">
           <div className="font-display text-lg text-muted">No runs yet</div>
           <p className="mx-auto mt-2 max-w-[44ch] text-sm text-faint">
-            Capture a session with the agent, or <span className="text-signal">Import</span> a run (drag it anywhere here): a Watcher report JSON, a Claude Code transcript, a HAR export, or a Sysmon log.
+            Capture a session with the agent, or <span className="text-signal">Import</span> a run (drag it anywhere here): an owlsh report JSON, a Claude Code transcript, a HAR export, or a Sysmon log.
           </p>
         </div>
       ) : (

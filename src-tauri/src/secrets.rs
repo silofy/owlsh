@@ -1,5 +1,5 @@
 //! Local API-key storage for the cloud coaching providers. Keys are bearer credentials: they live
-//! only in ~/.watcher/config.json on this machine (never in the JS bundle, never in the repo) and are
+//! only in ~/.owlsh/config.json on this machine (never in the JS bundle, never in the repo) and are
 //! never returned to the webview — the UI only learns whether one is set. Shares the config file the
 //! HTB token uses. The provider name is checked against a fixed allowlist so the webview can't write
 //! arbitrary keys into the config.
@@ -11,7 +11,7 @@ use serde_json::Value;
 
 fn config_path() -> PathBuf {
     let home = std::env::var("USERPROFILE").or_else(|_| std::env::var("HOME")).unwrap_or_default();
-    PathBuf::from(home).join(".watcher").join("config.json")
+    PathBuf::from(home).join(".owlsh").join("config.json")
 }
 
 /// The config field a provider's key is stored under, or None for an unknown provider.
@@ -90,7 +90,7 @@ mod tests {
     use super::*;
 
     fn temp(name: &str) -> PathBuf {
-        let p = std::env::temp_dir().join(format!("watcher-secrets-{name}")).join("config.json");
+        let p = std::env::temp_dir().join(format!("owlsh-secrets-{name}")).join("config.json");
         let _ = fs::remove_dir_all(p.parent().unwrap());
         p
     }

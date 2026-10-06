@@ -3,14 +3,14 @@ import { join } from "node:path";
 import { describe, it, expect } from "vitest";
 import Ajv from "ajv/dist/2020";
 import addFormats from "ajv-formats";
-import schema from "../schema/watcher-report.schema.json";
+import schema from "../schema/owlsh-report.schema.json";
 import fixture from "../fixtures/session-htb-easy.json";
 
 const ajv = new Ajv({ allErrors: true, strict: false });
 addFormats(ajv);
 const validate = ajv.compile(schema);
 
-describe("watcher-report schema", () => {
+describe("owlsh-report schema", () => {
   const dir = join(import.meta.dirname, "..", "fixtures");
   const files = readdirSync(dir).filter((f) => /^session-.*\.json$/.test(f));
 
@@ -19,7 +19,7 @@ describe("watcher-report schema", () => {
   for (const f of files) {
     it(`validates ${f}`, () => {
       const doc = JSON.parse(readFileSync(join(dir, f), "utf8"));
-      // Defense (blue-team) debriefs are a DefenseReport, not a WatcherReport — a different shape
+      // Defense (blue-team) debriefs are a DefenseReport, not a OwlshReport — a different shape
       // entirely (see src/lib/defense/types.ts), so this schema doesn't apply to them.
       if ((doc as { mode?: string }).mode === "defense") return;
       const ok = validate(doc);
@@ -29,7 +29,7 @@ describe("watcher-report schema", () => {
   }
 });
 
-describe("fixture conforms to watcher-report.schema.json v1.0", () => {
+describe("fixture conforms to owlsh-report.schema.json v1.0", () => {
   it("validates the bundled HTB-easy fixture", () => {
     const ok = validate(fixture);
     if (!ok) console.error(validate.errors);

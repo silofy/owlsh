@@ -1,4 +1,4 @@
-import type { WatcherReport, Episode, Finding } from "../../types/report";
+import type { OwlshReport, Episode, Finding } from "../../types/report";
 import type { Artifact, Incident, UkcPhase } from "./types";
 
 const PHASE_WEIGHT: Record<string, number> = {
@@ -41,7 +41,7 @@ function entitiesFrom(ep: Episode): string[] {
   return [...out];
 }
 
-export function deriveIncident(attacker: WatcherReport): Incident {
+export function deriveIncident(attacker: OwlshReport): Incident {
   const eps = [...(attacker.episodes ?? [])].sort((a, b) => a.seq - b.seq);
   const cveBySeq = new Map<number, string>();
   for (const f of (attacker.findings ?? []) as Finding[]) {

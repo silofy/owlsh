@@ -14,7 +14,7 @@
  * Web (HTTP-proxy) runs need their own rubric — the "binary" of a web episode is the
  * HTTP method, not a tool — so this returns no golden for them (documented gap).
  */
-import type { GoldenObjective, WatcherReport } from "../../types/report";
+import type { GoldenObjective, OwlshReport } from "../../types/report";
 
 /** Standard host engagement ladder: recon → access → orient → privesc → root. */
 export const HOST_METHODOLOGY: GoldenObjective[] = [
@@ -41,7 +41,7 @@ export const WEB_METHODOLOGY: GoldenObjective[] = [
 ];
 
 /** True when the run is predominantly web traffic (needs a web rubric, not this one). */
-function isWebRun(report: WatcherReport): boolean {
+function isWebRun(report: OwlshReport): boolean {
   if ((report.session?.context_path ?? "").toLowerCase().startsWith("web")) return true;
   const eps = report.episodes ?? [];
   if (!eps.length) return false;
@@ -53,7 +53,7 @@ function isWebRun(report: WatcherReport): boolean {
  * The fallback golden for a run with none authored. Returns the host methodology
  * ladder for host-context runs, and [] for web runs (their rubric is a follow-up).
  */
-export function methodologyGolden(report: WatcherReport): GoldenObjective[] {
+export function methodologyGolden(report: OwlshReport): GoldenObjective[] {
   const ladder = isWebRun(report) ? WEB_METHODOLOGY : HOST_METHODOLOGY;
   return ladder.map((o) => ({ ...o }));
 }

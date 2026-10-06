@@ -6,7 +6,7 @@ import { classifyCommand, isOnTarget } from "../pipeline/mitre";
 import { segmentEpisodes } from "../pipeline/segment";
 import { assembleReport } from "../pipeline/ingest";
 import type { RawCommand } from "../pipeline/types";
-import type { Session, WatcherReport } from "../../types/report";
+import type { Session, OwlshReport } from "../../types/report";
 
 describe("parseScriptInputLog", () => {
   it("splits on Enter and trims", () => {
@@ -153,7 +153,7 @@ describe("sshSessionsFromDir", () => {
 });
 
 describe("finalizeLiveReport folds captured SSH sessions in", () => {
-  const base: WatcherReport = {
+  const base: OwlshReport = {
     schema_version: "1.1",
     session: { uuid: "u", started_at: new Date(0).toISOString(), ended_at: new Date(1000).toISOString(), target_scope: "Box", shell: "bash", source: "local_pty" },
     episodes: [{ seq: 1, cmd: "nmap 10.10.10.5", binary: "nmap", duration_ms: 2000, gap_before_ms: 0, actor: "machine_bound", tactic: "TA0007" }],

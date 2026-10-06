@@ -1,7 +1,7 @@
-//! The Watcher daemon core — the single SQLCipher owner. Every source (local PTY capture, plugins
+//! owlsh daemon core — the single SQLCipher owner. Every source (local PTY capture, plugins
 //! over a local socket) feeds it §3.3 envelopes; the daemon:
-//!   1. **re-redacts on receipt** (`watcher_core::redact`) — never trusts an upstream's scrubbing,
-//!   2. **owns session boundaries** (`watcher_core::SessionController`) — honors upstream
+//!   1. **re-redacts on receipt** (`owlsh_core::redact`) — never trusts an upstream's scrubbing,
+//!   2. **owns session boundaries** (`owlsh_core::SessionController`) — honors upstream
 //!      session_start/session_end, auto-starts/closes otherwise, surfaces flag nudges,
 //!   3. **stamps + persists** command/output to the encrypted store under the active session.
 //!
@@ -11,8 +11,8 @@
 use std::sync::mpsc::Receiver;
 
 use serde::Deserialize;
-use watcher_core::{redact, redact_body, redact_headers, EndReason, SessionConfig, SessionController, SessionEvent};
-use watcher_store::{ingest, parse_ndjson, RawEvent, SqlConnection};
+use owlsh_core::{redact, redact_body, redact_headers, EndReason, SessionConfig, SessionController, SessionEvent};
+use owlsh_store::{ingest, parse_ndjson, RawEvent, SqlConnection};
 
 // ---- Plugin capability handshake (brief §5.4) ----
 
@@ -28,7 +28,9 @@ pub struct Capabilities {
 /// can weight events and fill what the plugin can't provide.
 #[derive(Debug, Deserialize)]
 pub struct Handshake {
-    pub watcher_handshake: String,
+    /// Pre-rename plugins send `watcher_handshake`; accept both so they keep working.
+    #[serde(alias = "watcher_handshake")]
+    pub owlsh_handshake: String,
     pub plugin: String,
     pub class: String,
     pub capabilities: Capabilities,
@@ -276,7 +278,7 @@ pub fn run_consumer(
 mod tests {
     use super::*;
     use std::sync::mpsc;
-    use watcher_store::{open, parse_ndjson};
+    use owlsh_store::{open, parse_ndjson};
 
     fn counter() -> Box<dyn FnMut() -> String + Send> {
         let mut n = 0;
@@ -377,7 +379,14 @@ mod tests {
         assert!(req_body.contains("user=admin")); // trailing param survives — shape preserved
     }
 
-    const HANDSHAKE: &str = r#"{"watcher_handshake":"1.0","plugin":"aws-cloudshell","class":"source","capabilities":{"has_exit_codes":false,"has_stdin":true,"boundary_confidence":"inferred","redaction":"none"},"context_template":"cloud:aws:cloudshell"}"#;
+    const HANDSHAKE: &str = r#"{"owlsh_handshake":"1.0","plugin":"aws-cloudshell","class":"source","capabilities":{"has_exit_codes":false,"has_stdin":true,"boundary_confidence":"inferred","redaction":"none"},"context_template":"cloud:aws:cloudshell"}"#;
+
+    #[test]
+    fn legacy_watcher_handshake_key_still_parses() {
+        let legacy = HANDSHAKE.replace("owlsh_handshake", "watcher_handshake");
+        let h: Handshake = serde_json::from_str(&legacy).expect("legacy handshake parses");
+        assert_eq!(h.owlsh_handshake, "1.0");
+    }
 
     #[test]
     fn parses_a_capability_handshake() {

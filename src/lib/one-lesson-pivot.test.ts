@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { pickOneLesson } from "./one-lesson";
-import type { WatcherReport } from "../types/report";
+import type { OwlshReport } from "../types/report";
 
-const withGhost = (items: unknown[]) => ({ ghost: { items } }) as unknown as WatcherReport;
+const withGhost = (items: unknown[]) => ({ ghost: { items } }) as unknown as OwlshReport;
 
 describe("pickOneLesson pivot", () => {
   it("exposes the worst late pivot's unlock and action steps", () => {

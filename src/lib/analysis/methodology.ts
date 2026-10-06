@@ -1,4 +1,4 @@
-import type { WatcherReport, Episode, Finding } from "../../types/report";
+import type { OwlshReport, Episode, Finding } from "../../types/report";
 import { isOnTarget } from "../pipeline/mitre";
 
 interface Ctx {
@@ -41,7 +41,7 @@ const RULES: Rule[] = [
     done: (c) => usesAny(c, ["linpeas", "linpeas.sh", "pspy", "pspy64", "getcap"]) || c.episodes.some((e) => /\bsudo\s+-l\b/.test(e.cmd)) },
 ];
 
-function buildCtx(report: WatcherReport): Ctx {
+function buildCtx(report: OwlshReport): Ctx {
   const episodes = report.episodes;
   const findings = report.findings ?? [];
   const binaries = new Set(episodes.map((e) => e.binary.toLowerCase()).filter(Boolean));
@@ -58,7 +58,7 @@ function buildCtx(report: WatcherReport): Ctx {
 }
 
 /** Deterministic methodology coverage: applicable disciplined checks the run performed. */
-export function computeMethodology(report: WatcherReport): MethodologyResult {
+export function computeMethodology(report: OwlshReport): MethodologyResult {
   const c = buildCtx(report);
   const checks: MethodologyCheck[] = RULES.map((r) => {
     const result = r.applies(c);
@@ -71,6 +71,6 @@ export function computeMethodology(report: WatcherReport): MethodologyResult {
 }
 
 /** The single highest-value un-done applicable check (RULES are ordered recon→privesc), or null. */
-export function topUnmetCheck(report: WatcherReport): MethodologyCheck | null {
+export function topUnmetCheck(report: OwlshReport): MethodologyCheck | null {
   return computeMethodology(report).checks.find((c) => c.applicable && !c.done) ?? null;
 }

@@ -1,10 +1,10 @@
-//! watcher-store — ingest §3.3 telemetry (NDJSON) into the encrypted SQLCipher store.
+//! owlsh-store — ingest §3.3 telemetry (NDJSON) into the encrypted SQLCipher store.
 //!
-//!   watcher-store --db <path> [--key <key>] [--ndjson <path>]   (NDJSON defaults to stdin)
+//!   owlsh-store --db <path> [--key <key>] [--ndjson <path>]   (NDJSON defaults to stdin)
 
 use std::io::Read;
 
-use watcher_store::{dump, export_ndjson, ingest, open, parse_ndjson};
+use owlsh_store::{dump, export_ndjson, ingest, open, parse_ndjson};
 
 fn arg(name: &str) -> Option<String> {
     let a: Vec<String> = std::env::args().collect();
@@ -43,6 +43,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut conn = open(&db, &key)?;
     let (cmds, outs) = ingest(&mut conn, &events)?;
 
-    eprintln!("[watcher-store] {db}: ingested {cmds} commands, {outs} output blocks (AES-256, SQLCipher)");
+    eprintln!("[owlsh-store] {db}: ingested {cmds} commands, {outs} output blocks (AES-256, SQLCipher)");
     Ok(())
 }

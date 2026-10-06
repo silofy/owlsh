@@ -1,4 +1,4 @@
-/* Standalone embed bundle: mounts real Watcher report components into any host page
+/* Standalone embed bundle: mounts real owlsh report components into any host page
  * (e.g. the marketing landing) inside a Shadow DOM, so the app's Tailwind reset is
  * isolated from the host and the theme's :root vars resolve inside the shadow. The
  * store auto-loads the fullest demo (Abducted) — see src/store/report.ts loadSessions. */
@@ -38,8 +38,8 @@ function mount(el: HTMLElement, view: string) {
 }
 
 function auto() {
-  document.querySelectorAll<HTMLElement>("[data-watcher]").forEach((el) => mount(el, el.dataset.watcher!));
+  document.querySelectorAll<HTMLElement>("[data-owlsh]").forEach((el) => mount(el, el.dataset.owlsh!));
 }
-(window as unknown as { mountWatcher: () => void }).mountWatcher = auto;
+(window as unknown as { mountOwlsh: () => void }).mountOwlsh = auto;
 if (document.readyState !== "loading") auto();
 else document.addEventListener("DOMContentLoaded", auto);

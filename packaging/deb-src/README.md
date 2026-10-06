@@ -1,4 +1,4 @@
-# Debian source package — `watcher-capture`
+# Debian source package — `owlsh`
 
 The artifact for getting the capture agent into **Kali** (a *New Tool Request*),
 and the same package installs on **Parrot / HTB Pwnbox**. Unlike the binary `.deb`
@@ -6,7 +6,7 @@ and the same package installs on **Parrot / HTB Pwnbox**. Unlike the binary `.de
 and Kali build daemons require.
 
 Only the agent is packaged — it's pure Rust, no GUI/WebKit. The source tree is just
-two crates (`watcher-capture` + the `watcher-core` lib it path-depends on) plus the
+two crates (`owlsh` + the `owlsh-core` lib it path-depends on) plus the
 vendored dependency graph.
 
 ## Build it (on Debian/Kali)
@@ -27,9 +27,9 @@ test with `sudo dpkg -i`.
 | `control` | source + binary package metadata; `Depends` is auto (`${shlibs:Depends}` — empty for the static binary) |
 | `rules` | offline `cargo build` of `crates/capture`, installs the binary; no root Cargo.toml so debhelper doesn't fight it |
 | `changelog` | `0.1.0-1` initial packaging |
-| `copyright` | DEP-5: the Watcher crates are AGPL-3.0; **the `vendor/*` stanza is a placeholder** |
+| `copyright` | DEP-5: owlsh crates are AGPL-3.0; **the `vendor/*` stanza is a placeholder** |
 | `source/format` | `3.0 (quilt)` |
-| `manpages` | installs `watcher-capture.1` |
+| `manpages` | installs `owlsh.1` |
 | `watch` | tracks upstream tags |
 
 ## Before submitting to Kali
