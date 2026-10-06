@@ -5,9 +5,9 @@ name: Deploy demos
 # https://silofy.github.io/owlsh-demos/. Keeps the demos matching the app
 # instead of drifting stale.
 #
-# One-time setup: add a secret DEMOS_DEPLOY_TOKEN — a fine-grained PAT (or
-# classic token with `repo`) that has Contents: write on silofy/owlsh-demos.
-# (A deploy key via `deploy_key:` is the tighter, single-repo alternative.)
+# Auth: a deploy key scoped to silofy/owlsh-demos only. Its public half is a
+# write-enabled deploy key on that repo; the private half is the DEMOS_DEPLOY_KEY
+# secret here. To rotate: ssh-keygen -t ed25519, then replace both.
 
 on:
   push:
@@ -35,7 +35,7 @@ jobs:
       - name: Publish to silofy/owlsh-demos
         uses: peaceiris/actions-gh-pages@v4
         with:
-          personal_token: ${{ secrets.DEMOS_DEPLOY_TOKEN }}
+          deploy_key: ${{ secrets.DEMOS_DEPLOY_KEY }}
           external_repository: silofy/owlsh-demos
           publish_branch: main
           publish_dir: ./dist
