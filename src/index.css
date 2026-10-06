@@ -316,3 +316,13 @@ body {
     animation: none;
   }
 }
+
+/* owlsh mark (OwlMark): light owl on the dark UI; dithered brows cycle attack → defense */
+.owl-mark .om-hd{fill:#e9ebf2}.owl-mark .om-ey{fill:#0b0d1a}.owl-mark .om-pu{fill:#e9ebf2}.owl-mark .om-bk{fill:#8a90a8}.owl-mark .om-tr{fill:#0b0d1a}
+.owl-mark .om-bw{transform-box:fill-box;transform-origin:center;animation:om-brow-l 9s cubic-bezier(.5,0,.2,1) infinite}
+.owl-mark .om-bw.r{animation-name:om-brow-r}
+.owl-mark .om-def{animation:om-def 9s cubic-bezier(.5,0,.2,1) infinite}
+@keyframes om-brow-l{0%,42%,100%{transform:translateY(1.6px) rotate(22deg)}50%,92%{transform:translateY(-1.4px) rotate(0)}}
+@keyframes om-brow-r{0%,42%,100%{transform:translateY(1.6px) rotate(-22deg)}50%,92%{transform:translateY(-1.4px) rotate(0)}}
+@keyframes om-def{0%,42%,100%{opacity:0}50%,92%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.owl-mark .om-bw,.owl-mark .om-def{animation:none}.owl-mark .om-bw{transform:translateY(1.6px) rotate(22deg)}.owl-mark .om-bw.r{transform:translateY(1.6px) rotate(-22deg)}.owl-mark .om-def{opacity:0}}

@@ -4,7 +4,7 @@ import { STEP_COUNT, deriveChecklist } from "../lib/onboarding";
 import { llmStatus, pullModel, DEFAULT_MODEL } from "../lib/llm/runtime";
 import { setCoachMode } from "../lib/llm/mode";
 import { setApiKey, CLOUD_LABEL, type CloudName } from "../lib/llm/cloud";
-import { Check, ScanEye, ArrowUpRight, Terminal, Crosshair, ChevronDown } from "./icons";
+import { Check, ScanEye, OwlMark, ArrowUpRight, Terminal, Crosshair, ChevronDown } from "./icons";
 import { InstallReference } from "./Install";
 
 /** Tauri-only: never read `window` at module load — only inside handlers/effects. */
@@ -560,9 +560,7 @@ export function Onboarding() {
         <aside className="flex flex-col justify-between gap-8 border-b border-edge px-7 py-8 lg:border-b-0 lg:border-r lg:py-11">
           <div className="space-y-8">
             <div className="flex items-center gap-2.5">
-              <span className="flex h-8 w-8 items-center justify-center rounded-[7px] bg-signal/15 text-signal ring-1 ring-signal/20">
-                <ScanEye size={17} />
-              </span>
+              <OwlMark size={36} />
               <div>
                 <div className="font-display text-[15px] font-semibold leading-tight text-fg">owlsh</div>
                 <div className="label text-[10px] text-faint">activation</div>

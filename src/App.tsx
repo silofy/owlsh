@@ -28,7 +28,7 @@ import { Onboarding } from "./components/Onboarding";
 import { isLiveRecording } from "./lib/live";
 import { pickOneLesson } from "./lib/one-lesson";
 import { shouldShowNudge } from "./lib/onboarding";
-import { ScanEye } from "./components/icons";
+import { OwlMark } from "./components/icons";
 import { ditherMask } from "./lib/dither";
 import { isDesktop } from "./lib/net";
 import { StepStrip } from "./components/StepStrip";
@@ -208,9 +208,7 @@ export function App() {
           <div className="mx-auto flex min-h-16 max-w-6xl flex-wrap items-stretch justify-between gap-x-6 gap-y-2 px-5">
             <div className="flex items-stretch gap-7">
               <div className="flex items-center gap-2">
-                <span className="flex h-5 w-5 items-center justify-center rounded-[5px] bg-signal/15 text-signal">
-                  <ScanEye size={13} />
-                </span>
+                <OwlMark size={28} />
                 <span className="font-display font-semibold tracking-tight text-fg">owlsh</span>
               </div>
               <nav className="flex items-stretch gap-7">
