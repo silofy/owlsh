@@ -1,5 +1,10 @@
 <div align="center">
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/brand/owlsh-dark.svg">
+  <img src="docs/brand/owlsh-light.svg" alt="owlsh — an owl whose brows shift from attack to defense" width="120">
+</picture>
+
 # owlsh
 
 **A local-first flight-data-recorder for security practice.**

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="120" height="120">
+<title>owlsh</title>
+<style>
+.lid{transform-box:view-box;animation:l 9s cubic-bezier(.5,0,.2,1) infinite}
+.l{transform-origin:9.2px 13px}.r{transform-origin:22.8px 13px;animation-name:r}
+.bk{animation:b 9s cubic-bezier(.5,0,.2,1) infinite}
+@keyframes l{0%,42%,100%{transform:rotate(24deg)}50%,92%{transform:translateY(-3px) rotate(-4deg)}}
+@keyframes r{0%,42%,100%{transform:rotate(-24deg)}50%,92%{transform:translateY(-3px) rotate(4deg)}}
+@keyframes b{0%,42%,100%{fill:#ef6a55}50%,92%{fill:#2fe6b0}}
+@media (prefers-reduced-motion:reduce){.lid,.bk{animation:none}.l{transform:rotate(24deg)}.r{transform:rotate(-24deg)}}
+</style>
+<defs><clipPath id="cl"><rect class="lid l" x="-10" y="13" width="30" height="30"/></clipPath><clipPath id="cr"><rect class="lid r" x="12" y="13" width="30" height="30"/></clipPath></defs>
+<circle cx="9.2" cy="18.2" r="6.6" fill="#e9ebf2" clip-path="url(#cl)"/><circle cx="22.8" cy="18.2" r="6.6" fill="#e9ebf2" clip-path="url(#cr)"/>
+<path d="M3.4 14.6 1 6.4 8.6 11.8Z" fill="#e9ebf2"/><path d="M28.6 14.6 31 6.4 23.4 11.8Z" fill="#e9ebf2"/>
+<circle cx="10.4" cy="19.2" r="1.6" fill="#0d1117"/><circle cx="21.6" cy="19.2" r="1.6" fill="#0d1117"/>
+<rect class="bk" x="14.2" y="26.4" width="3.6" height="1.8" fill="#ef6a55"/>
+</svg>
