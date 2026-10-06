@@ -1,5 +1,4 @@
 import { useId, type ReactNode, type SVGProps } from "react";
-import { DITHER, ditherCells } from "../lib/dither";
 
 /**
  * Local, dependency-free stroke icons — Lucide's path data embedded directly (MIT-licensed), matching
@@ -135,33 +134,24 @@ export function ScanEye(props: IconProps) {
   );
 }
 
-/** The owlsh mark — an owl whose brows are two little dithered progress bars that shift from attack
- *  (angled, coral) to defense (level, mint). Same Bayer dots as the bars (lib/dither). Animated by
- *  `.owl-mark` in index.css; reduced motion holds the attack pose. */
+/** The owlsh mark — two eyes with sharp tufts, a brow line that clips each eye, and a cursor-block
+ *  beak. The brows shift from attack (cut down into a glare, coral beak) to defense (lifted, eyes wide
+ *  open, mint beak). Animated by `.owl-mark` in index.css; reduced motion holds the attack pose. */
 export function OwlMark({ size = 24, className = "" }: { size?: number; className?: string }) {
   const id = useId().replace(/:/g, "");
-  const dots = ditherCells(DITHER.value).map(([c, r]) => <rect key={`${c}${r}`} x={c * 0.9} y={r * 0.9} width={0.7} height={0.7} />);
-  const brow = (side: "l" | "r", x: number) => (
-    <g className={`om-bw ${side}`}>
-      <rect x={x - 0.5} y={11.1} width={11.6} height={4.6} rx={0.8} className="om-tr" />
-      <rect x={x} y={11.6} width={10.6} height={3.6} fill={`url(#${id}a)`} className="om-atk" />
-      <rect x={x} y={11.6} width={10.6} height={3.6} fill={`url(#${id}d)`} className="om-def" />
-    </g>
-  );
   return (
     <svg className={`owl-mark ${className}`} width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
       <defs>
-        <pattern id={`${id}a`} width="3.6" height="3.6" patternUnits="userSpaceOnUse"><g fill="#ef6a55">{dots}</g></pattern>
-        <pattern id={`${id}d`} width="3.6" height="3.6" patternUnits="userSpaceOnUse"><g fill="#2fe6b0">{dots}</g></pattern>
+        <clipPath id={`${id}l`}><rect className="om-lid l" x="-10" y="13" width="30" height="30" /></clipPath>
+        <clipPath id={`${id}r`}><rect className="om-lid r" x="12" y="13" width="30" height="30" /></clipPath>
       </defs>
-      <path className="om-hd" d="M5 13 1.4 3.4 11.2 8.2H20.8L30.6 3.4 27 13V21.5L21 29.5H11L5 21.5Z" />
-      <path className="om-ey" d="M7.4 17.2 11 14.6 14.6 17.2V20.6L11 23 7.4 20.6Z" />
-      <path className="om-ey" d="M17.4 17.2 21 14.6 24.6 17.2V20.6L21 23 17.4 20.6Z" />
-      <circle className="om-pu" cx="11" cy="18.9" r="1.7" />
-      <circle className="om-pu" cx="21" cy="18.9" r="1.7" />
-      <path className="om-bk" d="M14.4 23.4H17.6L16 27.4Z" />
-      {brow("l", 5.2)}
-      {brow("r", 16.2)}
+      <circle className="om-ink" cx="9.2" cy="18.2" r="6.6" clipPath={`url(#${id}l)`} />
+      <circle className="om-ink" cx="22.8" cy="18.2" r="6.6" clipPath={`url(#${id}r)`} />
+      <path className="om-ink" d="M3.4 14.6 1 6.4 8.6 11.8Z" />
+      <path className="om-ink" d="M28.6 14.6 31 6.4 23.4 11.8Z" />
+      <circle className="om-gl" cx="10.4" cy="19.2" r="1.6" />
+      <circle className="om-gl" cx="21.6" cy="19.2" r="1.6" />
+      <rect className="om-bk" x="14.2" y="26.4" width="3.6" height="1.8" />
     </svg>
   );
 }
