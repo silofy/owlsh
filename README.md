@@ -14,6 +14,20 @@ Record your run against any box, then get a graded debrief: what you achieved, w
   <img src="docs/screenshots/live-ops.gif" alt="Live Ops: the run building in real time" width="820">
 </p>
 
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/verdict.png" alt="The verdict: machine, stealth score and letter grade"><br><b>The verdict</b> — one grade for the whole run, with stealth scored alongside.</td>
+    <td width="50%"><img src="docs/screenshots/one-lesson.png" alt="The one lesson, deep-linked to the step"><br><b>The one lesson</b> — the single highest-value fix, linked to the exact step it happened.</td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/grade.png" alt="Explainable rubric: radar plus seven weighted metrics"><br><b>A grade you can defend</b> — seven weighted metrics across ATT&amp;CK, the Kill Chain and CWE.</td>
+    <td width="50%"><img src="docs/screenshots/report.png" alt="OSCP/CPTS-style report with executive summary"><br><b>The report writes itself</b> — an OSCP/CPTS-style write-up with a CISO summary, exported as Markdown or PDF. <a href="https://watcher-site-six.vercel.app/assets/watcher-sample-report-abducted.pdf">Sample PDF</a>.</td>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="docs/screenshots/widget.png" alt="The live widget in a tmux split beside your shell"><br><b>A coach beside your shell</b> — the live widget mirrors your run in a tmux pane and flags loose ends. Hints are opt-in and cost you independence.</td>
+  </tr>
+</table>
+
 ---
 
 The Watcher records the commands you run against a target — on Hack The Box, TryHackMe, OffSec, Immersive Labs, or a local CTF — and turns the run into a graded debrief. Every run is read through three frameworks at once: **MITRE ATT&CK** (*what* you did), the **Unified Kill Chain** (the *order*, so backtracking is measurable), and **CWE** (the *weakness class*, so SQLi and XXE count as two skills). Everything runs on your machine — no account, no telemetry, no cloud.
