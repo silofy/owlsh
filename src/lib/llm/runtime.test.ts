@@ -42,3 +42,20 @@ describe("llmStatus (browser/dev path — no Tauri)", () => {
     expect(await llmStatus()).toEqual({ available: false, runtime: "rules-only" });
   });
 });
+
+describe("llmStatus on a public origin", () => {
+  it("never probes localhost (no local-network permission prompt for site visitors)", async () => {
+    const g = globalThis as { location?: unknown; fetch: typeof fetch };
+    const prev = { location: g.location, fetch: g.fetch };
+    let called = false;
+    g.location = { hostname: "owlsh.com", protocol: "https:" };
+    g.fetch = (async () => { called = true; return new Response("{}"); }) as typeof fetch;
+    try {
+      expect(await llmStatus()).toEqual({ available: false, runtime: "rules-only" });
+      expect(called).toBe(false);
+    } finally {
+      g.location = prev.location;
+      g.fetch = prev.fetch;
+    }
+  });
+});

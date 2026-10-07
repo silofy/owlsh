@@ -11,6 +11,8 @@ function envVar(name: string): string | undefined {
   return typeof process !== "undefined" ? process.env?.[name] : undefined;
 }
 
+import { isLocalOrigin } from "./runtime";
+
 export class OllamaProvider implements LlmProvider {
   readonly name = "ollama";
   constructor(
@@ -19,6 +21,8 @@ export class OllamaProvider implements LlmProvider {
   ) {}
 
   async available(): Promise<boolean> {
+    // a public page must not probe this machine (Chrome's local-network prompt); see runtime.ts
+    if (/^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/.test(this.url) && !isLocalOrigin()) return false;
     try {
       const ctl = new AbortController();
       const t = setTimeout(() => ctl.abort(), 600);

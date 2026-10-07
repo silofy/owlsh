@@ -30,6 +30,12 @@ export function nextSetupStep(s: LlmRuntimeStatus, opts: { isDesktop: boolean; m
   return has ? "ready" : "needs-model";
 }
 
+/** True when the page itself is served from this machine; node (tests, scripts) counts as local. */
+export function isLocalOrigin(): boolean {
+  if (typeof location === "undefined") return true;
+  return ["localhost", "127.0.0.1", "[::1]", ""].includes(location.hostname) || location.protocol === "file:";
+}
+
 function isTauri(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 }
@@ -44,6 +50,10 @@ export async function llmStatus(): Promise<LlmRuntimeStatus> {
       /* fall through to a direct probe */
     }
   }
+  // Only a page served from this machine (npm run dev) may probe localhost. On a public origin
+  // (owlsh.com embeds, the hosted demos) the probe can't help and makes Chrome ask visitors for
+  // local-network access — so stay rules-only there.
+  if (!isLocalOrigin()) return { available: false, runtime: "rules-only" };
   try {
     const ctl = new AbortController();
     const t = setTimeout(() => ctl.abort(), 600);
