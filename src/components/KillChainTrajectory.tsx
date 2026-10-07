@@ -38,6 +38,8 @@ const ACTOR_TEXT: Record<string, string> = {
 };
 
 // viewBox height in shared-axis units; preserveAspectRatio="none" stretches it to the container.
+/** Width (px) of the left gutter that holds the phase-row labels, outside the plot. */
+const LABEL_GUTTER = 66;
 const H = 100;
 const TOP = 16;
 const BOT = 20;
@@ -106,6 +108,17 @@ export function KillChainTrajectory({ progression, compact = false }: { progress
       </div>
 
       <div className="relative overflow-hidden rounded-md border border-edge bg-ink/40" style={{ height: containerH }}>
+        {/* phase-row labels live in their own gutter, so the plot's first points never sit under them */}
+        {reachedRanks.map((r) => (
+          <span
+            key={r}
+            className="label pointer-events-none absolute left-2 text-faint"
+            style={{ top: `${topPct(r)}%`, transform: "translateY(-50%)" }}
+          >
+            {UKC_SHORT[UKC_ORDER[r]]}
+          </span>
+        ))}
+        <div className="absolute inset-y-0 right-0" style={{ left: LABEL_GUTTER }}>
         <svg viewBox={`0 0 ${AXIS_W} ${H}`} preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
           {/* phase-row guide lines */}
           {reachedRanks.map((r) => (
@@ -159,17 +172,6 @@ export function KillChainTrajectory({ progression, compact = false }: { progress
 
         {/* crisp HTML overlays (SVG is aspect-distorted): phase labels, command dots, furthest marker */}
         <div className="pointer-events-none absolute inset-0">
-          {/* phase-row labels, floated at the left of each row */}
-          {reachedRanks.map((r) => (
-            <span
-              key={r}
-              className="label absolute left-1 rounded bg-ink/70 px-1 text-faint"
-              style={{ top: `${topPct(r)}%`, transform: "translateY(-50%)" }}
-            >
-              {UKC_SHORT[UKC_ORDER[r]]}
-            </span>
-          ))}
-
           {/* live "you are here" ring, pulsing out from the furthest-reached point */}
           {live &&
             (() => {
@@ -212,10 +214,11 @@ export function KillChainTrajectory({ progression, compact = false }: { progress
             );
           })}
         </div>
+        </div>
       </div>
 
-      {/* axis — the same clock the ribbon and stealth curve use */}
-      <div className="mono mt-1 flex justify-between text-xs text-faint">
+      {/* axis — the same clock the ribbon and stealth curve use (offset past the label gutter) */}
+      <div className="mono mt-1 flex justify-between text-xs text-faint" style={{ paddingLeft: LABEL_GUTTER }}>
         {[0, 0.25, 0.5, 0.75, 1].map((f) => (
           <span key={f}>{fmtClock(f * total)}</span>
         ))}
