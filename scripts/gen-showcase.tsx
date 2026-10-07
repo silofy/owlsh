@@ -1,7 +1,7 @@
-import { ABDUCTED } from "../src/lib/demo/abducted";
+import { SALTMARSH } from "../src/lib/demo/saltmarsh";
 import { computeGrade } from "../src/lib/bridge/grade";
 import { writeFileSync } from "fs";
-const r: any = JSON.parse(JSON.stringify(ABDUCTED.report));
+const r: any = JSON.parse(JSON.stringify(SALTMARSH.report));
 // Strong-but-believable metrics -> A- / B+
 r.metrics = { ...r.metrics,
   objective_coverage_pct: 91, technique_breadth: 11, efficiency_pct: 78,

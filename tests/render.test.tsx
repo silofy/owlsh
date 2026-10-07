@@ -51,8 +51,8 @@ describe("report renders end-to-end", () => {
   // (client snapshot path) rather than `renderToStaticMarkup` against the raw store.
 
   it("renders the machine identity, platform, verdict, and command log", () => {
-    expect(html).toContain("Abducted"); // the default demo's identity in the verdict band
-    expect(html).toContain("Hack The Box"); // correctly identified platform (not mislabeled)
+    expect(html).toContain("Saltmarsh"); // the default demo's identity in the verdict band
+    expect(html).toContain("Breachyard"); // correctly identified platform (not mislabeled)
     expect(html).toContain("System flag");
     expect(html).toContain("rpcclient"); // a real command from the run's command log
   });

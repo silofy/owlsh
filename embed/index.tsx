@@ -1,7 +1,7 @@
 /* Standalone embed bundle: mounts real owlsh report components into any host page
  * (e.g. the marketing landing) inside a Shadow DOM, so the app's Tailwind reset is
  * isolated from the host and the theme's :root vars resolve inside the shadow. The
- * store auto-loads the fullest demo (Abducted) — see src/store/report.ts loadSessions. */
+ * store auto-loads the fullest demo (Saltmarsh) — see src/store/report.ts loadSessions. */
 import { createRoot } from "react-dom/client";
 import cssRaw from "../src/index.css?inline";
 import { GhostCard } from "../src/components/GhostCard";

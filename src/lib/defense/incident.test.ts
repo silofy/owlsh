@@ -3,7 +3,7 @@ import { deriveIncident } from "./incident";
 import type { OwlshReport } from "../../types/report";
 
 const attacker = {
-  session: { target_scope: "HTB :: Abducted", target: { name: "Abducted" } },
+  session: { target_scope: "Breachyard :: Saltmarsh", target: { name: "Saltmarsh" } },
   episodes: [
     { seq: 7, cmd: "echo 'x' > '|bash'", binary: "echo", tactic: "TA0002", technique: "T1059", output_digest: "payload written; CVE-2026-4480", frameworks: { ukc: "execution" }, started_at_ms: 1000 },
     { seq: 25, cmd: "echo -e '[Service]' > /etc/systemd/system/smbd.service.d/override.conf", binary: "echo", tactic: "TA0004", technique: "T1543", output_digest: "drop-in written", frameworks: { ukc: "privilege-escalation" }, started_at_ms: 2000 },

@@ -14,7 +14,7 @@ describe("detectCapture", () => {
   it("routes each format to the right adapter without cross-matching", () => {
     expect(detectCapture(har)?.kind).toBe("http-proxy");
     expect(detectCapture(sysmon)?.kind).toBe("sysmon");
-    expect(detectCapture(transcript, "abducted.jsonl")?.kind).toBe("claude-code");
+    expect(detectCapture(transcript, "saltmarsh.jsonl")?.kind).toBe("claude-code");
   });
 
   it("returns null for unrecognized input", () => {

@@ -1,8 +1,8 @@
 import type { DemoDef } from "./build";
-import { ABDUCTED } from "./abducted";
-import { ROOTME } from "./rootme";
+import { SALTMARSH } from "./saltmarsh";
+import { DUNMOOR } from "./dunmoor";
 
-export const DEMOS: DemoDef[] = [ABDUCTED, ROOTME];
+export const DEMOS: DemoDef[] = [SALTMARSH, DUNMOOR];
 export const LEGACY_DEMO_ID = DEMOS[0].id;
 
 const BY_ID = new Map(DEMOS.flatMap((d) => [[d.id, d], [d.slug, d]] as const));

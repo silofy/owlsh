@@ -3,7 +3,7 @@ import { assembleDefenseReport } from "./assemble";
 import type { OwlshReport } from "../../types/report";
 
 const attacker = {
-  session: { target_scope: "HTB :: Abducted", target: { name: "Abducted" }, source: "plugin", shell: "sysmon" },
+  session: { target_scope: "Breachyard :: Saltmarsh", target: { name: "Saltmarsh" }, source: "plugin", shell: "sysmon" },
   episodes: [
     { seq: 7, cmd: "smbclient print '|bash' override.conf", binary: "smbclient", tactic: "TA0002", technique: "T1059", output_digest: "CVE-2026-4480", frameworks: { ukc: "execution" }, started_at_ms: 1000 },
   ],

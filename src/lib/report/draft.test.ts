@@ -12,7 +12,7 @@ describe("draftReport", () => {
   it("contains every top-level section in order", () => {
     const heads = (md.match(/^## .+$/gm) || []).map((h) => h.replace(/^## /, ""));
     expect(heads).toEqual(["Executive summary", "What was done", "Scope", "Methodology", "Findings", "Walkthrough", "Appendix"]);
-    expect(md).toMatch(/^# Abducted/m);
+    expect(md).toMatch(/^# Saltmarsh/m);
   });
 
   it("has one findings entry per derived finding", () => {

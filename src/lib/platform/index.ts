@@ -25,8 +25,11 @@ export function adapterFor(id: PlatformId): PlatformAdapter | undefined {
  *  label every consumer (rail identity, History rows, Progress rows) surfaces so a run's platform
  *  reads at a glance instead of only living in the raw id. Falls back to the id itself if it's
  *  ever unrecognized, so a future/unknown id still renders something rather than crashing. */
+/** Fictional demo platforms have no capture adapter; give them a display name here. */
+const DEMO_PLATFORM_LABELS: Partial<Record<PlatformId, string>> = { breachyard: "Breachyard" };
+
 export function platformLabel(id: PlatformId): string {
-  return ADAPTERS.find((a) => a.id === id)?.label ?? id;
+  return ADAPTERS.find((a) => a.id === id)?.label ?? DEMO_PLATFORM_LABELS[id] ?? id;
 }
 
 /** Highest detect() confidence wins; localAdapter's 0.1 floor guarantees a winner. */

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { assembleReport } from "../src/lib/pipeline/ingest";
-import { ABDUCTED, ABDUCTED_GOLDEN, ABDUCTED_SESSION } from "../src/lib/demo/abducted";
+import { SALTMARSH, SALTMARSH_GOLDEN, SALTMARSH_SESSION } from "../src/lib/demo/saltmarsh";
 import { detectFlags } from "../src/lib/flags";
 import { finalizeLiveReport } from "../src/lib/finalize";
 import { useReport } from "../src/store/report";
@@ -12,9 +12,9 @@ import { useReport } from "../src/store/report";
  * permission audit the only skip). If the classifier or alignment drifts, this fails before the demo
  * misleads a viewer.
  */
-describe("demo playthrough (Abducted)", () => {
-  const DEMO_RAW = ABDUCTED.raw;
-  const report = assembleReport(DEMO_RAW, { session: ABDUCTED_SESSION, golden: ABDUCTED_GOLDEN });
+describe("demo playthrough (Saltmarsh)", () => {
+  const DEMO_RAW = SALTMARSH.raw;
+  const report = assembleReport(DEMO_RAW, { session: SALTMARSH_SESSION, golden: SALTMARSH_GOLDEN });
 
   it("classifies the reverse-shell payload as Execution (the print-injection foothold)", () => {
     const shell = report.episodes.find((e) => e.cmd.includes("/dev/tcp/"));
@@ -37,17 +37,17 @@ describe("demo playthrough (Abducted)", () => {
 
   it("registers a demo card in History (openable as a live playthrough)", () => {
     const s = useReport.getState();
-    const card = s.sessionCards.find((c) => c.id === ABDUCTED.id);
+    const card = s.sessionCards.find((c) => c.id === SALTMARSH.id);
     expect(card?.demo).toBe(true);
-    expect(card?.machine.name).toBe("Abducted");
+    expect(card?.machine.name).toBe("Saltmarsh");
     // History is exactly the curated demos plus any defense (blue-team) debrief — no dev/sample
     // fixtures leak in.
     expect(s.sessionCards.filter((c) => c.mode !== "defense").every((c) => c.demo)).toBe(true);
-    expect(new Set(s.sessionCards.map((c) => c.machine.name))).toEqual(new Set(["Abducted", "RootMe"]));
+    expect(new Set(s.sessionCards.map((c) => c.machine.name))).toEqual(new Set(["Saltmarsh", "Dunmoor"]));
   });
 
   it("marks a live snapshot as recording and resolves when it ends", () => {
-    const partial = assembleReport(DEMO_RAW.slice(0, 4), { session: ABDUCTED_SESSION, golden: [] });
+    const partial = assembleReport(DEMO_RAW.slice(0, 4), { session: SALTMARSH_SESSION, golden: [] });
     const live = finalizeLiveReport({ ...partial, recording: true });
     expect(live.recording).toBe(true);
     const done = finalizeLiveReport({ ...report, recording: false });

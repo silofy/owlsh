@@ -16,7 +16,7 @@ telemetry envelope (over a TCP/unix socket); the daemon:
 
 ```bash
 # pipe a capture straight through the daemon into an encrypted per-engagement DB
-owlsh --label "HTB :: Optimum" -- whoami "cat root.txt" \
+owlsh --label "Breachyard :: Saltmarsh" -- whoami "cat root.txt" \
   | owlsh-daemon --db optimum.db --key <passphrase>
 
 cargo test --manifest-path crates/daemon/Cargo.toml   # process: re-redact + stamp + nudge; auto-start

@@ -28,7 +28,7 @@ export interface Machine {
   retired?: boolean;
 }
 
-export type PlatformId = "htb" | "thm" | "offsec" | "immersive" | "local";
+export type PlatformId = "htb" | "thm" | "offsec" | "immersive" | "local" | "breachyard";
 
 export interface TargetDifficulty {
   level: 1 | 2 | 3 | 4 | 5;

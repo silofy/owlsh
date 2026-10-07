@@ -159,8 +159,8 @@ mod tests {
     fn manual_start_and_stop() {
         let mut c = SessionController::new(SessionConfig::default(), counter());
         assert_eq!(
-            c.start("Optimum", 1000),
-            vec![SessionEvent::Start { uuid: "s1".into(), label: "Optimum".into(), at_us: 1000 }]
+            c.start("Saltmarsh", 1000),
+            vec![SessionEvent::Start { uuid: "s1".into(), label: "Saltmarsh".into(), at_us: 1000 }]
         );
         assert_eq!(c.active_uuid(), Some("s1"));
         assert_eq!(
@@ -173,7 +173,7 @@ mod tests {
     #[test]
     fn start_with_honors_an_upstream_id() {
         let mut c = SessionController::new(SessionConfig::default(), counter());
-        let evs = c.start_with("ext-uuid".into(), "HTB :: Optimum", 0);
+        let evs = c.start_with("ext-uuid".into(), "Breachyard :: Saltmarsh", 0);
         assert!(matches!(&evs[0], SessionEvent::Start { uuid, .. } if uuid == "ext-uuid"));
         assert_eq!(c.active_uuid(), Some("ext-uuid"));
     }

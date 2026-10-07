@@ -1,0 +1,449 @@
+{
+  "schema_version": "1.4",
+  "session": {
+    "uuid": "00000000-0000-4000-8000-000000000000",
+    "started_at": "2026-09-28T09:00:00.000Z",
+    "ended_at": "2026-09-28T09:03:30.000Z",
+    "target_scope": "Sysmon :: WS07",
+    "context_path": "host",
+    "shell": "sysmon",
+    "source": "plugin",
+    "target": {
+      "platform": "local",
+      "kind": "host",
+      "name": "Sysmon :: WS07",
+      "difficulty": null,
+      "emblem": {
+        "avatar": null,
+        "hue": 330
+      },
+      "url": null
+    }
+  },
+  "episodes": [
+    {
+      "seq": 1,
+      "cmd": "C:\\Windows\\System32\\cmd.exe",
+      "binary": "cmd.exe",
+      "started_at_ms": 1790586000000,
+      "duration_ms": 0,
+      "gap_before_ms": 0,
+      "exit_code": null,
+      "actor": "human_active",
+      "output_digest": "user CORP\\jdoe · parent C:\\Windows\\explorer.exe",
+      "tactic": "TA0007",
+      "technique": "T1059",
+      "confidence": 0.2,
+      "noise_weight": 1,
+      "volume": 1,
+      "context_path": "edr:sysmon",
+      "alignment": "alternative",
+      "loop_of_seq": null,
+      "frameworks": {
+        "ukc": "reconnaissance"
+      }
+    },
+    {
+      "seq": 2,
+      "cmd": "whoami /all",
+      "binary": "whoami",
+      "started_at_ms": 1790586015000,
+      "duration_ms": 0,
+      "gap_before_ms": 15000,
+      "exit_code": null,
+      "actor": "human_active",
+      "output_digest": "user CORP\\jdoe · parent C:\\Windows\\System32\\cmd.exe",
+      "tactic": "TA0004",
+      "technique": "T1033",
+      "confidence": 0.6,
+      "noise_weight": 1,
+      "volume": 1,
+      "context_path": "edr:sysmon",
+      "alignment": "match",
+      "loop_of_seq": null,
+      "frameworks": {
+        "ukc": "privilege-escalation"
+      }
+    },
+    {
+      "seq": 3,
+      "cmd": "powershell -nop -w hidden -enc SQBFAFgA",
+      "binary": "powershell",
+      "started_at_ms": 1790586060000,
+      "duration_ms": 0,
+      "gap_before_ms": 45000,
+      "exit_code": null,
+      "actor": "human_active",
+      "output_digest": "user CORP\\jdoe · parent C:\\Windows\\System32\\cmd.exe",
+      "tactic": "TA0007",
+      "technique": "T1059",
+      "confidence": 0.2,
+      "noise_weight": 1,
+      "volume": 1,
+      "context_path": "edr:sysmon",
+      "alignment": "alternative",
+      "loop_of_seq": null,
+      "frameworks": {
+        "ukc": "reconnaissance"
+      }
+    },
+    {
+      "seq": 4,
+      "cmd": "net use x /user:corp/admin --password=[redacted]",
+      "binary": "net",
+      "started_at_ms": 1790586210000,
+      "duration_ms": 0,
+      "gap_before_ms": 150000,
+      "exit_code": null,
+      "actor": "human_active",
+      "output_digest": "user CORP\\jdoe · parent C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "tactic": "TA0007",
+      "technique": "T1059",
+      "confidence": 0.2,
+      "noise_weight": 1,
+      "volume": 1,
+      "context_path": "edr:sysmon",
+      "alignment": "alternative",
+      "loop_of_seq": null,
+      "frameworks": {
+        "ukc": "reconnaissance"
+      }
+    }
+  ],
+  "phases": [
+    {
+      "mitre_tactic": "TA0007",
+      "label": "Discovery",
+      "started_at": "2026-09-28T09:00:00.000Z",
+      "ended_at": "2026-09-28T09:03:30.000Z",
+      "efficiency_pct": 100
+    },
+    {
+      "mitre_tactic": "TA0004",
+      "label": "Privilege Escalation",
+      "started_at": "2026-09-28T09:00:00.000Z",
+      "ended_at": "2026-09-28T09:00:15.000Z",
+      "efficiency_pct": 100
+    }
+  ],
+  "golden_dag": [
+    {
+      "objective": "enumerate_services",
+      "tactic": "TA0007",
+      "satisfied_by": [
+        "nmap",
+        "rustscan",
+        "masscan",
+        "nc",
+        "ncat"
+      ],
+      "depends_on": [],
+      "user_satisfied_by_seq": null,
+      "status": "untouched",
+      "finding_refs": [],
+      "proven_by_seq": null
+    },
+    {
+      "objective": "enumerate_web_content",
+      "tactic": "TA0007",
+      "satisfied_by": [
+        "gobuster",
+        "ffuf",
+        "feroxbuster",
+        "dirb",
+        "dirbuster",
+        "nikto",
+        "whatweb",
+        "wfuzz",
+        "curl",
+        "wget"
+      ],
+      "depends_on": [
+        "enumerate_services"
+      ],
+      "user_satisfied_by_seq": null,
+      "status": "untouched",
+      "finding_refs": [],
+      "proven_by_seq": null
+    },
+    {
+      "objective": "enumerate_smb_shares",
+      "tactic": "TA0007",
+      "satisfied_by": [
+        "smbclient",
+        "smbmap",
+        "crackmapexec",
+        "cme",
+        "netexec",
+        "nxc",
+        "enum4linux",
+        "enum4linux-ng",
+        "rpcclient",
+        "nmblookup"
+      ],
+      "depends_on": [
+        "enumerate_services"
+      ],
+      "user_satisfied_by_seq": null,
+      "status": "untouched",
+      "finding_refs": [],
+      "proven_by_seq": null
+    },
+    {
+      "objective": "get_foothold",
+      "tactic": "TA0002",
+      "satisfied_by": [
+        "nc",
+        "ncat",
+        "curl",
+        "wget",
+        "python",
+        "python3",
+        "bash",
+        "sh",
+        "powershell",
+        "pwsh",
+        "msfconsole",
+        "ssh",
+        "evil-winrm",
+        "smbclient"
+      ],
+      "depends_on": [
+        "enumerate_services"
+      ],
+      "user_satisfied_by_seq": null,
+      "status": "untouched",
+      "finding_refs": [],
+      "proven_by_seq": null
+    },
+    {
+      "objective": "situational_awareness",
+      "tactic": "TA0004",
+      "satisfied_by": [
+        "whoami",
+        "id",
+        "hostname",
+        "uname",
+        "ipconfig",
+        "systeminfo",
+        "arch"
+      ],
+      "depends_on": [
+        "get_foothold"
+      ],
+      "user_satisfied_by_seq": 2,
+      "status": "reached",
+      "finding_refs": [],
+      "proven_by_seq": null
+    },
+    {
+      "objective": "enumerate_privesc",
+      "tactic": "TA0004",
+      "satisfied_by": [
+        "sudo",
+        "find",
+        "ls",
+        "cat",
+        "getcap",
+        "linpeas",
+        "linpeas.sh",
+        "pspy",
+        "pspy64",
+        "winpeas",
+        "winpeas.exe",
+        "powerup",
+        "ss",
+        "netstat",
+        "crontab"
+      ],
+      "depends_on": [
+        "situational_awareness"
+      ],
+      "user_satisfied_by_seq": null,
+      "status": "untouched",
+      "finding_refs": [],
+      "proven_by_seq": null
+    },
+    {
+      "objective": "escalate_to_root",
+      "tactic": "TA0004",
+      "satisfied_by": [
+        "su",
+        "sudo",
+        "ssh",
+        "systemctl",
+        "docker",
+        "python",
+        "python3",
+        "bash",
+        "gcc",
+        "chmod",
+        "msfconsole",
+        ".rootbash"
+      ],
+      "depends_on": [
+        "enumerate_privesc"
+      ],
+      "user_satisfied_by_seq": null,
+      "status": "untouched",
+      "finding_refs": [],
+      "proven_by_seq": null
+    }
+  ],
+  "metrics": {
+    "efficiency_pct": 100,
+    "time_waster": {
+      "productive_ms": 210000,
+      "detour_ms": 0,
+      "stuck_ms": 0,
+      "loop_ms": 0,
+      "t_active_ms": 210000
+    },
+    "stealth_score": 99,
+    "loud_moments": [
+      {
+        "seq": 1,
+        "noise": 1
+      },
+      {
+        "seq": 2,
+        "noise": 1
+      },
+      {
+        "seq": 3,
+        "noise": 1
+      }
+    ],
+    "objective_coverage_pct": 14,
+    "technique_breadth": 2,
+    "ukc_coverage_pct": 67,
+    "ukc_progression": 67,
+    "weakness_breadth": 0,
+    "methodology_coverage_pct": 0,
+    "focus_discipline_pct": 100,
+    "recovery_median_ms": null,
+    "ghost_time_lost_ms": 0,
+    "ghost_human_wins": 0
+  },
+  "coaching": {
+    "skill_radar": {
+      "recon": 100,
+      "web": 50,
+      "exploit": 50,
+      "privesc": 100,
+      "opsec": 99
+    },
+    "next_steps": [
+      {
+        "action": "Attempt **enumerate services**",
+        "why": "You never tried it — `nmap` is the intended route, and it's a free check you skipped.",
+        "category": "Recon",
+        "evidence_seq": null
+      },
+      {
+        "action": "Attempt **enumerate web content**",
+        "why": "You never tried it — `gobuster` is the intended route, and it's a free check you skipped.",
+        "category": "Recon",
+        "evidence_seq": null
+      },
+      {
+        "action": "Attempt **enumerate smb shares**",
+        "why": "You never tried it — `smbclient` is the intended route, and it's a free check you skipped.",
+        "category": "Recon",
+        "evidence_seq": null
+      },
+      {
+        "action": "Attempt **get foothold**",
+        "why": "You never tried it — `nc` is the intended route, and it's a free check you skipped.",
+        "category": "Tactics",
+        "evidence_seq": null
+      },
+      {
+        "action": "Attempt **enumerate privesc**",
+        "why": "You never tried it — `sudo` is the intended route, and it's a free check you skipped.",
+        "category": "PrivEsc",
+        "evidence_seq": null
+      },
+      {
+        "action": "Attempt **escalate to root**",
+        "why": "You never tried it — `su` is the intended route, and it's a free check you skipped.",
+        "category": "PrivEsc",
+        "evidence_seq": null
+      },
+      {
+        "action": "Quiet down `cmd.exe`",
+        "why": "Your loudest moment — a noisier footprint than the rest of the run combined. Reach for a stealthier approach here.",
+        "category": "OpSec",
+        "evidence_seq": 1
+      }
+    ]
+  },
+  "replay": {
+    "cast_ref": null,
+    "inline_cast": null
+  },
+  "redaction_profile": "full",
+  "findings": [],
+  "ghost": {
+    "time_lost_ms": 0,
+    "human_wins": 0,
+    "items": [
+      {
+        "objective": "enumerate_services",
+        "verdict": "skipped",
+        "unlock_seq": 1,
+        "actual_seq": null,
+        "lag_ms": 0,
+        "note": "Unlocked at step 1; never attempted — the optimal line takes it."
+      },
+      {
+        "objective": "enumerate_web_content",
+        "verdict": "skipped",
+        "unlock_seq": 1,
+        "actual_seq": null,
+        "lag_ms": 0,
+        "note": "Unlocked at step 1; never attempted — the optimal line takes it."
+      },
+      {
+        "objective": "enumerate_smb_shares",
+        "verdict": "skipped",
+        "unlock_seq": 1,
+        "actual_seq": null,
+        "lag_ms": 0,
+        "note": "Unlocked at step 1; never attempted — the optimal line takes it."
+      },
+      {
+        "objective": "get_foothold",
+        "verdict": "skipped",
+        "unlock_seq": 1,
+        "actual_seq": null,
+        "lag_ms": 0,
+        "note": "Unlocked at step 1; never attempted — the optimal line takes it."
+      },
+      {
+        "objective": "situational_awareness",
+        "verdict": "on_time",
+        "unlock_seq": 1,
+        "actual_seq": 2,
+        "lag_ms": 0,
+        "note": "On the optimal line for situational awareness."
+      },
+      {
+        "objective": "enumerate_privesc",
+        "verdict": "skipped",
+        "unlock_seq": 1,
+        "actual_seq": null,
+        "lag_ms": 0,
+        "note": "Unlocked at step 1; never attempted — the optimal line takes it."
+      },
+      {
+        "objective": "escalate_to_root",
+        "verdict": "skipped",
+        "unlock_seq": 1,
+        "actual_seq": null,
+        "lag_ms": 0,
+        "note": "Unlocked at step 1; never attempted — the optimal line takes it."
+      }
+    ]
+  }
+}

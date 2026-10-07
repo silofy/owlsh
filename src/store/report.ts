@@ -53,7 +53,7 @@ function loadSessions(): SessionEntry[] {
     }
   }
 
-  // History is exactly the curated real-content demos (HTB Abducted, THM RootMe) — no dev/sample
+  // History is exactly the curated fictional demos (Breachyard Saltmarsh, Breachyard Dunmoor) — no dev/sample
   // fixtures. Each is streamable live when opened (its `demo` flag drives startLiveDemo).
   return DEMOS.map((d) => ({ id: d.id, label: d.session.target_scope, report: d.report }));
 }
@@ -467,7 +467,7 @@ export const useReport = create<ReportState>((set, get) => ({
         clearInterval(demoTick); demoTick = undefined;
         // the run is done and archived; a beat later "the writeup loads" and unlocks the comparison
         demoGoldenTimer = setTimeout(() => {
-          get().applyGoldenDag(demo.golden, { source: demo.platform === "htb" ? "0xdf" : "writeup", confidence: 0.92 });
+          get().applyGoldenDag(demo.golden, { source: "methodology", confidence: 0.92 });
           set({ demo: { phase: "compared", n: total, total } });
         }, DEMO_GOLDEN_DELAY_MS);
       }

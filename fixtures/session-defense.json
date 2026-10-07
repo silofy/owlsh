@@ -4,71 +4,67 @@
     "uuid": "de00f0e1-0001-4000-8000-000000000001",
     "started_at": "2026-07-07T19:00:00.000Z",
     "ended_at": "2026-07-07T19:14:23.600Z",
-    "target_scope": "HTB :: Abducted",
+    "target_scope": "Breachyard :: Saltmarsh",
     "context_path": "host",
     "shell": "bash",
     "source": "local_pty",
     "machine": {
-      "name": "Abducted",
+      "name": "Saltmarsh",
       "os": "Linux",
       "difficulty": "Medium",
       "retired": true
     },
     "target": {
-      "platform": "htb",
+      "platform": "breachyard",
       "kind": "box",
-      "name": "Abducted",
-      "slug": "abducted",
+      "name": "Saltmarsh",
+      "slug": "saltmarsh",
       "os": "Linux",
       "difficulty": {
         "level": 3,
         "label": "Medium"
       },
       "emblem": {
-        "avatar": "https://cdn.services-k8s.prod.aws.htb.systems/content/machines/avatar/a1f1a05f-5c5d-4cca-8103-cf875d8e5698-1780591497.png",
+        "avatar": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cpath%20d%3D%22M32%203%2057%2017.5v29L32%2061%207%2046.5v-29Z%22%20fill%3D%22%230e1a2e%22%20stroke%3D%22%232fe6b0%22%20stroke-width%3D%222.6%22%2F%3E%3Ccircle%20cx%3D%2242%22%20cy%3D%2222%22%20r%3D%226.4%22%20fill%3D%22%23f2c26b%22%2F%3E%3Ccircle%20cx%3D%2245%22%20cy%3D%2220%22%20r%3D%225.4%22%20fill%3D%22%230e1a2e%22%2F%3E%3Cpath%20d%3D%22M9%2041q11-6%2023-1t23-2v8L32%2058%209%2046Z%22%20fill%3D%22%232fe6b0%22%20opacity%3D%220.85%22%2F%3E%3Cpath%20d%3D%22M19%2041V30M23%2041V32M27%2041V28M37%2042V33M41%2042V35%22%20stroke%3D%22%239fe9d3%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E",
         "hue": null
       },
-      "url": "https://app.hackthebox.com/machines/abducted"
+      "url": null
     }
   },
   "incident": {
     "artifacts": [
       {
         "id": "art:seq1",
-        "label": "nmap: nmap -p- --min-rate 10000 abducted.htb",
+        "label": "nmap: nmap -p- --min-rate 10000 saltmarsh.range",
         "phase": "reconnaissance",
         "technique": "T1046",
         "indicators": [
           "--min-rate",
-          "abducted.htb",
+          "saltmarsh.range",
           "22/tcp",
           "139/tcp",
           "netbios-ssn",
           "445/tcp"
         ],
-        "entities": [
-          "abducted.htb"
-        ],
+        "entities": [],
         "weight": 1,
         "depends_on": [],
         "source_seq": 1
       },
       {
         "id": "art:seq2",
-        "label": "nmap: nmap -p 22,139,445 -sCV abducted.htb",
+        "label": "nmap: nmap -p 22,139,445 -sCV saltmarsh.range",
         "phase": "reconnaissance",
         "technique": "T1046",
         "indicators": [
           "22,139,445",
-          "abducted.htb",
+          "saltmarsh.range",
           "22/tcp",
           "OpenSSH",
           "9.6p1",
           "3ubuntu13.16"
         ],
-        "entities": [
-          "abducted.htb"
-        ],
+        "entities": [],
         "weight": 1,
         "depends_on": [
           "art:seq1"
@@ -77,20 +73,18 @@
       },
       {
         "id": "art:seq3",
-        "label": "nmblookup: nmblookup -A abducted.htb",
+        "label": "nmblookup: nmblookup -A saltmarsh.range",
         "phase": "reconnaissance",
         "technique": "T1059",
         "indicators": [
           "nmblookup",
-          "abducted.htb",
-          "ABDUCTED",
+          "saltmarsh.range",
+          "SALTMARSH",
           "<00><03><20>",
           "WORKGROUP",
           "<00><1d><1e>"
         ],
-        "entities": [
-          "abducted.htb"
-        ],
+        "entities": [],
         "weight": 1,
         "depends_on": [
           "art:seq2"
@@ -99,20 +93,18 @@
       },
       {
         "id": "art:seq4",
-        "label": "smbclient: smbclient -L //abducted.htb/ -N",
+        "label": "smbclient: smbclient -L //saltmarsh.range/ -N",
         "phase": "reconnaissance",
         "technique": "T1059",
         "indicators": [
           "smbclient",
-          "//abducted.htb/",
+          "//saltmarsh.range/",
           "HP-Reception",
           "Printer",
           "projects",
           "transfer"
         ],
-        "entities": [
-          "abducted.htb"
-        ],
+        "entities": [],
         "weight": 1,
         "depends_on": [
           "art:seq3"
@@ -121,19 +113,18 @@
       },
       {
         "id": "art:seq5",
-        "label": "rpcclient: rpcclient -N abducted.htb -U \"\" -c enumdomusers",
+        "label": "rpcclient: rpcclient -N saltmarsh.range -U \"\" -c enumdomuse",
         "phase": "reconnaissance",
         "technique": "T1059",
         "indicators": [
           "rpcclient",
-          "abducted.htb",
+          "saltmarsh.range",
           "enumdomusers",
           "user:[scott]",
           "rid:[0x3e8]",
           "session"
         ],
         "entities": [
-          "abducted.htb",
           "scott"
         ],
         "weight": 1,
@@ -144,20 +135,18 @@
       },
       {
         "id": "art:seq6",
-        "label": "rpcclient: rpcclient -N abducted.htb -U \"\" -c netshareenuma",
+        "label": "rpcclient: rpcclient -N saltmarsh.range -U \"\" -c netshareen",
         "phase": "reconnaissance",
         "technique": "T1059",
         "indicators": [
           "rpcclient",
-          "abducted.htb",
+          "saltmarsh.range",
           "netshareenumall",
           "HP-Reception",
           "C:\\var\\spool\\samba",
           "projects"
         ],
-        "entities": [
-          "abducted.htb"
-        ],
+        "entities": [],
         "weight": 1,
         "depends_on": [
           "art:seq5"
@@ -202,20 +191,18 @@
       },
       {
         "id": "art:seq9",
-        "label": "smbclient: smbclient //abducted.htb/HP-Reception -N -c 'pri",
+        "label": "smbclient: smbclient //saltmarsh.range/HP-Reception -N -c '",
         "phase": "reconnaissance",
         "technique": "T1059",
         "indicators": [
           "smbclient",
-          "//abducted.htb/HP-Reception",
+          "//saltmarsh.range/HP-Reception",
           "putting",
           "description",
           "command",
-          "nobody@abducted:/var/spool/samba$"
+          "nobody@saltmarsh:/var/spool/samba$"
         ],
-        "entities": [
-          "abducted.htb"
-        ],
+        "entities": [],
         "weight": 1,
         "depends_on": [
           "art:seq8"
@@ -229,7 +216,7 @@
         "technique": "T1059",
         "indicators": [
           "/dev/null",
-          "nobody@abducted:/var/spool/samba$",
+          "nobody@saltmarsh:/var/spool/samba$",
           "upgraded"
         ],
         "entities": [],
@@ -266,9 +253,9 @@
           "/etc/passwd",
           "root:x:0:0:root:/root:/bin/bash",
           "scott:x:1000:1001:Scott",
-          "Mercer:/home/scott:/bin/bash",
+          "Hale:/home/scott:/bin/bash",
           "marcus:x:1001:1002:Marcus",
-          "Vale:/home/marcus:/bin/bash"
+          "Orr:/home/marcus:/bin/bash"
         ],
         "entities": [],
         "weight": 5,
@@ -302,14 +289,14 @@
         "indicators": [
           "/opt/offsite-backup/rclone.conf",
           "[offsite]",
-          "backup.hartley-group.internal",
+          "backup.saltworks.internal",
           "svc-backup",
           "[redacted]",
           "rclone-obscured",
           "rclone.conf"
         ],
         "entities": [
-          "hartley-group.internal"
+          "saltworks.internal"
         ],
         "weight": 5,
         "depends_on": [
@@ -343,7 +330,7 @@
         "indicators": [
           "Password:",
           "[redacted]",
-          "scott@abducted:~$",
+          "scott@saltmarsh:~$",
           "offsite-backup",
           "password",
           "account"
@@ -411,20 +398,18 @@
       },
       {
         "id": "art:seq21",
-        "label": "smbclient: smbclient //abducted.htb/transfer -U scott%[reda",
+        "label": "smbclient: smbclient //saltmarsh.range/transfer -U scott%[r",
         "phase": "reconnaissance",
         "technique": "T1059",
         "indicators": [
           "smbclient",
-          "//abducted.htb/transfer",
+          "//saltmarsh.range/transfer",
           "scott%[redacted]",
           "marcus-link/.ssh",
           "id_ed25519.pub",
           "marcus-link/.ssh/authorized_keys"
         ],
-        "entities": [
-          "abducted.htb"
-        ],
+        "entities": [],
         "weight": 1,
         "depends_on": [
           "art:seq20"
@@ -433,19 +418,17 @@
       },
       {
         "id": "art:seq22",
-        "label": "ssh: ssh -o IdentityFile=./id_ed25519 marcus@abducted",
+        "label": "ssh: ssh -o IdentityFile=./id_ed25519 marcus@saltmars",
         "phase": "reconnaissance",
         "technique": "T1059",
         "indicators": [
           "IdentityFile=./id_ed25519",
-          "marcus@abducted.htb",
-          "marcus@abducted:~$",
+          "marcus@saltmarsh.range",
+          "marcus@saltmarsh:~$",
           "key-based",
           "password"
         ],
-        "entities": [
-          "abducted.htb"
-        ],
+        "entities": [],
         "weight": 1,
         "depends_on": [
           "art:seq21"
@@ -582,51 +565,46 @@
       }
     ],
     "entities": [
-      "abducted.htb",
       "scott",
-      "hartley-group.internal"
+      "saltworks.internal"
     ],
-    "target_scope": "Abducted"
+    "target_scope": "Saltmarsh"
   },
   "result": {
     "incident": {
       "artifacts": [
         {
           "id": "art:seq1",
-          "label": "nmap: nmap -p- --min-rate 10000 abducted.htb",
+          "label": "nmap: nmap -p- --min-rate 10000 saltmarsh.range",
           "phase": "reconnaissance",
           "technique": "T1046",
           "indicators": [
             "--min-rate",
-            "abducted.htb",
+            "saltmarsh.range",
             "22/tcp",
             "139/tcp",
             "netbios-ssn",
             "445/tcp"
           ],
-          "entities": [
-            "abducted.htb"
-          ],
+          "entities": [],
           "weight": 1,
           "depends_on": [],
           "source_seq": 1
         },
         {
           "id": "art:seq2",
-          "label": "nmap: nmap -p 22,139,445 -sCV abducted.htb",
+          "label": "nmap: nmap -p 22,139,445 -sCV saltmarsh.range",
           "phase": "reconnaissance",
           "technique": "T1046",
           "indicators": [
             "22,139,445",
-            "abducted.htb",
+            "saltmarsh.range",
             "22/tcp",
             "OpenSSH",
             "9.6p1",
             "3ubuntu13.16"
           ],
-          "entities": [
-            "abducted.htb"
-          ],
+          "entities": [],
           "weight": 1,
           "depends_on": [
             "art:seq1"
@@ -635,20 +613,18 @@
         },
         {
           "id": "art:seq3",
-          "label": "nmblookup: nmblookup -A abducted.htb",
+          "label": "nmblookup: nmblookup -A saltmarsh.range",
           "phase": "reconnaissance",
           "technique": "T1059",
           "indicators": [
             "nmblookup",
-            "abducted.htb",
-            "ABDUCTED",
+            "saltmarsh.range",
+            "SALTMARSH",
             "<00><03><20>",
             "WORKGROUP",
             "<00><1d><1e>"
           ],
-          "entities": [
-            "abducted.htb"
-          ],
+          "entities": [],
           "weight": 1,
           "depends_on": [
             "art:seq2"
@@ -657,20 +633,18 @@
         },
         {
           "id": "art:seq4",
-          "label": "smbclient: smbclient -L //abducted.htb/ -N",
+          "label": "smbclient: smbclient -L //saltmarsh.range/ -N",
           "phase": "reconnaissance",
           "technique": "T1059",
           "indicators": [
             "smbclient",
-            "//abducted.htb/",
+            "//saltmarsh.range/",
             "HP-Reception",
             "Printer",
             "projects",
             "transfer"
           ],
-          "entities": [
-            "abducted.htb"
-          ],
+          "entities": [],
           "weight": 1,
           "depends_on": [
             "art:seq3"
@@ -679,19 +653,18 @@
         },
         {
           "id": "art:seq5",
-          "label": "rpcclient: rpcclient -N abducted.htb -U \"\" -c enumdomusers",
+          "label": "rpcclient: rpcclient -N saltmarsh.range -U \"\" -c enumdomuse",
           "phase": "reconnaissance",
           "technique": "T1059",
           "indicators": [
             "rpcclient",
-            "abducted.htb",
+            "saltmarsh.range",
             "enumdomusers",
             "user:[scott]",
             "rid:[0x3e8]",
             "session"
           ],
           "entities": [
-            "abducted.htb",
             "scott"
           ],
           "weight": 1,
@@ -702,20 +675,18 @@
         },
         {
           "id": "art:seq6",
-          "label": "rpcclient: rpcclient -N abducted.htb -U \"\" -c netshareenuma",
+          "label": "rpcclient: rpcclient -N saltmarsh.range -U \"\" -c netshareen",
           "phase": "reconnaissance",
           "technique": "T1059",
           "indicators": [
             "rpcclient",
-            "abducted.htb",
+            "saltmarsh.range",
             "netshareenumall",
             "HP-Reception",
             "C:\\var\\spool\\samba",
             "projects"
           ],
-          "entities": [
-            "abducted.htb"
-          ],
+          "entities": [],
           "weight": 1,
           "depends_on": [
             "art:seq5"
@@ -760,20 +731,18 @@
         },
         {
           "id": "art:seq9",
-          "label": "smbclient: smbclient //abducted.htb/HP-Reception -N -c 'pri",
+          "label": "smbclient: smbclient //saltmarsh.range/HP-Reception -N -c '",
           "phase": "reconnaissance",
           "technique": "T1059",
           "indicators": [
             "smbclient",
-            "//abducted.htb/HP-Reception",
+            "//saltmarsh.range/HP-Reception",
             "putting",
             "description",
             "command",
-            "nobody@abducted:/var/spool/samba$"
+            "nobody@saltmarsh:/var/spool/samba$"
           ],
-          "entities": [
-            "abducted.htb"
-          ],
+          "entities": [],
           "weight": 1,
           "depends_on": [
             "art:seq8"
@@ -787,7 +756,7 @@
           "technique": "T1059",
           "indicators": [
             "/dev/null",
-            "nobody@abducted:/var/spool/samba$",
+            "nobody@saltmarsh:/var/spool/samba$",
             "upgraded"
           ],
           "entities": [],
@@ -824,9 +793,9 @@
             "/etc/passwd",
             "root:x:0:0:root:/root:/bin/bash",
             "scott:x:1000:1001:Scott",
-            "Mercer:/home/scott:/bin/bash",
+            "Hale:/home/scott:/bin/bash",
             "marcus:x:1001:1002:Marcus",
-            "Vale:/home/marcus:/bin/bash"
+            "Orr:/home/marcus:/bin/bash"
           ],
           "entities": [],
           "weight": 5,
@@ -860,14 +829,14 @@
           "indicators": [
             "/opt/offsite-backup/rclone.conf",
             "[offsite]",
-            "backup.hartley-group.internal",
+            "backup.saltworks.internal",
             "svc-backup",
             "[redacted]",
             "rclone-obscured",
             "rclone.conf"
           ],
           "entities": [
-            "hartley-group.internal"
+            "saltworks.internal"
           ],
           "weight": 5,
           "depends_on": [
@@ -901,7 +870,7 @@
           "indicators": [
             "Password:",
             "[redacted]",
-            "scott@abducted:~$",
+            "scott@saltmarsh:~$",
             "offsite-backup",
             "password",
             "account"
@@ -969,20 +938,18 @@
         },
         {
           "id": "art:seq21",
-          "label": "smbclient: smbclient //abducted.htb/transfer -U scott%[reda",
+          "label": "smbclient: smbclient //saltmarsh.range/transfer -U scott%[r",
           "phase": "reconnaissance",
           "technique": "T1059",
           "indicators": [
             "smbclient",
-            "//abducted.htb/transfer",
+            "//saltmarsh.range/transfer",
             "scott%[redacted]",
             "marcus-link/.ssh",
             "id_ed25519.pub",
             "marcus-link/.ssh/authorized_keys"
           ],
-          "entities": [
-            "abducted.htb"
-          ],
+          "entities": [],
           "weight": 1,
           "depends_on": [
             "art:seq20"
@@ -991,19 +958,17 @@
         },
         {
           "id": "art:seq22",
-          "label": "ssh: ssh -o IdentityFile=./id_ed25519 marcus@abducted",
+          "label": "ssh: ssh -o IdentityFile=./id_ed25519 marcus@saltmars",
           "phase": "reconnaissance",
           "technique": "T1059",
           "indicators": [
             "IdentityFile=./id_ed25519",
-            "marcus@abducted.htb",
-            "marcus@abducted:~$",
+            "marcus@saltmarsh.range",
+            "marcus@saltmarsh:~$",
             "key-based",
             "password"
           ],
-          "entities": [
-            "abducted.htb"
-          ],
+          "entities": [],
           "weight": 1,
           "depends_on": [
             "art:seq21"
@@ -1140,11 +1105,10 @@
         }
       ],
       "entities": [
-        "abducted.htb",
         "scott",
-        "hartley-group.internal"
+        "saltworks.internal"
       ],
-      "target_scope": "Abducted"
+      "target_scope": "Saltmarsh"
     },
     "hits": [
       {
@@ -1159,14 +1123,14 @@
         "found": true,
         "found_by_seq": 1,
         "found_at_ms": 0,
-        "matched_indicator": "abducted.htb"
+        "matched_indicator": "saltmarsh.range"
       },
       {
         "artifact_id": "art:seq3",
         "found": true,
         "found_by_seq": 1,
         "found_at_ms": 0,
-        "matched_indicator": "abducted.htb"
+        "matched_indicator": "saltmarsh.range"
       },
       {
         "artifact_id": "art:seq4",
@@ -1180,14 +1144,14 @@
         "found": true,
         "found_by_seq": 1,
         "found_at_ms": 0,
-        "matched_indicator": "abducted.htb"
+        "matched_indicator": "saltmarsh.range"
       },
       {
         "artifact_id": "art:seq6",
         "found": true,
         "found_by_seq": 1,
         "found_at_ms": 0,
-        "matched_indicator": "abducted.htb"
+        "matched_indicator": "saltmarsh.range"
       },
       {
         "artifact_id": "art:seq7",
@@ -1215,7 +1179,7 @@
         "found": true,
         "found_by_seq": 9,
         "found_at_ms": 398300,
-        "matched_indicator": "nobody@abducted:/var/spool/samba$"
+        "matched_indicator": "nobody@saltmarsh:/var/spool/samba$"
       },
       {
         "artifact_id": "art:seq12",
@@ -1420,7 +1384,7 @@
     "human_wins": 21,
     "items": [
       {
-        "objective": "nmap: nmap -p- --min-rate 10000 abducted.htb",
+        "objective": "nmap: nmap -p- --min-rate 10000 saltmarsh.range",
         "verdict": "on_time",
         "unlock_seq": 1,
         "actual_seq": 1,
@@ -1428,7 +1392,7 @@
         "note": ""
       },
       {
-        "objective": "nmap: nmap -p 22,139,445 -sCV abducted.htb",
+        "objective": "nmap: nmap -p 22,139,445 -sCV saltmarsh.range",
         "verdict": "on_time",
         "unlock_seq": 2,
         "actual_seq": 1,
@@ -1436,7 +1400,7 @@
         "note": ""
       },
       {
-        "objective": "nmblookup: nmblookup -A abducted.htb",
+        "objective": "nmblookup: nmblookup -A saltmarsh.range",
         "verdict": "on_time",
         "unlock_seq": 3,
         "actual_seq": 1,
@@ -1444,7 +1408,7 @@
         "note": ""
       },
       {
-        "objective": "smbclient: smbclient -L //abducted.htb/ -N",
+        "objective": "smbclient: smbclient -L //saltmarsh.range/ -N",
         "verdict": "on_time",
         "unlock_seq": 4,
         "actual_seq": 4,
@@ -1452,7 +1416,7 @@
         "note": ""
       },
       {
-        "objective": "rpcclient: rpcclient -N abducted.htb -U \"\" -c enumdomusers",
+        "objective": "rpcclient: rpcclient -N saltmarsh.range -U \"\" -c enumdomuse",
         "verdict": "late_pivot",
         "unlock_seq": 5,
         "actual_seq": 1,
@@ -1460,7 +1424,7 @@
         "note": ""
       },
       {
-        "objective": "rpcclient: rpcclient -N abducted.htb -U \"\" -c netshareenuma",
+        "objective": "rpcclient: rpcclient -N saltmarsh.range -U \"\" -c netshareen",
         "verdict": "on_time",
         "unlock_seq": 6,
         "actual_seq": 1,
@@ -1484,7 +1448,7 @@
         "note": ""
       },
       {
-        "objective": "smbclient: smbclient //abducted.htb/HP-Reception -N -c 'pri",
+        "objective": "smbclient: smbclient //saltmarsh.range/HP-Reception -N -c '",
         "verdict": "late_pivot",
         "unlock_seq": 9,
         "actual_seq": 4,
@@ -1572,7 +1536,7 @@
         "note": ""
       },
       {
-        "objective": "smbclient: smbclient //abducted.htb/transfer -U scott%[reda",
+        "objective": "smbclient: smbclient //saltmarsh.range/transfer -U scott%[r",
         "verdict": "late_pivot",
         "unlock_seq": 21,
         "actual_seq": 4,
@@ -1580,7 +1544,7 @@
         "note": ""
       },
       {
-        "objective": "ssh: ssh -o IdentityFile=./id_ed25519 marcus@abducted",
+        "objective": "ssh: ssh -o IdentityFile=./id_ed25519 marcus@saltmars",
         "verdict": "on_time",
         "unlock_seq": 22,
         "actual_seq": 16,

@@ -188,7 +188,7 @@ function StepMeet() {
       <div className="space-y-3">
         <button
           type="button"
-          onClick={() => startLiveDemo("abducted")}
+          onClick={() => startLiveDemo("saltmarsh")}
           disabled={streaming}
           className="label inline-flex items-center gap-2 rounded-md border border-signal/40 bg-signal/10 px-4 py-2 text-signal transition-colors hover:bg-signal/15 disabled:cursor-progress disabled:opacity-60"
         >

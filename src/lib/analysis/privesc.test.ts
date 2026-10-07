@@ -13,8 +13,8 @@ const rep = (episodes: Episode[], findings: Finding[] = []): OwlshReport => ({
 const byId = (r: ReturnType<typeof analyzePrivesc>, id: string) => r.paths.find((p) => p.id === id);
 
 describe("analyzePrivesc — rulebook", () => {
-  it("confirms a SUID GTFOBins binary from a `find -perm /4000` sweep (RootMe pattern)", () => {
-    // The real THM RootMe demo line: bare-path output from a SUID sweep.
+  it("confirms a SUID GTFOBins binary from a `find -perm /4000` sweep (web-to-root demo pattern)", () => {
+    // The Dunmoor demo line: bare-path output from a SUID sweep.
     const r = analyzePrivesc(rep([ep({ seq: 5, cmd: "find / -user root -perm /4000 2>/dev/null", output_digest: "/usr/bin/python — the one non-standard entry alongside the usual passwd/su/sudo/mount SUID set" })]));
     const p = byId(r, "suid:python");
     expect(p).toBeTruthy();
@@ -24,7 +24,7 @@ describe("analyzePrivesc — rulebook", () => {
     expect(r.confirmed).toBe(1);
   });
 
-  it("confirms a group-writable systemd drop-in dir (HTB Abducted pattern)", () => {
+  it("confirms a group-writable systemd drop-in dir (Saltmarsh demo pattern)", () => {
     const r = analyzePrivesc(rep([ep({ seq: 9, cmd: "ls -ld /etc/systemd/system/smbd.service.d/", output_digest: "drwxrwxr-x 2 root operators 4096 ... — group-writable by operators" })]));
     const p = r.paths.find((x) => x.vector === "systemd");
     expect(p).toBeTruthy();

@@ -4,8 +4,8 @@ import type { Incident } from "./types";
 import type { OwlshReport } from "../../types/report";
 
 const incident: Incident = {
-  target_scope: "Abducted",
-  entities: ["abducted.htb"],
+  target_scope: "Saltmarsh",
+  entities: ["saltmarsh.range"],
   artifacts: [
     { id: "art:seq7", label: "injection", phase: "execution", technique: "T1059", indicators: ["CVE-2026-4480", "|bash"], entities: [], weight: 6, depends_on: [], source_seq: 7 },
     { id: "art:seq25", label: "persistence", phase: "privilege-escalation", technique: "T1543", indicators: ["override.conf"], entities: [], weight: 5, depends_on: ["art:seq7"], source_seq: 25 },

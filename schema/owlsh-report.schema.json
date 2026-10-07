@@ -40,7 +40,7 @@
           "description": "Neutral, platform-agnostic target identity (schema v1.2). Supersedes session.machine; machine is retained for back-compat.",
           "additionalProperties": false,
           "properties": {
-            "platform": { "type": "string", "enum": ["htb", "thm", "offsec", "immersive", "local"] },
+            "platform": { "type": "string", "enum": ["htb", "thm", "offsec", "immersive", "local", "breachyard"] },
             "kind": { "type": "string" },
             "name": { "type": "string" },
             "slug": { "type": "string" },

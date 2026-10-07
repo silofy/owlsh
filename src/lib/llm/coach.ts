@@ -36,7 +36,7 @@ export function buildCoachPrompt(machine: string, steps: CoachStep[]): string {
     (s) => `[#${s.seq}] cmd: ${JSON.stringify(s.cmd).slice(0, 200)} | result: ${JSON.stringify(s.output).slice(0, 180)} | issue: ${s.kind} | intended: ${s.intended}`,
   );
   return [
-    `You are a blunt, expert offensive-security coach reviewing a Hack The Box "${machine}" session.`,
+    `You are a blunt, expert offensive-security coach reviewing a practice-box "${machine}" session.`,
     `For EACH step below, write ONE specific, actionable suggestion (max 24 words) for what the operator should have done instead or next.`,
     `Reference the actual command and result; name the better tool/flag/approach. No flattery, no filler, no markdown.`,
     `Return ONLY JSON matching the schema — exactly one entry per step seq.`,

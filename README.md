@@ -99,10 +99,10 @@ Then capture, which differs by where you're working:
 
 ## Demos
 
-Two real runs you can watch build live in your browser, no install — transcribed from public write-ups, flags and credentials redacted:
+Two scripted runs you can watch build live in your browser, no install. These are fictional practice boxes on an invented platform ("Breachyard") — not real machines, write-ups or artwork:
 
-- **[HTB Abducted](https://silofy.github.io/owlsh-demos/?demo=abducted)** (medium) — Samba print-job RCE → `rclone` creds → wide-links pivot → writable systemd drop-in to root.
-- **[THM RootMe](https://silofy.github.io/owlsh-demos/?demo=rootme)** (easy) — upload-filter bypass to a `www-data` shell → SUID-python GTFOBins jump to root.
+- **[Breachyard Saltmarsh](https://silofy.github.io/owlsh-demos/?demo=saltmarsh)** (medium) — Samba print-job RCE → `rclone` creds → wide-links pivot → writable systemd drop-in to root.
+- **[Breachyard Dunmoor](https://silofy.github.io/owlsh-demos/?demo=dunmoor)** (easy) — upload-filter bypass to a `www-data` shell → SUID-python GTFOBins jump to root.
 
 ## The debrief
 

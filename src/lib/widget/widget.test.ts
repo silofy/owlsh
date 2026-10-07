@@ -11,7 +11,7 @@ describe("deriveWidgetState", () => {
   const s = deriveWidgetState(report, Date.parse(report.session.ended_at));
 
   it("mirrors the run: target, phase from the latest episode, counts", () => {
-    expect(s.target).toBe("Abducted");
+    expect(s.target).toBe("Saltmarsh");
     expect(report.phases.map((p) => p.label)).toContain(s.phase);
     expect(s.findings).toBe((report.findings ?? []).length);
     expect(s.coverage.engaged).toBeLessThanOrEqual(s.coverage.found);
@@ -55,7 +55,7 @@ describe("renderWidget", () => {
   it("draws a fixed-width box with the phase, stats and footer", () => {
     const lines = renderWidget(deriveWidgetState(report, Date.parse(report.session.ended_at)), { width: 44 });
     expect(new Set(lines.map((l) => l.length))).toEqual(new Set([44]));
-    expect(lines[0]).toContain("OWLSH · Abducted");
+    expect(lines[0]).toContain("OWLSH · Saltmarsh");
     expect(lines.join("\n")).toContain("[h] hint");
   });
   it("shows a pulled hint and the running penalty", () => {

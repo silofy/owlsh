@@ -10,7 +10,7 @@ describe("sections", () => {
   it("header names the target and warns of unredacted detail under the full profile", () => {
     expect(report.redaction_profile).toBe("full");
     const h = headerSection(report);
-    expect(h).toContain("# Abducted");
+    expect(h).toContain("# Saltmarsh");
     expect(h).toMatch(/do not share/i);
     expect(h).not.toMatch(/are masked/i);
   });

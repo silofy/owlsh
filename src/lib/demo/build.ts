@@ -7,7 +7,7 @@ export interface Step { cmd: string; gap: number; dur: number; out: string; line
 export interface DemoDef {
   id: string;
   slug: string;
-  platform: "htb" | "thm" | "immersive";
+  platform: "htb" | "thm" | "immersive" | "breachyard";
   target: string;
   session: Session;
   golden: GoldenObjective[];

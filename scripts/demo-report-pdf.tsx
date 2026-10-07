@@ -1,5 +1,5 @@
 /**
- * Builds the public sample report PDF for the landing page from the Abducted demo run — the same
+ * Builds the public sample report PDF for the landing page from the Saltmarsh demo run — the same
  * draftReport + light "paper" stylesheet the app's Download PDF uses, printed by Chromium.
  *   npx vite-node scripts/demo-report-pdf.tsx -- <out.pdf>
  */

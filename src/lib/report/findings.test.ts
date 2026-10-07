@@ -5,7 +5,7 @@ import type { OwlshReport } from "../../types/report";
 
 const report = demo as unknown as OwlshReport;
 
-describe("deriveReportFindings (Abducted fixture)", () => {
+describe("deriveReportFindings (Saltmarsh fixture)", () => {
   const findings = deriveReportFindings(report);
 
   it("derives exactly the two source-backed findings", () => {
@@ -27,7 +27,7 @@ describe("deriveReportFindings (Abducted fixture)", () => {
   });
 
   it("uses the target name as affected", () => {
-    expect(findings[0].affected).toBe("Abducted");
+    expect(findings[0].affected).toBe("Saltmarsh");
   });
 });
 

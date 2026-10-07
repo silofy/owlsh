@@ -1,0 +1,293 @@
+{
+  "schema_version": "1.4",
+  "session": {
+    "uuid": "00000000-0000-4000-8000-000000000000",
+    "started_at": "2026-09-28T14:00:00.000Z",
+    "ended_at": "2026-09-28T14:01:05.095Z",
+    "target_scope": "web test",
+    "context_path": "web",
+    "shell": "http-proxy",
+    "source": "plugin",
+    "target": {
+      "platform": "local",
+      "kind": "host",
+      "name": "web test",
+      "difficulty": null,
+      "emblem": {
+        "avatar": null,
+        "hue": 270
+      },
+      "url": null
+    }
+  },
+  "episodes": [
+    {
+      "seq": 1,
+      "cmd": "GET /",
+      "binary": "GET",
+      "started_at_ms": 1790604000000,
+      "duration_ms": 85,
+      "gap_before_ms": 0,
+      "exit_code": null,
+      "actor": "human_active",
+      "tactic": "TA0007",
+      "technique": "T1595",
+      "confidence": 0.4,
+      "noise_weight": 1,
+      "volume": 1,
+      "context_path": "web:har",
+      "alignment": "match",
+      "loop_of_seq": null,
+      "frameworks": {
+        "ukc": "reconnaissance"
+      }
+    },
+    {
+      "seq": 2,
+      "cmd": "GET /robots.txt",
+      "binary": "GET",
+      "started_at_ms": 1790604012000,
+      "duration_ms": 140,
+      "gap_before_ms": 11915,
+      "exit_code": null,
+      "actor": "human_active",
+      "tactic": "TA0007",
+      "technique": "T1595",
+      "confidence": 0.4,
+      "noise_weight": 1,
+      "volume": 1,
+      "context_path": "web:har",
+      "alignment": "alternative",
+      "loop_of_seq": null,
+      "frameworks": {
+        "ukc": "reconnaissance"
+      }
+    },
+    {
+      "seq": 3,
+      "cmd": "POST /login",
+      "binary": "POST",
+      "started_at_ms": 1790604040000,
+      "duration_ms": 210,
+      "gap_before_ms": 27860,
+      "exit_code": null,
+      "actor": "human_active",
+      "tactic": "TA0001",
+      "technique": "T1110",
+      "confidence": 0.6,
+      "noise_weight": 1,
+      "volume": 1,
+      "context_path": "web:har",
+      "alignment": "match",
+      "loop_of_seq": null,
+      "frameworks": {
+        "ukc": "exploitation"
+      }
+    },
+    {
+      "seq": 4,
+      "cmd": "GET /admin?id=1%27%20OR%20%271%27=%271",
+      "binary": "GET",
+      "started_at_ms": 1790604065000,
+      "duration_ms": 95,
+      "gap_before_ms": 24790,
+      "exit_code": null,
+      "actor": "human_active",
+      "tactic": "TA0001",
+      "technique": "T1190",
+      "confidence": 0.7,
+      "noise_weight": 1,
+      "volume": 1,
+      "context_path": "web:har",
+      "alignment": "match",
+      "frameworks": {
+        "ukc": "exploitation",
+        "cwe": [
+          "CWE-89"
+        ]
+      },
+      "loop_of_seq": null
+    }
+  ],
+  "phases": [
+    {
+      "mitre_tactic": "TA0007",
+      "label": "Discovery",
+      "started_at": "2026-09-28T14:00:00.000Z",
+      "ended_at": "2026-09-28T14:00:12.140Z",
+      "efficiency_pct": 100
+    },
+    {
+      "mitre_tactic": "TA0001",
+      "label": "Initial Access",
+      "started_at": "2026-09-28T14:00:12.140Z",
+      "ended_at": "2026-09-28T14:01:05.095Z",
+      "efficiency_pct": 100
+    }
+  ],
+  "golden_dag": [
+    {
+      "objective": "map_attack_surface",
+      "tactic": "TA0007",
+      "satisfied_by": [],
+      "techniques": [
+        "T1595",
+        "T1046"
+      ],
+      "depends_on": [],
+      "user_satisfied_by_seq": 1,
+      "status": "reached",
+      "finding_refs": [],
+      "proven_by_seq": null
+    },
+    {
+      "objective": "content_discovery",
+      "tactic": "TA0007",
+      "satisfied_by": [],
+      "techniques": [
+        "T1595.003",
+        "T1083"
+      ],
+      "depends_on": [
+        "map_attack_surface"
+      ],
+      "user_satisfied_by_seq": null,
+      "status": "untouched",
+      "finding_refs": [],
+      "proven_by_seq": null
+    },
+    {
+      "objective": "attack_authentication",
+      "tactic": "TA0001",
+      "satisfied_by": [],
+      "techniques": [
+        "T1110",
+        "T1078"
+      ],
+      "depends_on": [
+        "map_attack_surface"
+      ],
+      "user_satisfied_by_seq": 3,
+      "status": "reached",
+      "finding_refs": [],
+      "proven_by_seq": null
+    },
+    {
+      "objective": "exploit_web_app",
+      "tactic": "TA0001",
+      "satisfied_by": [],
+      "techniques": [
+        "T1190"
+      ],
+      "depends_on": [
+        "content_discovery"
+      ],
+      "user_satisfied_by_seq": 4,
+      "status": "reached",
+      "finding_refs": [],
+      "proven_by_seq": null
+    }
+  ],
+  "metrics": {
+    "efficiency_pct": 100,
+    "time_waster": {
+      "productive_ms": 65095,
+      "detour_ms": 0,
+      "stuck_ms": 0,
+      "loop_ms": 0,
+      "t_active_ms": 65095
+    },
+    "stealth_score": 99,
+    "loud_moments": [
+      {
+        "seq": 1,
+        "noise": 1
+      },
+      {
+        "seq": 2,
+        "noise": 1
+      },
+      {
+        "seq": 3,
+        "noise": 1
+      }
+    ],
+    "objective_coverage_pct": 75,
+    "technique_breadth": 3,
+    "ukc_coverage_pct": 100,
+    "ukc_progression": 100,
+    "weakness_breadth": 0,
+    "methodology_coverage_pct": 0,
+    "focus_discipline_pct": 100,
+    "recovery_median_ms": null,
+    "ghost_time_lost_ms": 0,
+    "ghost_human_wins": 1
+  },
+  "coaching": {
+    "skill_radar": {
+      "recon": 100,
+      "web": 100,
+      "exploit": 50,
+      "privesc": 50,
+      "opsec": 99
+    },
+    "next_steps": [
+      {
+        "action": "Attempt **content discovery**",
+        "why": "You never tried it — `undefined` is the intended route, and it's a free check you skipped.",
+        "category": "Tactics",
+        "evidence_seq": null
+      },
+      {
+        "action": "Quiet down `GET`",
+        "why": "Your loudest moment — a noisier footprint than the rest of the run combined. Reach for a stealthier approach here.",
+        "category": "OpSec",
+        "evidence_seq": 1
+      }
+    ]
+  },
+  "replay": {
+    "cast_ref": null,
+    "inline_cast": null
+  },
+  "redaction_profile": "full",
+  "findings": [],
+  "ghost": {
+    "time_lost_ms": 0,
+    "human_wins": 1,
+    "items": [
+      {
+        "objective": "map_attack_surface",
+        "verdict": "ahead",
+        "unlock_seq": 1,
+        "actual_seq": 1,
+        "lag_ms": 0,
+        "note": "You did map attack surface before its prerequisite surfaced — ahead of the optimal line."
+      },
+      {
+        "objective": "content_discovery",
+        "verdict": "skipped",
+        "unlock_seq": 1,
+        "actual_seq": null,
+        "lag_ms": 0,
+        "note": "Unlocked at step 1; never attempted — the optimal line takes it."
+      },
+      {
+        "objective": "attack_authentication",
+        "verdict": "on_time",
+        "unlock_seq": 1,
+        "actual_seq": 3,
+        "lag_ms": 0,
+        "note": "On the optimal line for attack authentication."
+      },
+      {
+        "objective": "exploit_web_app",
+        "verdict": "on_time",
+        "unlock_seq": 1,
+        "actual_seq": 4,
+        "lag_ms": 0,
+        "note": "On the optimal line for exploit web app."
+      }
+    ]
+  }
+}

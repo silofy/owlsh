@@ -15,6 +15,7 @@ export const CIDRS: Record<PlatformId, string[]> = {
   offsec: [],
   immersive: [],
   local: [],
+  breachyard: [],
 };
 
 const IPV4 = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
