@@ -143,6 +143,45 @@ describe("guard: tierOneTools", () => {
   });
 });
 
+describe("guard: unicode hardening", () => {
+  it("blocks a golden term split by a zero-width character", () => {
+    expect(guard(hint("Look at the por​tal again."), ctx({ golden: GOLDEN })).ok).toBe(false);
+  });
+  it("blocks a golden term with a look-alike letter from another script", () => {
+    // Cyrillic small o (U+043E) in place of Latin o
+    const r = guard(hint("Look at the pоrtal again."), ctx({ golden: GOLDEN }));
+    expect(r).toEqual({ ok: false, reason: "shape: mixed script" });
+  });
+  it("blocks a full-width variant of a golden term (NFKC folds it)", () => {
+    expect(guard(hint("Look at the ｐｏｒｔａｌ again."), ctx({ golden: GOLDEN })).ok).toBe(false);
+  });
+  it("blocks a 301-character hint", () => {
+    const text = [...Array(29).fill("abcdefghi"), "abcdefghijk"].join(" ");
+    expect(text.length).toBe(301);
+    expect(guard(hint(text), ctx()).ok).toBe(false);
+  });
+  it("passes a plain 30-word hint under 300 characters", () => {
+    const text = Array(30).fill("slowly").join(" ");
+    expect(text.length).toBeLessThan(300);
+    expect(guard(hint(text), ctx()).ok).toBe(true);
+  });
+  it("blocks the plural of an unsatisfied golden term", () => {
+    expect(guard(hint("Think about the portals again."), ctx({ golden: GOLDEN })).ok).toBe(false);
+    expect(guard(hint("Think about the gadgetprobes again."), ctx({ golden: GOLDEN })).ok).toBe(false);
+  });
+  it("passes the plural of a term in seen", () => {
+    const seen = new Set(["gizmoscan"]);
+    expect(guard(hint("Maybe gizmoscans would help here."), ctx({ golden: GOLDEN, seen })).ok).toBe(true);
+  });
+  it("passes a plain nudge and returns it with invisible characters removed", () => {
+    const r = guard(hint(" Slow do​wn and re️read your⁠ notes. "), ctx({ golden: GOLDEN }));
+    expect(r).toEqual({ ok: true, text: "Slow down and reread your notes.", kind: "process" });
+  });
+  it.each(["\uD800 lone high", "lone low \uDC00", "\uDFFF\uD800", "\u0000​"])("never throws on odd input %#", (text) => {
+    expect(() => guard(hint(text), ctx({ golden: GOLDEN, tier: 1 }))).not.toThrow();
+  });
+});
+
 describe("guard: property", () => {
   // mulberry32
   function rng(seed: number) {
@@ -169,6 +208,10 @@ describe("guard: property", () => {
       const text = words.join(" ");
       expect(guard(hint(text), ctx({ golden: GOLDEN })).ok, text).toBe(false);
       expect(guard(hint(text), ctx({ golden: GOLDEN, seen: new Set([term]) })).ok, text).toBe(true);
+      const at = 1 + Math.floor(r() * (term.length - 1));
+      const zw = pick(["​", "‌", "‍", "⁠", "﻿", "­"]);
+      const split = text.replace(new RegExp(term, "i"), (m) => m.slice(0, at) + zw + m.slice(at));
+      expect(guard(hint(split), ctx({ golden: GOLDEN })).ok, JSON.stringify(split)).toBe(false);
     }
   });
 });

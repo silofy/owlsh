@@ -19,6 +19,7 @@ export interface GuardCtx {
 export type GuardResult = { ok: true; text: string; kind: HintKind } | { ok: false; reason: string };
 
 const MAX_WORDS = 30;
+const MAX_CHARS = 300;
 const KINDS: readonly HintKind[] = ["process", "area", "technique"];
 
 export const KNOWN_TOOLS: string[] = [
@@ -46,6 +47,24 @@ const ARTIFACT_PATTERNS: [string, RegExp][] = [
   ["command", /(?:^|\s)--?[a-z][\w-]*|\||(?:^|\s)\d?[<>]{1,2}|\$\(|\$\{|`|&&/i],
 ];
 
+// Format characters (\p{Cf}: zero-width space/joiners, word joiner, BOM, soft hyphen,
+// bidi controls, tag characters) plus invisible fillers and variation selectors that
+// are not Cf. Stripped so they cannot split a forbidden term.
+const INVISIBLE =
+  /[\p{Cf}͏ᅟᅠ឴឵᠋-᠏ㅤ︀-️ﾠ\u{E0100}-\u{E01EF}]/gu;
+
+/** NFKC-fold compatibility forms (full-width etc.), then drop invisible characters. */
+function normalizeHint(text: string): string {
+  return text.normalize("NFKC").replace(INVISIBLE, "");
+}
+
+function hasMixedScriptWord(text: string): boolean {
+  for (const w of text.match(/[\p{L}\p{M}\p{N}]+/gu) ?? []) {
+    if (/\p{Script=Latin}/u.test(w) && /(?!\p{Script=Latin})\p{L}/u.test(w)) return true;
+  }
+  return false;
+}
+
 function words(text: string): string[] {
   return text.split(/\s+/).filter(Boolean);
 }
@@ -64,7 +83,7 @@ function escapeRe(s: string): string {
 }
 
 function containsWord(haystackLower: string, term: string): boolean {
-  return new RegExp(`(?<![a-z0-9])${escapeRe(term)}(?![a-z0-9])`).test(haystackLower);
+  return new RegExp(`(?<![a-z0-9])${escapeRe(term)}(?:e?s)?(?![a-z0-9])`).test(haystackLower);
 }
 
 function isSatisfied(o: GoldenObjective): boolean {
@@ -74,9 +93,13 @@ function isSatisfied(o: GoldenObjective): boolean {
 function shape(raw: unknown, ctx: GuardCtx): string | null {
   if (typeof raw !== "object" || raw === null) return "shape: not an object";
   const { hint, kind } = raw as Record<string, unknown>;
-  if (typeof hint !== "string" || hint.trim() === "") return "shape: missing or empty hint";
+  if (typeof hint !== "string") return "shape: missing or empty hint";
+  const text = normalizeHint(hint).trim();
+  if (text === "") return "shape: missing or empty hint";
   if (typeof kind !== "string" || !KINDS.includes(kind as HintKind)) return "shape: bad kind";
-  if (words(hint).length > MAX_WORDS) return "shape: too many words";
+  if (text.length > MAX_CHARS) return "shape: too long";
+  if (words(text).length > MAX_WORDS) return "shape: too many words";
+  if (hasMixedScriptWord(text)) return "shape: mixed script";
   if (ctx.tier === 1 && kind !== "process") return "shape: tier 1 requires process";
   if (ctx.tier === 2 && kind === "technique") return "shape: tier 2 forbids technique";
   return null;
@@ -122,9 +145,10 @@ export function guard(raw: unknown, ctx: GuardCtx): GuardResult {
   }
   if (shapeReason) return { ok: false, reason: shapeReason };
   const { hint, kind } = raw as { hint: string; kind: HintKind };
-  const text = hint.trim();
+  let text: string;
   let reason: string | null;
   try {
+    text = normalizeHint(hint).trim();
     reason = artifacts(text) ?? golden(text, ctx) ?? tierOneTools(text, ctx);
   } catch {
     return { ok: false, reason: "guard: exception" };
