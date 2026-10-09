@@ -13,13 +13,17 @@ import { resolve } from "node:path";
 import type { OwlshReport } from "../src/types/report";
 import { deriveWidgetState } from "../src/lib/widget/state";
 import { renderWidget, WIDGET_SIZES, type WidgetSize } from "../src/lib/widget/render";
-import { hintFor, nextTier, independencePenalty, HINTS_SUFFIX, type HintPull } from "../src/lib/widget/hints";
+import { independencePenalty, HINTS_SUFFIX, type HintPull } from "../src/lib/widget/hints";
+import { createPuller } from "../src/lib/hints/pull";
+import { NONE } from "../src/lib/hints/golden-source";
+import { OllamaProvider, NullProvider } from "../src/lib/llm";
 
 const argv = process.argv.slice(2);
 const arg = (k: string) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : undefined; };
 const path = resolve(arg("--report") ?? "fixtures/session-demo-full.json");
 const widthArg = arg("--width");
 let size: WidgetSize = (WIDGET_SIZES as string[]).includes(arg("--size") ?? "") ? (arg("--size") as WidgetSize) : "medium";
+const goldenPath = path + ".golden";
 const hintsPath = path + HINTS_SUFFIX; // not .json — the app reads every .json in sessions/ as a report
 
 let pulls: HintPull[] = existsSync(hintsPath) ? JSON.parse(readFileSync(hintsPath, "utf8")) : [];
@@ -33,7 +37,10 @@ function colour(line: string): string {
 }
 
 function load() {
-  try { report = JSON.parse(readFileSync(path, "utf8")); } catch { /* mid-write; keep the last good frame */ }
+  try {
+    report = JSON.parse(readFileSync(path, "utf8"));
+    if (report && existsSync(goldenPath)) report.hint_golden = JSON.parse(readFileSync(goldenPath, "utf8"));
+  } catch { /* mid-write; keep the last good frame */ }
 }
 
 function draw() {
@@ -43,12 +50,20 @@ function draw() {
   process.stdout.write("\x1b[2J\x1b[H" + lines.map(colour).join("\n") + "\n");
 }
 
-function pullHint() {
+const puller = createPuller({
+  provider: async () => { const o = new OllamaProvider(); return (await o.available()) ? o : new NullProvider(); },
+  lookupPref: () => "off", // no box-name egress from the terminal; cloud keys live in the desktop app
+  resolveGolden: async () => NONE,
+  saveGolden: async () => {},
+  record: async (p) => { pulls.push(p); writeFileSync(hintsPath, JSON.stringify(pulls, null, 2)); },
+});
+
+async function pullHint() {
   if (!report) return;
-  const tier = nextTier(pulls);
-  pulls.push({ tier, atMs: Date.now(), phase: deriveWidgetState(report).phase });
-  writeFileSync(hintsPath, JSON.stringify(pulls, null, 2));
-  lastHint = hintFor(tier);
+  lastHint = "thinking…";
+  draw();
+  const r = await puller.pull(report, pulls);
+  if (r) lastHint = r.text + (r.pull.source && r.pull.source !== "static" ? "  (ai)" : "");
   draw();
 }
 
@@ -63,7 +78,7 @@ if (process.stdin.isTTY) {
   process.stdin.on("data", (b) => {
     const k = b.toString();
     if (k === "q" || k === "\u0003") { process.stdout.write("\x1b[2J\x1b[H"); process.exit(0); }
-    if (k === "h") pullHint();
+    if (k === "h") void pullHint();
     if (k === "s") { size = WIDGET_SIZES[(WIDGET_SIZES.indexOf(size) + 1) % WIDGET_SIZES.length]; draw(); }
   });
 }
