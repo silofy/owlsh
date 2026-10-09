@@ -325,8 +325,19 @@
         "properties": {
           "tier": { "type": "integer", "enum": [1, 2, 3] },
           "atMs": { "type": "number", "minimum": 0 },
-          "phase": { "type": "string" }
+          "phase": { "type": "string" },
+          "source": { "type": "string", "enum": ["static", "ai:golden", "ai:knowledge"] }
         }
+      }
+    },
+
+    "hint_golden": {
+      "type": "object",
+      "description": "Golden path resolved for live hints (the .golden sidecar). source 'none' caches a failed lookup.",
+      "properties": {
+        "source": { "type": "string" },
+        "confidence": { "type": "number" },
+        "golden": { "type": "array", "items": { "type": "object" } }
       }
     },
 

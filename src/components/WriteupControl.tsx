@@ -5,6 +5,7 @@ import { targetOf, adapterFor } from "../lib/platform";
 import { resolveProvider } from "../lib/llm";
 import { goldenFromText } from "../lib/writeup";
 import { fetchWriteupUrl, fetchWriteupFrom0xdf, writeupSearchUrl, isDesktop, hasHtbToken, setHtbToken, fetchHtbWriteup, openExternal } from "../lib/net";
+import { useReuseHintGolden } from "./useReuseHintGolden";
 import { Check, ChevronDown, ExternalLink } from "./icons";
 
 type Status = { kind: "idle" | "working" | "error"; msg?: string };
@@ -35,6 +36,8 @@ export function WriteupControl() {
   const [showToken, setShowToken] = useState(false);
   const [tokenInput, setTokenInput] = useState("");
   const working = status.kind === "working";
+
+  useReuseHintGolden();
 
   useEffect(() => {
     hasHtbToken().then(setHtbReady);

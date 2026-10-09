@@ -52,6 +52,7 @@ pub fn run() {
             sessions::list_sessions,
             sessions::latest_session,
             sessions::record_hint,
+            sessions::record_golden,
             open_widget,
             sessions::list_ssh_logs,
             net::fetch_writeup,

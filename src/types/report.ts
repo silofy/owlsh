@@ -241,11 +241,22 @@ export interface Ghost {
   items?: GhostItem[];
 }
 
+export type HintSource = "static" | "ai:golden" | "ai:knowledge";
+
 /** One opt-in hint pull from the live widget (tiers escalate 1→3; each costs independence). */
 export interface HintPull {
   tier: 1 | 2 | 3;
   atMs: number;
   phase: string;
+  /** Where the shown text came from. Absent on pulls recorded before AI hints. */
+  source?: HintSource;
+}
+
+/** Golden path resolved for live hints (`<report>.golden`). `source: "none"` caches a failed lookup. */
+export interface HintGolden {
+  source: string;
+  confidence: number;
+  golden: GoldenObjective[];
 }
 
 export interface OwlshReport {
@@ -270,4 +281,5 @@ export interface OwlshReport {
   ghost?: Ghost;
   /** Hint pulls from the live widget; each lowers the independence component of the grade. */
   hints?: HintPull[];
+  hint_golden?: HintGolden;
 }

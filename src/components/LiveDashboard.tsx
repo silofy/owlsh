@@ -17,6 +17,7 @@ import { ArrowUpRight, Flag, ScanEye } from "./icons";
 const ACTOR_TEXT: Record<string, string> = { machine_bound: "machine bound", human_active: "typed by hand", think_pause: "thinking", idle: "idle" };
 import { KillChainTrajectory } from "./KillChainTrajectory";
 import { AnimatedNumber } from "./AnimatedNumber";
+import { LiveHint } from "./LiveHint";
 import type { Episode, OwlshReport } from "../types/report";
 import type { TimedEpisode, Timeline } from "../lib/scale";
 
@@ -309,6 +310,7 @@ export function LiveDashboard() {
               </span>
             )
           )}
+          <LiveHint report={report} />
           <span className="ml-auto text-faint">
             {findingsCount} finding{findingsCount === 1 ? "" : "s"}
           </span>

@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
-import type { HintPull, OwlshReport } from "../types/report";
+import type { OwlshReport } from "../types/report";
 import { deriveWidgetState } from "../lib/widget/state";
-import { hintFor, nextTier, independencePenalty } from "../lib/widget/hints";
 import { headline, WIDGET_SIZES, type WidgetSize } from "../lib/widget/render";
 import { isDesktop } from "../lib/net";
+import { targetOf } from "../lib/platform";
+import { useHint } from "../lib/hints/use-hint";
+import { HintLine } from "./HintLine";
+import { LookupOptIn } from "./LookupOptIn";
 import demo from "../../fixtures/session-demo-full.json";
 
 /**
@@ -30,8 +33,6 @@ export function WidgetWindow() {
   const desktop = isDesktop();
   const [report, setReport] = useState<OwlshReport | null>(desktop ? null : (demo as unknown as OwlshReport));
   const [path, setPath] = useState<string | null>(null);
-  const [hint, setHint] = useState<string | null>(null);
-  const [localPulls, setLocalPulls] = useState<HintPull[]>([]);
   const [now, setNow] = useState(() => Date.now());
   const [size, setSize] = useState<WidgetSize>(initialSize);
 
@@ -76,29 +77,12 @@ export function WidgetWindow() {
     };
   }, [desktop]);
 
-  // On desktop the saved pulls arrive with the next poll; count this window's newer pulls optimistically
-  // until they do, so two quick presses escalate instead of recording the same tier twice.
-  const saved = report?.hints ?? [];
-  const lastSaved = saved.reduce((m, p) => Math.max(m, p.atMs), 0);
-  const pulls = desktop ? [...saved, ...localPulls.filter((p) => p.atMs > lastSaved)] : localPulls;
-  const penalty = independencePenalty(pulls);
-
-  async function pullHint() {
-    if (!report) return;
-    const tier = nextTier(pulls);
-    const pull: HintPull = { tier, atMs: Date.now(), phase: deriveWidgetState(report, now).phase };
-    setHint(hintFor(tier));
-    if (desktop && path) {
-      const { invoke } = await import("@tauri-apps/api/core");
-      await invoke("record_hint", { path, tier: pull.tier, atMs: pull.atMs, phase: pull.phase });
-    }
-    setLocalPulls((p) => [...p, pull]);
-  }
+  const { hint, pending, askLookup, penalty, ready, pull: pullHint, lookupDone } = useHint(report, path, desktop);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.key === "h") void pullHint();
+      if (e.key === "h" && ready) void pullHint();
       if (e.key === "s") void applySize(WIDGET_SIZES[(WIDGET_SIZES.indexOf(size) + 1) % WIDGET_SIZES.length]);
     };
     window.addEventListener("keydown", onKey);
@@ -201,13 +185,24 @@ export function WidgetWindow() {
               </div>
             </>
           )}
-          {hint && <p className="font-sans text-[12.5px] leading-snug text-signal">hint: {hint}</p>}
+          {askLookup && report && (
+            <LookupOptIn
+              box={targetOf(report).name}
+              onDone={lookupDone}
+            />
+          )}
+          <HintLine text={hint?.text ?? null} source={hint?.source ?? null} pending={pending} />
           <button
             type="button"
-            onClick={pullHint}
-            className="mt-auto rounded border border-edge px-2 py-1.5 text-left text-faint transition-colors hover:border-loud hover:text-fg"
+            disabled={!ready}
+            onClick={() => void pullHint()}
+            className="mt-auto rounded border border-edge px-2 py-1.5 text-left text-faint transition-colors enabled:hover:border-loud enabled:hover:text-fg disabled:opacity-60"
           >
-            {size === "small" ? (penalty ? `[h] hint · −${penalty}` : "[h] hint") : `[h] hint · ${penalty ? `−${penalty} independence so far` : "costs independence"}`}
+            {!ready
+              ? "[h] hint · connecting…"
+              : size === "small"
+                ? penalty ? `[h] hint · −${penalty}` : "[h] hint"
+                : `[h] hint · ${penalty ? `−${penalty} independence so far` : "costs independence"}`}
           </button>
         </div>
       )}

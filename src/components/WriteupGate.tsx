@@ -4,6 +4,7 @@ import { MachineAvatar } from "./MachineAvatar";
 import { DIFFICULTY_COLOR } from "../lib/machine";
 import { targetOf, adapterFor } from "../lib/platform";
 import { resolveProvider } from "../lib/llm";
+import { useReuseHintGolden } from "./useReuseHintGolden";
 import { goldenFromText } from "../lib/writeup";
 import { fetchWriteupUrl, isDesktop } from "../lib/net";
 
@@ -20,6 +21,8 @@ export function WriteupGate() {
   const isThm = target.platform === "thm";
   const [text, setText] = useState("");
   const [status, setStatus] = useState<Status>({ kind: "idle" });
+
+  useReuseHintGolden();
 
   async function analyze() {
     const input = text.trim();

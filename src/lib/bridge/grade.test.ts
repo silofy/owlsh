@@ -223,6 +223,18 @@ describe("live-widget hint pulls", () => {
     expect(g.rationale.join(" ")).toMatch(/Used 2 hints .*−9 independence/);
   });
 
+  it("name AI hints in the rationale without changing the penalty", () => {
+    const g = computeGrade({ ...unmeasured(), hints: [{ tier: 1, atMs: 1, phase: "x", source: "ai:golden" }, { tier: 2, atMs: 2, phase: "x" }] });
+    expect(g.components.independence!.raw).toBe(91);
+    expect(g.rationale.join(" ")).toMatch(/Used 2 hints \(1 AI\) .*−9 independence/);
+  });
+
+  it("grade old pulls without a source exactly as before", () => {
+    const old = [{ tier: 1 as const, atMs: 1, phase: "x" }];
+    const tagged = [{ tier: 1 as const, atMs: 1, phase: "x", source: "static" as const }];
+    expect(computeGrade({ ...unmeasured(), hints: old }).score).toBe(computeGrade({ ...unmeasured(), hints: tagged }).score);
+  });
+
   it("deduct from an existing independence signal", () => {
     const r = structuredClone(report);
     r.metrics.independence = { score: 80, signals: {} };

@@ -28,3 +28,13 @@ describe("WidgetWindow size switch", () => {
     expect(html).toMatch(/aria-pressed="true"[^>]*title="medium widget"/);
   });
 });
+
+describe("HintLine", () => {
+  it("tags the source of an AI hint and shows a pending state", async () => {
+    const { HintLine } = await import("../src/components/HintLine");
+    expect(renderToStaticMarkup(<HintLine text="Re-read it." source="ai:golden" pending={false} />)).toContain("ai · write-up");
+    expect(renderToStaticMarkup(<HintLine text="Re-read it." source="ai:knowledge" pending={false} />)).toContain("ai · model");
+    expect(renderToStaticMarkup(<HintLine text="Re-read it." source="static" pending={false} />)).not.toContain("ai ·");
+    expect(renderToStaticMarkup(<HintLine text={null} source={null} pending />)).toContain("thinking…");
+  });
+});
