@@ -15,3 +15,11 @@ describe("LiveHint", () => {
     expect(renderToStaticMarkup(<LiveHint report={r} />)).toContain("−3");
   });
 });
+
+describe("LiveHint in the browser preview", () => {
+  it("is enabled, with no connecting state (only desktop needs a sidecar path)", () => {
+    const html = renderToStaticMarkup(<LiveHint report={fixture as unknown as OwlshReport} />);
+    expect(html).not.toContain("connecting");
+    expect(html).not.toContain('disabled=""');
+  });
+});

@@ -7,13 +7,15 @@ import { targetOf } from "../platform";
 import { createPuller } from "./pull";
 import { desktopPullDeps } from "./desktop";
 import { getLookupPref } from "./golden-source";
-import { reportForPull, shouldAskLookup, type SavedGolden } from "./widget-logic";
+import { canPull, isStaleResult, mergePulls, reportForPull, shouldAskLookup, type SavedGolden } from "./widget-logic";
 
 export interface UseHint {
   hint: { text: string; source: HintSource } | null;
   pending: boolean;
   askLookup: boolean;
   penalty: number;
+  /** False on desktop until the session's sidecar path is known: a pull now would never reach the grade. */
+  ready: boolean;
   pull(): Promise<void>;
   /** The opt-in was answered: close it and pull. */
   lookupDone(): void;
@@ -35,8 +37,7 @@ export function useHint(report: OwlshReport | null, path: string | null, countSa
   // Saved pulls arrive with the next poll; count this surface's newer pulls optimistically until then,
   // so two quick presses escalate instead of recording the same tier twice.
   const saved = report?.hints ?? [];
-  const lastSaved = saved.reduce((m, p) => Math.max(m, p.atMs), 0);
-  const pulls = countSaved ? [...saved, ...localPulls.filter((p) => p.atMs > lastSaved)] : localPulls;
+  const pulls = mergePulls(saved, localPulls, countSaved);
   const penalty = independencePenalty(pulls);
 
   const os = report ? (targetOf(report).os ?? null) : null;
@@ -56,7 +57,7 @@ export function useHint(report: OwlshReport | null, path: string | null, countSa
   }, [uuid]);
 
   async function pull() {
-    if (!report || pending) return;
+    if (!report || !canPull({ desktop, path, pending })) return;
     if (shouldAskLookup(desktop, getLookupPref(), targetOf(report).platform)) {
       setAskLookup(true);
       return;
@@ -66,7 +67,7 @@ export function useHint(report: OwlshReport | null, path: string | null, countSa
     try {
       const r = await puller.pull(reportForPull(report, savedGolden), pulls);
       // The session changed while this pull was in flight: its result belongs to the old box.
-      if (r && uuidRef.current === startedFor) {
+      if (r && !isStaleResult(startedFor, uuidRef.current)) {
         setHint({ text: r.text, source: r.pull.source ?? "static" });
         setLocalPulls((p) => [...p, r.pull]);
       }
@@ -80,6 +81,7 @@ export function useHint(report: OwlshReport | null, path: string | null, countSa
     pending,
     askLookup,
     penalty,
+    ready: !desktop || path !== null,
     pull,
     lookupDone: () => {
       setAskLookup(false);
