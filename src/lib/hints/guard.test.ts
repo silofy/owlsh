@@ -150,15 +150,33 @@ describe("guard: unicode hardening", () => {
   it("blocks a golden term with a look-alike letter from another script", () => {
     // Cyrillic small o (U+043E) in place of Latin o
     const r = guard(hint("Look at the pоrtal again."), ctx({ golden: GOLDEN }));
-    expect(r).toEqual({ ok: false, reason: "shape: mixed script" });
+    expect(r).toEqual({ ok: false, reason: "shape: non-ascii letter" });
   });
+  it.each([
+    ["entirely look-alike Cyrillic", "Look at the рогтаӀ again."],
+    ["accented Latin letter", "Look at the pórtal again."],
+    ["Latin-extended small capitals", "Look at the ᴘᴏʀᴛᴀʟ again."],
+  ])("blocks a term spelled with %s", (_n, text) => {
+    expect(guard(hint(text), ctx({ golden: GOLDEN }))).toEqual({ ok: false, reason: "shape: non-ascii letter" });
+  });
+  it("blocks a 300+ char string of only invisible characters as empty", () => {
+    const text = "​⁠﻿".repeat(120);
+    expect(() => guard(hint(text), ctx())).not.toThrow();
+    expect(guard(hint(text), ctx())).toEqual({ ok: false, reason: "shape: missing or empty hint" });
+  });
+  it.each(["Slow down, then reread step 2 of your notes.", "What changed between your first and third attempt?"])(
+    "passes plain ASCII nudge: %s",
+    (text) => {
+      expect(guard(hint(text), ctx({ golden: GOLDEN })).ok).toBe(true);
+    },
+  );
   it("blocks a full-width variant of a golden term (NFKC folds it)", () => {
     expect(guard(hint("Look at the ｐｏｒｔａｌ again."), ctx({ golden: GOLDEN })).ok).toBe(false);
   });
   it("blocks a 301-character hint", () => {
     const text = [...Array(29).fill("abcdefghi"), "abcdefghijk"].join(" ");
     expect(text.length).toBe(301);
-    expect(guard(hint(text), ctx()).ok).toBe(false);
+    expect(guard(hint(text), ctx())).toEqual({ ok: false, reason: "shape: too long" });
   });
   it("passes a plain 30-word hint under 300 characters", () => {
     const text = Array(30).fill("slowly").join(" ");
