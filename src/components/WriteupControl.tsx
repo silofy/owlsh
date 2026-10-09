@@ -5,6 +5,7 @@ import { targetOf, adapterFor } from "../lib/platform";
 import { resolveProvider } from "../lib/llm";
 import { goldenFromText } from "../lib/writeup";
 import { fetchWriteupUrl, fetchWriteupFrom0xdf, writeupSearchUrl, isDesktop, hasHtbToken, setHtbToken, fetchHtbWriteup, openExternal } from "../lib/net";
+import { useReuseHintGolden } from "../lib/hints/reuse-golden";
 import { Check, ChevronDown, ExternalLink } from "./icons";
 
 type Status = { kind: "idle" | "working" | "error"; msg?: string };
@@ -36,12 +37,7 @@ export function WriteupControl() {
   const [tokenInput, setTokenInput] = useState("");
   const working = status.kind === "working";
 
-  // A golden path the live hints already resolved (`<report>.golden`) loads here without a paste.
-  // Keyed per session on purpose: runs once per session so it never overrides a later manual choice.
-  useEffect(() => {
-    const g = report.hint_golden;
-    if (g && g.golden.length && report.golden_dag.length === 0 && !writeup) applyGoldenDag(g.golden, { source: g.source, confidence: g.confidence });
-  }, [report.session.uuid]);
+  useReuseHintGolden();
 
   useEffect(() => {
     hasHtbToken().then(setHtbReady);
