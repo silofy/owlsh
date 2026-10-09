@@ -60,8 +60,10 @@ function normalizeHint(text: string): string {
 
 // Hints are English-only: any letter outside ASCII A-Z/a-z (look-alikes from other
 // scripts, accented or Latin-extended letters) could smuggle a term past [a-z] matching.
+// Combining marks (\p{M}) are rejected too: a letter + mark with no precomposed form
+// survives NFKC and would split a term the same way.
 function hasNonAsciiLetter(text: string): boolean {
-  return /(?![A-Za-z])\p{L}/u.test(text);
+  return /(?![A-Za-z])\p{L}|\p{M}/u.test(text);
 }
 
 function words(text: string): string[] {

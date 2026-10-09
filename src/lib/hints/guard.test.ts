@@ -159,6 +159,13 @@ describe("guard: unicode hardening", () => {
   ])("blocks a term spelled with %s", (_n, text) => {
     expect(guard(hint(text), ctx({ golden: GOLDEN }))).toEqual({ ok: false, reason: "shape: non-ascii letter" });
   });
+  it("blocks a term with a letter + combining mark that has no precomposed form", () => {
+    // t + U+0301 combining acute: survives NFKC, is not \p{L}
+    expect(guard(hint("Look at the port́al again."), ctx({ golden: GOLDEN }))).toEqual({
+      ok: false,
+      reason: "shape: non-ascii letter",
+    });
+  });
   it("blocks a 300+ char string of only invisible characters as empty", () => {
     const text = "​⁠﻿".repeat(120);
     expect(() => guard(hint(text), ctx())).not.toThrow();
