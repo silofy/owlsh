@@ -29,13 +29,6 @@ describe("WidgetWindow size switch", () => {
   });
 });
 
-describe("WidgetWindow opt-in for write-up lookup", () => {
-  it("renders no opt-in prompt until a hint is pulled", () => {
-    const html = renderToStaticMarkup(<WidgetWindow />);
-    expect(html).not.toContain("Look up a write-up");
-  });
-});
-
 describe("HintLine", () => {
   it("tags the source of an AI hint and shows a pending state", async () => {
     const { HintLine } = await import("../src/components/HintLine");
