@@ -1,9 +1,15 @@
-import { useEffect, useState } from "react";
-import type { HintPull, OwlshReport } from "../types/report";
+import { useEffect, useMemo, useState } from "react";
+import type { HintGolden, HintPull, HintSource, OwlshReport } from "../types/report";
 import { deriveWidgetState } from "../lib/widget/state";
-import { hintFor, nextTier, independencePenalty } from "../lib/widget/hints";
+import { independencePenalty } from "../lib/widget/hints";
 import { headline, WIDGET_SIZES, type WidgetSize } from "../lib/widget/render";
 import { isDesktop } from "../lib/net";
+import { targetOf } from "../lib/platform";
+import { createPuller } from "../lib/hints/pull";
+import { desktopPullDeps } from "../lib/hints/desktop";
+import { getLookupPref } from "../lib/hints/golden-source";
+import { HintLine } from "./HintLine";
+import { LookupOptIn } from "./LookupOptIn";
 import demo from "../../fixtures/session-demo-full.json";
 
 /**
@@ -30,7 +36,11 @@ export function WidgetWindow() {
   const desktop = isDesktop();
   const [report, setReport] = useState<OwlshReport | null>(desktop ? null : (demo as unknown as OwlshReport));
   const [path, setPath] = useState<string | null>(null);
-  const [hint, setHint] = useState<string | null>(null);
+  const [hint, setHint] = useState<{ text: string; source: HintSource } | null>(null);
+  const [pending, setPending] = useState(false);
+  const [askLookup, setAskLookup] = useState(false);
+  // Golden saved by this window's pull; bridges the gap until the next poll returns report.hint_golden.
+  const [savedGolden, setSavedGolden] = useState<HintGolden | null>(null);
   const [localPulls, setLocalPulls] = useState<HintPull[]>([]);
   const [now, setNow] = useState(() => Date.now());
   const [size, setSize] = useState<WidgetSize>(initialSize);
@@ -83,16 +93,25 @@ export function WidgetWindow() {
   const pulls = desktop ? [...saved, ...localPulls.filter((p) => p.atMs > lastSaved)] : localPulls;
   const penalty = independencePenalty(pulls);
 
+  const os = report ? (targetOf(report).os ?? null) : null;
+  const puller = useMemo(() => createPuller(desktopPullDeps(path, os, setSavedGolden)), [path, os]);
+
   async function pullHint() {
-    if (!report) return;
-    const tier = nextTier(pulls);
-    const pull: HintPull = { tier, atMs: Date.now(), phase: deriveWidgetState(report, now).phase };
-    setHint(hintFor(tier));
-    if (desktop && path) {
-      const { invoke } = await import("@tauri-apps/api/core");
-      await invoke("record_hint", { path, tier: pull.tier, atMs: pull.atMs, phase: pull.phase });
+    if (!report || pending) return;
+    if (desktop && getLookupPref() === "unset" && targetOf(report).platform === "htb") {
+      setAskLookup(true);
+      return;
     }
-    setLocalPulls((p) => [...p, pull]);
+    setPending(true);
+    try {
+      const r = await puller.pull({ ...report, hint_golden: report.hint_golden ?? savedGolden ?? undefined }, pulls);
+      if (r) {
+        setHint({ text: r.text, source: r.pull.source ?? "static" });
+        setLocalPulls((p) => [...p, r.pull]);
+      }
+    } finally {
+      setPending(false);
+    }
   }
 
   useEffect(() => {
@@ -201,7 +220,16 @@ export function WidgetWindow() {
               </div>
             </>
           )}
-          {hint && <p className="font-sans text-[12.5px] leading-snug text-signal">hint: {hint}</p>}
+          {askLookup && report && (
+            <LookupOptIn
+              box={targetOf(report).name}
+              onDone={() => {
+                setAskLookup(false);
+                void pullHint();
+              }}
+            />
+          )}
+          <HintLine text={hint?.text ?? null} source={hint?.source ?? null} pending={pending} />
           <button
             type="button"
             onClick={pullHint}
