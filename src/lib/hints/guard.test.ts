@@ -110,6 +110,17 @@ describe("guard: golden", () => {
   it("passes a stop-listed generic word", () => {
     expect(guard(hint("Enumerate the service before you try to access anything."), ctx({ golden: GOLDEN })).ok).toBe(true);
   });
+  it.each(["Look at the widget-portal again.", "Look at the widget_portal again."])(
+    "blocks a golden term inside a compound: %s",
+    (text) => {
+      expect(guard(hint(text), ctx({ golden: GOLDEN })).ok).toBe(false);
+    },
+  );
+  it("returns ok:false instead of throwing on malformed golden data", () => {
+    const bad = [{ objective: 42, satisfied_by: "nope", techniques: 7 }] as unknown as GoldenObjective[];
+    expect(() => guard(hint("Slow down and reread your notes."), ctx({ golden: bad, tier: 1 }))).not.toThrow();
+    expect(guard(hint("Slow down and reread your notes."), ctx({ golden: bad, tier: 1 })).ok).toBe(false);
+  });
   it("is case-insensitive", () => {
     expect(guard(hint("The Portal deserves attention."), ctx({ golden: GOLDEN })).ok).toBe(false);
   });
@@ -120,6 +131,9 @@ describe("guard: tierOneTools", () => {
     const text = "Consider whether nmap told you everything.";
     expect(guard(hint(text), ctx({ tier: 1 })).ok).toBe(false);
     expect(guard(hint(text), ctx({ tier: 2 })).ok).toBe(true);
+  });
+  it("blocks a hyphenated known tool at tier 1", () => {
+    expect(guard(hint("Try an nmap-style sweep of your notes."), ctx({ tier: 1 })).ok).toBe(false);
   });
   it("allows a known tool at tier 1 when it is in seen", () => {
     expect(guard(hint("Consider whether nmap told you everything."), ctx({ tier: 1, seen: new Set(["nmap"]) })).ok).toBe(true);

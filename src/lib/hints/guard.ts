@@ -64,7 +64,7 @@ function escapeRe(s: string): string {
 }
 
 function containsWord(haystackLower: string, term: string): boolean {
-  return new RegExp(`(?<![\\w-])${escapeRe(term)}(?![\\w-])`).test(haystackLower);
+  return new RegExp(`(?<![a-z0-9])${escapeRe(term)}(?![a-z0-9])`).test(haystackLower);
 }
 
 function isSatisfied(o: GoldenObjective): boolean {
@@ -114,11 +114,21 @@ function tierOneTools(text: string, ctx: GuardCtx): string | null {
 }
 
 export function guard(raw: unknown, ctx: GuardCtx): GuardResult {
-  const shapeReason = shape(raw, ctx);
+  let shapeReason: string | null;
+  try {
+    shapeReason = shape(raw, ctx);
+  } catch {
+    return { ok: false, reason: "guard: exception" };
+  }
   if (shapeReason) return { ok: false, reason: shapeReason };
   const { hint, kind } = raw as { hint: string; kind: HintKind };
   const text = hint.trim();
-  const reason = artifacts(text) ?? golden(text, ctx) ?? tierOneTools(text, ctx);
+  let reason: string | null;
+  try {
+    reason = artifacts(text) ?? golden(text, ctx) ?? tierOneTools(text, ctx);
+  } catch {
+    return { ok: false, reason: "guard: exception" };
+  }
   return reason ? { ok: false, reason } : { ok: true, text, kind };
 }
 
