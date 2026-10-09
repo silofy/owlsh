@@ -58,6 +58,33 @@ describe("runHintPull", () => {
   });
 });
 
+describe("runHintPull failure paths", () => {
+  it("falls back to static and records when provider() rejects", async () => {
+    const d = deps({ provider: async () => { throw new Error("no provider"); } });
+    const r = await runHintPull(report, [], d);
+    expect(r.text).toBe(hintFor(1));
+    expect(r.pull.source).toBe("static");
+    expect(d.record).toHaveBeenCalledWith(r.pull);
+  });
+  it("returns {text, pull} when record throws synchronously", async () => {
+    const r = await runHintPull(report, [], deps({ record: (() => { throw new Error("sync"); }) as never }));
+    expect(r.text.length).toBeGreaterThan(0);
+    expect(r.pull.tier).toBe(1);
+  });
+  it("keeps the resolved golden when saveGolden throws synchronously", async () => {
+    const r = await runHintPull(report, [], deps({ saveGolden: (() => { throw new Error("sync"); }) as never }));
+    expect(r.pull.source).toBe("ai:golden");
+  });
+  it("shows static and records for a malformed report", async () => {
+    const d = deps();
+    const bad = { session: null, episodes: null } as unknown as OwlshReport;
+    const r = await runHintPull(bad, [], d);
+    expect(r.text).toBe(hintFor(1));
+    expect(r.pull.source).toBe("static");
+    expect(d.record).toHaveBeenCalledOnce();
+  });
+});
+
 describe("createPuller", () => {
   it("ignores a second pull while the first is pending", async () => {
     let release!: () => void;

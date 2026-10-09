@@ -4,7 +4,7 @@
  */
 import type { LlmProvider } from "../llm/provider";
 import type { HintGolden, HintPull, OwlshReport } from "../../types/report";
-import { nextTier } from "../widget/hints";
+import { hintFor, nextTier } from "../widget/hints";
 import { deriveWidgetState } from "../widget/state";
 import { targetOf } from "../platform";
 import { generateHint } from "./ai-hint";
@@ -23,20 +23,42 @@ async function goldenFor(report: OwlshReport, deps: PullDeps): Promise<HintGolde
   if (cached) return cached.golden.length ? cached : null;
   if (deps.lookupPref() !== "on") return null;
   const g = await deps.resolveGolden(targetOf(report));
-  await deps.saveGolden(g).catch(() => {});
+  try {
+    await deps.saveGolden(g);
+  } catch {
+    /* caching is best-effort; keep the resolved golden */
+  }
   return g.golden.length ? g : null;
 }
 
 export async function runHintPull(report: OwlshReport, pulls: HintPull[], deps: PullDeps, now = Date.now()): Promise<{ text: string; pull: HintPull }> {
   const tier = nextTier(pulls);
-  const golden = await goldenFor(report, deps).catch(() => null);
-  const target = targetOf(report);
-  const { text, source } = await generateHint(
-    { tier, box: target.name, platform: target.platform, episodes: report.episodes, golden: golden?.golden ?? null },
-    await deps.provider(),
-  );
-  const pull: HintPull = { tier, atMs: now, phase: deriveWidgetState(report, now).phase, source };
-  await deps.record(pull).catch(() => {});
+  let text = hintFor(tier);
+  let source: NonNullable<HintPull["source"]> = "static";
+  try {
+    const golden = await goldenFor(report, deps).catch(() => null);
+    const target = targetOf(report);
+    const provider = await deps.provider();
+    ({ text, source } = await generateHint(
+      { tier, box: target.name, platform: target.platform, episodes: report.episodes, golden: golden?.golden ?? null },
+      provider,
+    ));
+  } catch {
+    text = hintFor(tier);
+    source = "static";
+  }
+  let phase = "unknown";
+  try {
+    phase = deriveWidgetState(report, now).phase;
+  } catch {
+    /* keep the fallback so the pull is still recorded */
+  }
+  const pull: HintPull = { tier, atMs: now, phase, source };
+  try {
+    await deps.record(pull);
+  } catch {
+    /* the text still shows */
+  }
   return { text, pull };
 }
 
