@@ -150,7 +150,8 @@ export function computeGrade(report: OwlshReport): Grade {
       if (raws[key] < 50) rationale.push(`Low ${key} (${round1(raws[key])}).`);
     }
   }
-  if (pulls.length) rationale.push(`Used ${pulls.length} hint${pulls.length === 1 ? "" : "s"} from the live widget (−${hintPenalty} independence).`);
+  const ai = pulls.filter((p) => p.source === "ai:golden" || p.source === "ai:knowledge").length;
+  if (pulls.length) rationale.push(`Used ${pulls.length} hint${pulls.length === 1 ? "" : "s"}${ai ? ` (${ai} AI)` : ""} from the live widget (−${hintPenalty} independence).`);
   if (rationale.length === 0) rationale.push("Solid across the rubric; no integrity concerns.");
 
   return {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useReport } from "../store/report";
 import { MachineAvatar } from "./MachineAvatar";
 import { DIFFICULTY_COLOR } from "../lib/machine";
@@ -15,11 +15,19 @@ type Status = { kind: "idle" | "working" | "error"; msg?: string };
  * applied, there's nothing to grade against, so we ask for one up front rather than show a half report.
  */
 export function WriteupGate() {
-  const { report, applyGoldenDag, setGateDismissed } = useReport();
+  const { report, applyGoldenDag, setGateDismissed, writeup } = useReport();
   const target = targetOf(report);
   const isThm = target.platform === "thm";
   const [text, setText] = useState("");
   const [status, setStatus] = useState<Status>({ kind: "idle" });
+
+  // The gate renders instead of WriteupControl while golden_dag is empty, so the reuse must run here too.
+  // A golden path the live hints already resolved (`<report>.golden`) loads here without a paste.
+  // Keyed per session on purpose: runs once per session so it never overrides a later manual choice.
+  useEffect(() => {
+    const g = report.hint_golden;
+    if (g && g.golden.length && report.golden_dag.length === 0 && !writeup) applyGoldenDag(g.golden, { source: g.source, confidence: g.confidence });
+  }, [report.session.uuid]);
 
   async function analyze() {
     const input = text.trim();
