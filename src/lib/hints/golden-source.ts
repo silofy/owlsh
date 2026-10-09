@@ -8,7 +8,7 @@ import type { HintGolden } from "../../types/report";
 import { fetchWriteupFrom0xdf, fetchHtbWriteup, hasHtbToken } from "../net";
 import { goldenFromText } from "../writeup";
 
-export const NONE: HintGolden = { source: "none", confidence: 0, golden: [] };
+export const NONE: HintGolden = Object.freeze({ source: "none", confidence: 0, golden: Object.freeze([]) as unknown as HintGolden["golden"] });
 
 export type LookupPref = "on" | "off" | "unset";
 const KEY = "owlsh.hintLookup";

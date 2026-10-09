@@ -77,12 +77,12 @@ export function WidgetWindow() {
     };
   }, [desktop]);
 
-  const { hint, pending, askLookup, penalty, pull: pullHint, lookupDone } = useHint(report, path, desktop);
+  const { hint, pending, askLookup, penalty, ready, pull: pullHint, lookupDone } = useHint(report, path, desktop);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.key === "h") void pullHint();
+      if (e.key === "h" && ready) void pullHint();
       if (e.key === "s") void applySize(WIDGET_SIZES[(WIDGET_SIZES.indexOf(size) + 1) % WIDGET_SIZES.length]);
     };
     window.addEventListener("keydown", onKey);
@@ -194,10 +194,15 @@ export function WidgetWindow() {
           <HintLine text={hint?.text ?? null} source={hint?.source ?? null} pending={pending} />
           <button
             type="button"
-            onClick={pullHint}
-            className="mt-auto rounded border border-edge px-2 py-1.5 text-left text-faint transition-colors hover:border-loud hover:text-fg"
+            disabled={!ready}
+            onClick={() => void pullHint()}
+            className="mt-auto rounded border border-edge px-2 py-1.5 text-left text-faint transition-colors enabled:hover:border-loud enabled:hover:text-fg disabled:opacity-60"
           >
-            {size === "small" ? (penalty ? `[h] hint · −${penalty}` : "[h] hint") : `[h] hint · ${penalty ? `−${penalty} independence so far` : "costs independence"}`}
+            {!ready
+              ? "[h] hint · connecting…"
+              : size === "small"
+                ? penalty ? `[h] hint · −${penalty}` : "[h] hint"
+                : `[h] hint · ${penalty ? `−${penalty} independence so far` : "costs independence"}`}
           </button>
         </div>
       )}

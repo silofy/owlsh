@@ -26,4 +26,9 @@ describe("hintGoldenToApply", () => {
   it("skips when hint_golden is absent", () => {
     expect(hintGoldenToApply(rep({}), null)).toBeNull();
   });
+  it("skips while the session is still recording, applies once it ends", () => {
+    const session = { started_at: new Date().toISOString(), ended_at: new Date().toISOString() };
+    expect(hintGoldenToApply(rep({ hint_golden: hg, recording: true, session } as Partial<OwlshReport>), null)).toBeNull();
+    expect(hintGoldenToApply(rep({ hint_golden: hg, recording: false, session } as Partial<OwlshReport>), null)).toBe(hg);
+  });
 });

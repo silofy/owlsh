@@ -4,7 +4,7 @@ import { MachineAvatar } from "./MachineAvatar";
 import { DIFFICULTY_COLOR } from "../lib/machine";
 import { targetOf, adapterFor } from "../lib/platform";
 import { resolveProvider } from "../lib/llm";
-import { useReuseHintGolden } from "../lib/hints/reuse-golden";
+import { useReuseHintGolden } from "./useReuseHintGolden";
 import { goldenFromText } from "../lib/writeup";
 import { fetchWriteupUrl, isDesktop } from "../lib/net";
 

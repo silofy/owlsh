@@ -34,3 +34,8 @@ export function isStaleResult(startedUuid: string, currentUuid: string | null): 
 export function canPull(s: { desktop: boolean; path: string | null; pending: boolean }): boolean {
   return !s.pending && (!s.desktop || s.path !== null);
 }
+
+/** Whether a pull could go through if nothing were in flight (drives the button's enabled state). */
+export function isReady(s: { desktop: boolean; path: string | null }): boolean {
+  return canPull({ ...s, pending: false });
+}

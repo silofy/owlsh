@@ -8,12 +8,13 @@
  * Redraws whenever the file changes. Mirrors your run and coaches process only; [h] pulls an
  * opt-in hint that costs independence (recorded in <report>.hints, merged into the grade), [q] quits.
  */
-import { readFileSync, writeFileSync, existsSync, watchFile } from "node:fs";
+import { readFileSync, existsSync, watchFile } from "node:fs";
 import { resolve } from "node:path";
 import type { OwlshReport } from "../src/types/report";
 import { deriveWidgetState } from "../src/lib/widget/state";
 import { renderWidget, WIDGET_SIZES, type WidgetSize } from "../src/lib/widget/render";
 import { independencePenalty, HINTS_SUFFIX, type HintPull } from "../src/lib/widget/hints";
+import { readPulls, appendPull } from "../src/lib/widget/append-pull";
 import { createPuller } from "../src/lib/hints/pull";
 import { NONE } from "../src/lib/hints/golden-source";
 import { OllamaProvider, NullProvider } from "../src/lib/llm";
@@ -26,7 +27,7 @@ let size: WidgetSize = (WIDGET_SIZES as string[]).includes(arg("--size") ?? "") 
 const goldenPath = path + ".golden";
 const hintsPath = path + HINTS_SUFFIX; // not .json — the app reads every .json in sessions/ as a report
 
-let pulls: HintPull[] = existsSync(hintsPath) ? JSON.parse(readFileSync(hintsPath, "utf8")) : [];
+let pulls: HintPull[] = readPulls(hintsPath);
 let lastHint: string | null = null;
 let report: OwlshReport | null = null;
 
@@ -37,6 +38,7 @@ function colour(line: string): string {
 }
 
 function load() {
+  pulls = readPulls(hintsPath); // shared with the desktop widget/dashboard
   try {
     report = JSON.parse(readFileSync(path, "utf8"));
     if (report && existsSync(goldenPath)) report.hint_golden = JSON.parse(readFileSync(goldenPath, "utf8"));
@@ -55,7 +57,7 @@ const puller = createPuller({
   lookupPref: () => "off", // no box-name egress from the terminal; cloud keys live in the desktop app
   resolveGolden: async () => NONE,
   saveGolden: async () => {},
-  record: async (p) => { pulls.push(p); writeFileSync(hintsPath, JSON.stringify(pulls, null, 2)); },
+  record: async (p) => { pulls = appendPull(hintsPath, p); },
 });
 
 async function pullHint() {

@@ -7,7 +7,7 @@ import { targetOf } from "../platform";
 import { createPuller } from "./pull";
 import { desktopPullDeps } from "./desktop";
 import { getLookupPref } from "./golden-source";
-import { canPull, isStaleResult, mergePulls, reportForPull, shouldAskLookup, type SavedGolden } from "./widget-logic";
+import { canPull, isReady, isStaleResult, mergePulls, reportForPull, shouldAskLookup, type SavedGolden } from "./widget-logic";
 
 export interface UseHint {
   hint: { text: string; source: HintSource } | null;
@@ -81,7 +81,7 @@ export function useHint(report: OwlshReport | null, path: string | null, countSa
     pending,
     askLookup,
     penalty,
-    ready: !desktop || path !== null,
+    ready: isReady({ desktop, path }),
     pull,
     lookupDone: () => {
       setAskLookup(false);

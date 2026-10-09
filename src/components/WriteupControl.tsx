@@ -5,7 +5,7 @@ import { targetOf, adapterFor } from "../lib/platform";
 import { resolveProvider } from "../lib/llm";
 import { goldenFromText } from "../lib/writeup";
 import { fetchWriteupUrl, fetchWriteupFrom0xdf, writeupSearchUrl, isDesktop, hasHtbToken, setHtbToken, fetchHtbWriteup, openExternal } from "../lib/net";
-import { useReuseHintGolden } from "../lib/hints/reuse-golden";
+import { useReuseHintGolden } from "./useReuseHintGolden";
 import { Check, ChevronDown, ExternalLink } from "./icons";
 
 type Status = { kind: "idle" | "working" | "error"; msg?: string };
