@@ -1,14 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-import type { HintPull, HintSource, OwlshReport } from "../types/report";
+import { useEffect, useState } from "react";
+import type { OwlshReport } from "../types/report";
 import { deriveWidgetState } from "../lib/widget/state";
-import { independencePenalty } from "../lib/widget/hints";
 import { headline, WIDGET_SIZES, type WidgetSize } from "../lib/widget/render";
 import { isDesktop } from "../lib/net";
 import { targetOf } from "../lib/platform";
-import { createPuller } from "../lib/hints/pull";
-import { desktopPullDeps } from "../lib/hints/desktop";
-import { getLookupPref } from "../lib/hints/golden-source";
-import { reportForPull, shouldAskLookup, type SavedGolden } from "../lib/hints/widget-logic";
+import { useHint } from "../lib/hints/use-hint";
 import { HintLine } from "./HintLine";
 import { LookupOptIn } from "./LookupOptIn";
 import demo from "../../fixtures/session-demo-full.json";
@@ -37,12 +33,6 @@ export function WidgetWindow() {
   const desktop = isDesktop();
   const [report, setReport] = useState<OwlshReport | null>(desktop ? null : (demo as unknown as OwlshReport));
   const [path, setPath] = useState<string | null>(null);
-  const [hint, setHint] = useState<{ text: string; source: HintSource } | null>(null);
-  const [pending, setPending] = useState(false);
-  const [askLookup, setAskLookup] = useState(false);
-  // Golden saved by this window's pull; bridges the gap until the next poll returns report.hint_golden.
-  const [savedGolden, setSavedGolden] = useState<SavedGolden | null>(null);
-  const [localPulls, setLocalPulls] = useState<HintPull[]>([]);
   const [now, setNow] = useState(() => Date.now());
   const [size, setSize] = useState<WidgetSize>(initialSize);
 
@@ -87,43 +77,7 @@ export function WidgetWindow() {
     };
   }, [desktop]);
 
-  // On desktop the saved pulls arrive with the next poll; count this window's newer pulls optimistically
-  // until they do, so two quick presses escalate instead of recording the same tier twice.
-  const saved = report?.hints ?? [];
-  const lastSaved = saved.reduce((m, p) => Math.max(m, p.atMs), 0);
-  const pulls = desktop ? [...saved, ...localPulls.filter((p) => p.atMs > lastSaved)] : localPulls;
-  const penalty = independencePenalty(pulls);
-
-  const os = report ? (targetOf(report).os ?? null) : null;
-  const uuid = report?.session.uuid ?? null;
-  const puller = useMemo(
-    () => createPuller(desktopPullDeps(path, os, (golden) => uuid && setSavedGolden({ uuid, golden }))),
-    [path, os, uuid],
-  );
-
-  // A different session is a different box: drop the hint on screen.
-  useEffect(() => {
-    setHint(null);
-    setAskLookup(false);
-  }, [uuid]);
-
-  async function pullHint() {
-    if (!report || pending) return;
-    if (shouldAskLookup(desktop, getLookupPref(), targetOf(report).platform)) {
-      setAskLookup(true);
-      return;
-    }
-    setPending(true);
-    try {
-      const r = await puller.pull(reportForPull(report, savedGolden), pulls);
-      if (r) {
-        setHint({ text: r.text, source: r.pull.source ?? "static" });
-        setLocalPulls((p) => [...p, r.pull]);
-      }
-    } finally {
-      setPending(false);
-    }
-  }
+  const { hint, pending, askLookup, penalty, pull: pullHint, lookupDone } = useHint(report, path, desktop);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -234,10 +188,7 @@ export function WidgetWindow() {
           {askLookup && report && (
             <LookupOptIn
               box={targetOf(report).name}
-              onDone={() => {
-                setAskLookup(false);
-                void pullHint();
-              }}
+              onDone={lookupDone}
             />
           )}
           <HintLine text={hint?.text ?? null} source={hint?.source ?? null} pending={pending} />
