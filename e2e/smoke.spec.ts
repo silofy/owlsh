@@ -1,4 +1,4 @@
-import { test, expect } from "./fixtures";
+import { test, expect, ONBOARDED } from "./fixtures";
 
 // Browser tests must not request the `tauri` fixture (its unmocked-command check only runs when used),
 // so each mode gets its own describe and only desktop installs the fake.
@@ -7,9 +7,9 @@ type Mode = "browser" | "desktop";
 // A fresh profile opens the first-run wizard overlay, which covers the nav; the smoke checks target the
 // main views, so mark the profile as onboarded (key/value from src/lib/onboarding.ts).
 const markOnboarded = (page: import("@playwright/test").Page) =>
-  page.addInitScript(() => {
-    try { localStorage.setItem("owlsh.onboarded", "1"); } catch { /* storage unavailable */ }
-  });
+  page.addInitScript((entries: Record<string, string>) => {
+    try { for (const [k, v] of Object.entries(entries)) localStorage.setItem(k, v); } catch { /* storage unavailable */ }
+  }, ONBOARDED);
 
 function suite(mode: Mode) {
   const setup = async (tauri?: { install(): Promise<void> }) => {

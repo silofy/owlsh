@@ -1,20 +1,19 @@
-import { test, expect, makeCapture, asLatest, GOLDEN, clean, COACH_CLOUD } from "./fixtures";
+import { test, expect, makeCapture, asLatest, GOLDEN, clean, COACH_CLOUD, pathOf, FAST_TIMEOUTS, LOOKUP_OFF, ONBOARDED as ONBOARDED_KEY } from "./fixtures";
 import type { Page } from "@playwright/test";
 import type { TauriFake } from "./fixtures";
 import type { OwlshReport } from "../src/types/report";
 
-const ONBOARDED = { ...COACH_CLOUD, "owlsh.onboarded": "1" };
-const OFF = { ...ONBOARDED, "owlsh.hintLookup": "off" };
+const ONBOARDED = { ...COACH_CLOUD, ...ONBOARDED_KEY };
+const OFF = { ...ONBOARDED, ...LOOKUP_OFF };
 const demo = (extra: Partial<Parameters<typeof makeCapture>[0]> = {}) =>
   makeCapture({ uuid: "u-1", recording: true, platform: "htb", name: "Demo", ...extra });
-const pathOf = (c: OwlshReport) => `/fake/sessions/${c.session.uuid}.json`;
 const hintButton = (page: Page) => page.getByRole("button", { name: /^hint · / });
 // LiveBridge polls list_sessions every 4s; allow a couple of ticks.
 const POLL = { timeout: 10_000 };
 
 async function openLive(page: Page, tauri: TauriFake, capture: OwlshReport, storage = ONBOARDED) {
   tauri.on("list_sessions", [JSON.stringify(capture)]);
-  await tauri.install({ storage, test: { hintTimeoutMs: 300, goldenBudgetMs: 300 } });
+  await tauri.install({ storage, test: FAST_TIMEOUTS });
   await page.goto("/");
   await page.getByRole("button", { name: "Open debrief" }).click();
 }

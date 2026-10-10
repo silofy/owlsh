@@ -31,7 +31,17 @@ export function makeCapture(o: CaptureOpts = {}): OwlshReport {
   return r;
 }
 
+/** Default on-disk path the fake gives a capture. */
+export const pathOf = (r: OwlshReport) => `/fake/sessions/${r.session.uuid}.json`;
+
+/** Short test timeouts for the hint pipeline. */
+export const FAST_TIMEOUTS = { hintTimeoutMs: 300, goldenBudgetMs: 300 };
+/** Storage that turns the write-up lookup off. */
+export const LOOKUP_OFF = { "owlsh.hintLookup": "off" };
+/** Storage that skips the first-run wizard (key/value from src/lib/onboarding.ts). */
+export const ONBOARDED = { "owlsh.onboarded": "1" };
+
 /** The latest_session reply shape. */
-export function asLatest(r: OwlshReport, path = `/fake/sessions/${r.session.uuid}.json`): { path: string; json: string } {
+export function asLatest(r: OwlshReport, path = pathOf(r)): { path: string; json: string } {
   return { path, json: JSON.stringify(r) };
 }
