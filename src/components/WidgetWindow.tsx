@@ -93,8 +93,10 @@ export function WidgetWindow() {
 
   async function close() {
     if (!desktop) return;
+    // Hide, don't close: the window is declared in the config and reused on reopen, so destroying it
+    // would mean falling back to a runtime-created window (which doesn't reliably init on Windows).
     const { getCurrentWindow } = await import("@tauri-apps/api/window");
-    await getCurrentWindow().close();
+    await getCurrentWindow().hide();
   }
 
   const s = report ? deriveWidgetState(report, now) : null;

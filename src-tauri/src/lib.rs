@@ -14,34 +14,26 @@ mod sessions;
 #[tauri::command]
 fn open_widget(app: tauri::AppHandle) -> Result<(), String> {
     use tauri::Manager;
+    // The widget window is declared in tauri.conf.json (hidden at startup) so its webview initializes at
+    // launch on the UI thread — a window created at runtime from a command can fail to init on Windows.
     if let Some(w) = app.get_webview_window("widget") {
         let _ = w.show();
         let _ = w.set_focus();
         return Ok(());
     }
-    // In `tauri dev` a programmatically-created window built with WebviewUrl::App can resolve against
-    // the (unbuilt) frontendDist and render blank white. Point it explicitly at the dev server when one
-    // is configured; a release build has no dev_url and uses the bundled app URL as normal.
-    let url = match (cfg!(debug_assertions), app.config().build.dev_url.clone()) {
-        (true, Some(mut dev)) => {
-            dev.set_path("index.html");
-            dev.set_query(Some("widget=1"));
-            tauri::WebviewUrl::External(dev)
-        }
-        _ => tauri::WebviewUrl::App("index.html?widget=1".into()),
-    };
-    tauri::WebviewWindowBuilder::new(&app, "widget", url)
-        .title("owlsh — widget")
-        .inner_size(360.0, 330.0)
-        .min_inner_size(300.0, 240.0)
-        .always_on_top(true)
-        .decorations(false)
-        .resizable(true)
-        // paint the frame in owlsh ink so a slow/undecorated webview never flashes white
-        .background_color(tauri::window::Color(11, 11, 12, 255))
-        .build()
-        .map(|_| ())
-        .map_err(|e| e.to_string())
+    // Fallback only if the window was destroyed: rebuild on the main thread (WebView2 needs the UI thread).
+    let handle = app.clone();
+    app.run_on_main_thread(move || {
+        let _ = tauri::WebviewWindowBuilder::new(&handle, "widget", tauri::WebviewUrl::App("index.html?widget=1".into()))
+            .title("owlsh — widget")
+            .inner_size(360.0, 330.0)
+            .min_inner_size(300.0, 240.0)
+            .always_on_top(true)
+            .decorations(false)
+            .resizable(true)
+            .build();
+    })
+    .map_err(|e| e.to_string())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
