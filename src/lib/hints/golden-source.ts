@@ -7,6 +7,7 @@ import type { LlmProvider } from "../llm/provider";
 import type { HintGolden } from "../../types/report";
 import { fetchWriteupFrom0xdf, fetchHtbWriteup, hasHtbToken } from "../net";
 import { goldenFromText } from "../writeup";
+import { testOverride } from "./test-overrides";
 
 export const NONE: HintGolden = Object.freeze({ source: "none", confidence: 0, golden: Object.freeze([]) as unknown as HintGolden["golden"] });
 
@@ -66,7 +67,7 @@ async function lookup(target: { platform: string; name: string }, d: GoldenDeps)
   return NONE;
 }
 
-export async function resolveGolden(target: { platform: string; name: string }, deps: GoldenDeps, budgetMs = 30000): Promise<HintGolden> {
+export async function resolveGolden(target: { platform: string; name: string }, deps: GoldenDeps, budgetMs = testOverride("goldenBudgetMs") ?? 30000): Promise<HintGolden> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<HintGolden>((r) => {
     timer = setTimeout(() => r(NONE), budgetMs);
