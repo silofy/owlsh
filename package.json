@@ -31,7 +31,8 @@
     "capture": "node scripts/capture.mjs",
     "pretauri": "node scripts/doctor.mjs",
     "tauri": "tauri",
-    "widget": "vite-node scripts/widget.tsx"
+    "widget": "vite-node scripts/widget.tsx",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@fontsource-variable/hanken-grotesk": "^5.2.8",
@@ -49,6 +50,7 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/vite": "^4.0.0",
     "@tauri-apps/cli": "^2.1.0",
     "@types/d3-array": "^3.2.1",
