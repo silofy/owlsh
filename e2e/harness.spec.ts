@@ -1,4 +1,28 @@
-import { test, expect, makeCapture, asLatest } from "./fixtures";
+import { test, expect, makeCapture, asLatest, clean } from "./fixtures";
+
+test("unmocked commands are recorded and allowUnmocked clears them", async ({ page, tauri }) => {
+  await tauri.install();
+  await page.goto("/?widget=1");
+  await page.evaluate(() =>
+    (window as unknown as { __TAURI_INTERNALS__: { invoke(c: string): Promise<unknown> } }).__TAURI_INTERNALS__
+      .invoke("definitely_not_a_command")
+      .catch(() => {}),
+  );
+  expect(tauri.strayUnmocked()).toEqual(["definitely_not_a_command"]);
+  tauri.allowUnmocked("definitely_not_a_command");
+});
+
+test("model.useCloud seeds anthropic coach mode without explicit storage", async ({ page, tauri, model }) => {
+  model.useCloud(clean("Re-check your scan."));
+  await tauri.install();
+  await page.goto("/?widget=1");
+  expect(await page.evaluate(() => localStorage.getItem("owlsh.coachMode"))).toBe("anthropic");
+});
+
+test("model.useCloud after install throws", async ({ tauri, model }) => {
+  await tauri.install();
+  expect(() => model.useCloud(clean("x"))).toThrow(/before tauri.install/);
+});
 
 test("desktop fake: app starts with defaults and polls latest_session", async ({ page, tauri }) => {
   await tauri.install();

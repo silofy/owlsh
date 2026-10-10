@@ -36,9 +36,19 @@ export class TauriFake {
   private log: { cmd: string; args: Record<string, unknown> }[] = [];
   private unmocked = new Set<string>();
   private allowed = new Set<string>();
+  private installed = false;
+  /** Set by ModelFake.useCloud: install() seeds coach mode "anthropic" into storage. */
+  private cloud = false;
   constructor(private page: Page) {}
 
+  wantCloud(): void {
+    if (this.installed) throw new Error("model.useCloud() must be called before tauri.install(): coach mode is seeded at install");
+    this.cloud = true;
+  }
+
   async install(opts: InstallOpts = {}): Promise<void> {
+    this.installed = true;
+    const storage = this.cloud ? { ...opts.storage, "owlsh.coachMode": "anthropic" } : opts.storage;
     await this.page.exposeFunction("__owlshTauri", async (cmd: string, args: Record<string, unknown>) => {
       this.log.push({ cmd, args: args ?? {} });
       if (!this.handlers.has(cmd)) {
@@ -73,7 +83,7 @@ export class TauriFake {
           metadata: { currentWindow: { label: "main" }, currentWebview: { label: "main", windowLabel: "main" } },
         };
       },
-      { test: opts.test, storage: opts.storage },
+      { test: opts.test, storage },
     );
   }
 

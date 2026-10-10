@@ -14,11 +14,12 @@ export const error = (): ModelReply => ({ kind: "error" });
 export class ModelFake {
   constructor(private tauri: TauriFake) {}
   /**
-   * One reply per cloud_generate call; the last repeats. Coach mode must already be "anthropic" in
-   * storage: pass COACH_CLOUD to tauri.install({ storage }) (seeded by its init script before load).
+   * One reply per cloud_generate call; the last repeats. Must be called before tauri.install(), which
+   * then seeds coach mode "anthropic" into storage (throws if install already ran).
    */
   useCloud(...replies: ModelReply[]): void {
     if (replies.length === 0) throw new Error("useCloud needs at least one reply");
+    this.tauri.wantCloud();
     let i = 0;
     this.tauri.on("has_api_key", true);
     this.tauri.on("cloud_generate", async () => {
