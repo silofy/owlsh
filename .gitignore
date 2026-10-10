@@ -43,3 +43,7 @@ ui-v2-*.png
 # Python
 __pycache__/
 *.pyc
+
+# playwright
+playwright-report/
+test-results/

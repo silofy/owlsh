@@ -53,4 +53,12 @@ describe("generateHint", () => {
     const boom: LlmProvider = { name: "x", available: async () => true, generateJson: async () => { throw new Error("x"); } };
     expect((await generateHint(base, boom)).source).toBe("static");
   });
+  it("uses the test override for the timeout when set", async () => {
+    (globalThis as { __OWLSH_TEST__?: object }).__OWLSH_TEST__ = { hintTimeoutMs: 10 };
+    try {
+      expect(await generateHint(base, stub({ hint: "late", kind: "process" }, 50))).toEqual({ text: hintFor(1), source: "static" });
+    } finally {
+      delete (globalThis as { __OWLSH_TEST__?: object }).__OWLSH_TEST__;
+    }
+  });
 });

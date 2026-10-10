@@ -6,6 +6,7 @@ import type { LlmProvider } from "../llm/provider";
 import type { Episode, GoldenObjective, HintSource } from "../../types/report";
 import { hintFor, type HintTier } from "../widget/hints";
 import { guard, seenTerms } from "./guard";
+import { testOverride } from "./test-overrides";
 
 export const HINT_SCHEMA = {
   type: "object",
@@ -47,7 +48,7 @@ export function buildHintPrompt(i: HintInput): string {
 
 const STATIC = (tier: HintTier) => ({ text: hintFor(tier), source: "static" as HintSource });
 
-export async function generateHint(i: HintInput, provider: LlmProvider, timeoutMs = 8000): Promise<{ text: string; source: HintSource }> {
+export async function generateHint(i: HintInput, provider: LlmProvider, timeoutMs = testOverride("hintTimeoutMs") ?? 8000): Promise<{ text: string; source: HintSource }> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     const timeout = new Promise<null>((r) => { timer = setTimeout(() => r(null), timeoutMs); });
