@@ -1,7 +1,8 @@
 name: CI
 
-# Gate for every PR and push to main: the web app (typecheck + vitest) and the Rust capture-side
-# crates. src-tauri isn't tested here — it needs the full desktop toolchain; release.yml builds it.
+# Gate for every PR and push to main: the web app (typecheck + vitest), the browser e2e suite
+# (Playwright, chromium), and the Rust capture-side crates. src-tauri isn't tested here — it needs
+# the full desktop toolchain; release.yml builds it.
 
 on:
   push:
@@ -27,6 +28,26 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+        env:
+          CI: "true"
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
 
   rust:
     # Linux (openpty) and Windows (ConPTY) take different PTY paths in the capture agent.
