@@ -81,6 +81,8 @@ export function WidgetWindow() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Escape always closes — the widget is frameless (no OS close button), so this is the reliable exit.
+      if (e.key === "Escape") { void close(); return; }
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === "h" && ready) void pullHint();
       if (e.key === "s") void applySize(WIDGET_SIZES[(WIDGET_SIZES.indexOf(size) + 1) % WIDGET_SIZES.length]);
