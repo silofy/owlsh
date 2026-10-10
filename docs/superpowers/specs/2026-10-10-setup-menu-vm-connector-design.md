@@ -110,6 +110,29 @@ dropdown) rather than separate popovers — one open at a time.
 The live banner's existing "Pwnbox" indicator (`LiveBridge.tsx`) uses `connector.label` too, so a
 THM run reads "AttackBox", not "Pwnbox".
 
+## "Connect a model" empty state (added 2026-10-10)
+
+Today, with no coach model configured, a hint silently falls back to the static tier text — so all the
+AI-hint work looks like it did nothing. Instead, when no model is connected:
+
+- The AI section of the Setup menu shows **"Connect a model"** as a call to action (not just a status dot),
+  and the widget's hint area, before the first pull, shows a one-line "Connect a model for AI hints →"
+  that opens the Setup menu's AI section. The static hint still works as the no-model fallback.
+- The AI section presents three paths, in this order:
+  1. **Use your Claude plan (owlsh MCP server)** — the headline path; see the separate MCP connector
+     spec. Hints are generated in the user's own Claude client, billed to their existing plan. A short
+     explainer + "Set up" that links to the MCP connector flow.
+  2. **Local (Ollama)** — the existing offline path; zero cost. Guided install/start already exists in
+     `LlmStatusChip`.
+  3. **API key (advanced)** — the existing cloud-key path, relabeled to make clear it needs separate API
+     credits, not a subscription.
+
+Rationale (researched 2026-10-10): consumer Claude/ChatGPT subscriptions cannot authorize third-party
+API calls — Anthropic banned subscription-OAuth for third-party apps (enforced ~April 2026). The only
+compliant way to use an existing plan is the MCP inversion (owlsh as a server the user's own Claude
+client calls). The in-app `[h]` button keeps working for Local/API users; the MCP path routes coaching
+through the Claude client.
+
 ## Files
 
 - Modify: `src/lib/platform/types.ts` (+`connector`), `src/lib/platform/{htb,thm,offsec,immersive,local}.ts` (declare each), `src/lib/platform/index.ts` (+`connectorFor`)
