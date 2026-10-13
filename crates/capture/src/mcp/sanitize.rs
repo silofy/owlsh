@@ -10,6 +10,8 @@ const OUTPUT_MAX_CHARS: usize = 180;
 
 pub struct ActiveSession {
     pub path: PathBuf,
+    /// RAW, UNSANITIZED report (contains golden_dag / hint_golden). Must only
+    /// ever be passed through `sanitize()`; never serialize or log it directly.
     pub value: Value,
 }
 
@@ -65,6 +67,10 @@ pub fn sanitize(report: &Value) -> Value {
         .and_then(Value::as_object)
         .map(|m| {
             m.iter()
+                .filter(|(k, _)| {
+                    let k = k.to_lowercase();
+                    !(k.contains("writeup") || k.contains("write_up") || k.contains("golden"))
+                })
                 .filter(|(_, v)| matches!(v, Value::String(_) | Value::Number(_) | Value::Bool(_)))
                 .map(|(k, v)| (k.clone(), v.clone()))
                 .collect()
@@ -177,5 +183,18 @@ mod tests {
         std::fs::remove_file(d.join("b.json")).unwrap();
         assert!(find_active(&d).is_none());
         let _ = std::fs::remove_dir_all(&d);
+    }
+
+    #[test]
+    fn flags_skip_golden_and_writeup_keys() {
+        let mut r = full();
+        r["flags"] = json!({ "golden_hint": "the answer", "writeup_note": "x", "Write_Up2": "y", "found_user_flag": true });
+        let s = sanitize(&r);
+        let dump = serde_json::to_string(&s).unwrap();
+        assert_eq!(s["flags"]["found_user_flag"], true);
+        assert!(!dump.contains("golden_hint"));
+        assert!(!dump.contains("writeup_note"));
+        assert!(!dump.contains("Write_Up2"));
+        assert!(!dump.contains("the answer"));
     }
 }
