@@ -234,7 +234,7 @@ export function StepCapture() {
             <h3 className="font-display text-sm font-semibold text-fg">
               Install the agent <span className="font-normal text-faint">{"·"} one-time</span>
             </h3>
-            <p className="text-xs text-muted">A one-time install of the owlsh capture agent.</p>
+            <p className="text-xs text-muted">Installs the owlsh capture agent.</p>
             <CommandRow cmd="curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh" />
             <p className="text-xs text-faint">
               On Windows, install with{" "}
@@ -282,7 +282,7 @@ export function StepCapture() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal/60" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-signal/80" />
               </span>
-              <span className="text-muted">waiting for a session{"…"} run the command above and it lands here live</span>
+              <span className="text-muted">waiting for a session{"…"} run the attach command and it lands here live</span>
             </Readout>
             {!isDesktop() && (
               <p className="flex items-start gap-1.5 text-xs text-faint">
