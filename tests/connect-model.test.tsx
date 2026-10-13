@@ -10,6 +10,11 @@ describe("ConnectModelPaths", () => {
     expect(iMcp).toBeGreaterThanOrEqual(0);
     expect(iMcp).toBeLessThan(iLocal);
   });
+  it("shows the real MCP setup (config snippet + claude mcp add), not a coming-soon note", () => {
+    expect(html).toContain("mcpServers");
+    expect(html).toContain("claude mcp add owlsh -- owlsh mcp");
+    expect(html).not.toMatch(/coming soon/i);
+  });
   it("hides the API-key path until the MCP connector ships", () => {
     // The API-key card (heading + "needs separate API credits" copy) is gone. The MCP card's own
     // "not API credits" selling point is fine, so assert the card, not the word "credits" outright.
