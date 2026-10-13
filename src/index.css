@@ -296,24 +296,12 @@ body {
   display: none;
 }
 
-@keyframes lamp {
-  50% {
-    opacity: 0.35;
-  }
-}
-.setup-lamp {
-  animation: lamp 1.8s ease-in-out infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
-  }
-  .setup-lamp {
-    animation: none;
   }
 }
 

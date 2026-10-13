@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   llmStatus,
   startOllama,
@@ -18,7 +18,7 @@ import {
   type LlmRuntimeStatus,
 } from "../lib/llm";
 import { isDesktop, openExternal } from "../lib/net";
-import { Check, ChevronDown, ExternalLink } from "./icons";
+import { Check, ExternalLink } from "./icons";
 
 function errMsg(e: unknown, fallback: string): string {
   if (typeof e === "string" && e.trim()) return e;
@@ -222,49 +222,5 @@ function PanelBody({ m }: { m: CoachModel }) {
 
     {err && <p className="px-2 pt-1 text-xs text-detour">{err}</p>}
     </>
-  );
-}
-
-/**
- * Coaching-model selector — replaces the old on/off "Local AI" chip. Pick rules-based, a local Ollama
- * (guided setup), or a cloud model (Claude / ChatGPT / OpenRouter / Gemini). Cloud is a deliberate opt-in: it
- * carries a data-leaves-device warning and a note that commands are redacted before they're sent.
- */
-export function LlmStatusChip() {
-  const model = useCoachModel();
-  const { mode, ollamaStep, busy, active } = model;
-  const [open, setOpen] = useState(false);
-  const wrap = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e: MouseEvent) => {
-      if (wrap.current && !wrap.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, [open]);
-
-  return (
-    <div className="relative" ref={wrap}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-label="Coaching model"
-        className="flex h-9 items-center gap-2 rounded-md border border-edge px-4 text-sm font-medium text-muted transition-colors hover:border-signal/60 hover:bg-panel-2 hover:text-fg"
-      >
-        <span className="relative flex h-2 w-2 items-center justify-center">
-          {mode === "local" && ollamaStep === "ready" && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-match opacity-50" />}
-          <span className="relative h-2 w-2 rounded-full" style={{ background: active.dot }} />
-        </span>
-        <span>AI · {busy === "pulling" ? "downloading…" : busy === "starting" ? "starting…" : active.label}</span>
-        <ChevronDown size={13} className="text-faint transition-colors group-hover:text-signal" />
-      </button>
-
-      {open && (
-        <div className="absolute right-0 top-full z-30 mt-2 w-80 rounded-lg border border-edge bg-panel p-2 text-left shadow-xl">
-          <CoachModelPanel model={model} />
-        </div>
-      )}
-    </div>
   );
 }
