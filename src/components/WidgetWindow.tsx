@@ -81,9 +81,9 @@ export function WidgetWindow() {
 
   // Simplification: the widget doesn't probe Ollama, so `ollamaReachable` is treated as false — in
   // "local" mode the CTA shows until the user switches to a model the widget can see is configured.
-  // Cloud modes check the stored key (async, so assume "no key" until it resolves).
+  // Cloud modes check the stored key (async; the CTA waits until it resolves).
   const mode = getCoachMode();
-  const [hasKey, setHasKey] = useState(false);
+  const [hasKey, setHasKey] = useState<boolean | null>(null);
   useEffect(() => {
     if (mode === "rules" || mode === "local") return;
     let alive = true;
@@ -221,7 +221,7 @@ export function WidgetWindow() {
               onDone={lookupDone}
             />
           )}
-          {desktop && !hint && shouldPromptConnect(mode, false, hasKey) && (
+          {desktop && !hint && (mode === "rules" || mode === "local" || hasKey !== null) && shouldPromptConnect(mode, false, hasKey === true) && (
             <button type="button" onClick={() => void openMainWindow()} className="text-left text-faint hover:text-fg">
               Connect a model for AI hints →
             </button>
