@@ -65,15 +65,17 @@ function useCopy() {
 export function CommandRow({ cmd, prompt = true, label = "Copy command" }: { cmd: string; prompt?: boolean; label?: string }) {
   const { copied, copy } = useCopy();
   return (
-    <div className="flex items-start justify-between gap-3 overflow-x-auto rounded-md border border-edge bg-ink/70 px-3 py-2 ring-1 ring-inset ring-white/[0.02]">
-      <code className="mono whitespace-pre text-[13px] text-fg">
-        {prompt && <span className="select-none text-faint">$ </span>}
-        {cmd}
-      </code>
+    <div className="flex items-stretch gap-2 rounded-md border border-edge bg-ink/70 ring-1 ring-inset ring-white/[0.02]">
+      <div className="min-w-0 flex-1 overflow-x-auto px-3 py-2">
+        <code className="mono whitespace-pre text-[13px] text-fg">
+          {prompt && <span className="select-none text-faint">$ </span>}
+          {cmd}
+        </code>
+      </div>
       <button
         type="button"
         onClick={() => copy(cmd)}
-        className={`label shrink-0 rounded px-1.5 py-0.5 transition-colors hover:bg-panel-2 ${FOCUS}`}
+        className={`label m-1 shrink-0 self-start rounded bg-ink/70 px-1.5 py-0.5 transition-colors hover:bg-panel-2 ${FOCUS}`}
         aria-label={label}
       >
         <span aria-live="polite">
