@@ -12,6 +12,8 @@
 //! "Look like tmux, not like a debugger": userspace PTY only, no eBPF / ptrace / LD_PRELOAD.
 
 mod envelope;
+#[allow(dead_code)]
+mod mcp;
 mod shell;
 mod terminal;
 
