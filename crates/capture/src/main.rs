@@ -12,7 +12,6 @@
 //! "Look like tmux, not like a debugger": userspace PTY only, no eBPF / ptrace / LD_PRELOAD.
 
 mod envelope;
-#[allow(dead_code)]
 mod mcp;
 mod shell;
 mod terminal;
@@ -807,9 +806,20 @@ fn handle_web_capture(args: &[String], platform: &str) {
     }
 }
 
+/// `owlsh mcp` — the first argument after the program name selects the MCP stdio server.
+fn is_mcp(args: &[String]) -> bool {
+    args.get(1).map(String::as_str) == Some("mcp")
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     owlsh_core::migrate_legacy_home();
     let args: Vec<String> = std::env::args().collect();
+
+    if is_mcp(&args) {
+        let dir = owlsh_sessions_dir().ok_or("cannot resolve ~/.owlsh/sessions")?;
+        mcp::server::serve(&dir);
+        return Ok(());
+    }
 
     // `--shell <path>` picks the shell (and its marker scheme) by family; default = host shell.
     let profile = match arg_value(&args, "--shell") {
@@ -941,6 +951,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn detects_the_mcp_subcommand() {
+        assert!(is_mcp(&["owlsh".into(), "mcp".into()]));
+        assert!(!is_mcp(&["owlsh".into(), "--attach".into()]));
+        assert!(!is_mcp(&["owlsh".into()]));
+    }
 
     #[test]
     fn handshake_declares_exact_fidelity() {
