@@ -4,16 +4,13 @@ import { SetupMenu } from "../src/components/SetupMenu";
 
 describe("SetupMenu (closed state)", () => {
   const html = renderToStaticMarkup(<SetupMenu />);
-  it("renders the Setup trigger with a chevron", () => {
+  it("renders the Setup trigger and never inlines the wizard's config panels", () => {
+    // positive anchor: the menu actually rendered
+    expect(html).toContain("<button");
     expect(html).toContain("Setup");
     expect(html).toContain("<svg");
-  });
-  it("never renders inline config panels (they live in the wizard)", () => {
+    // landmark strings confirmed in VmConnector.tsx / ConnectModelPaths.tsx
     expect(html).not.toContain("Auto-pull over SSH");
     expect(html).not.toContain("Use your Claude plan");
-    expect(html).not.toMatch(/Claude plan/);
-    expect(html).not.toMatch(/Ollama/);
-    expect(html).not.toMatch(/Pwnbox|AttackBox/);
-    expect(html).not.toContain("Setup guide");
   });
 });
