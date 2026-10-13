@@ -6,6 +6,7 @@ import type { LlmProvider } from "../llm/provider";
 import type { Episode, GoldenObjective, HintSource } from "../../types/report";
 import { hintFor, type HintTier } from "../widget/hints";
 import { guard, seenTerms } from "./guard";
+import { COACHING_RULES } from "./coaching-rules";
 
 export const HINT_SCHEMA = {
   type: "object",
@@ -32,9 +33,9 @@ export function buildHintPrompt(i: HintInput): string {
       ]
     : [`Use your own knowledge of ${i.box} on ${i.platform} if you have it; otherwise coach from the session alone.`];
   return [
-    `You are a coach, not a solver, for a practice-lab session on "${i.box}" (${i.platform}).`,
-    `Give ONE hint of at most 30 words, ${TIER_RULE[i.tier]}`,
-    "Never state a command, file path, credential, URL, CVE, hostname, username or flag.",
+    COACHING_RULES,
+    `Practice-lab session on "${i.box}" (${i.platform}).`,
+    `Hint style: ${TIER_RULE[i.tier]}`,
     "Never name anything from UNSATISFIED objectives verbatim; describe the category of thing instead.",
     'Return ONLY JSON: {"hint": string, "kind": "process" | "area" | "technique"}.',
     "",
