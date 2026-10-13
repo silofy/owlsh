@@ -5,6 +5,7 @@ import { llmStatus, pullModel, DEFAULT_MODEL } from "../lib/llm/runtime";
 import { setCoachMode } from "../lib/llm/mode";
 import { Check, ScanEye, OwlMark, ArrowUpRight, Terminal, Crosshair, ChevronDown } from "./icons";
 import { InstallReference } from "./Install";
+import { VmConnector } from "./VmConnector";
 import { mcpClaudeCodeCommand, mcpDesktopConfigSnippet } from "../lib/hints/mcp-connect";
 
 const FOCUS = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/70";
@@ -222,7 +223,15 @@ function StepMeet() {
 // ── step ② Capture your first run ──────────────────────────────────────────
 
 export function StepCapture() {
-  const { sessionCards, switchSession, closeOnboarding, setOnboardingStep, onboardingStep } = useReport();
+  const { sessionCards, switchSession, closeOnboarding, setOnboardingStep, onboardingStep, setupJump, setSetupJump } = useReport();
+  // Setup menu → "VM connector" deep-links here with the options section open.
+  const [optionsOpen, setOptionsOpen] = useState(setupJump === "connector");
+  useEffect(() => {
+    if (setupJump === "connector") {
+      setOptionsOpen(true);
+      setSetupJump(null);
+    }
+  }, [setupJump, setSetupJump]);
 
   const realCards = sessionCards.filter((c) => !c.demo);
   const newest = realCards.slice().sort((a, b) => Date.parse(b.ended_at) - Date.parse(a.ended_at))[0];
@@ -281,13 +290,19 @@ export function StepCapture() {
         </div>
       )}
 
-      <details className="group/all border-t border-edge pt-4">
+      <details
+        className="group/all border-t border-edge pt-4"
+        open={optionsOpen}
+        onToggle={(e) => setOptionsOpen(e.currentTarget.open)}
+      >
         <summary className="label flex cursor-pointer list-none items-center gap-2 text-muted [&::-webkit-details-marker]:hidden">
           <ChevronDown size={12} className="transition-transform group-open/all:rotate-180" />
           All setup options
         </summary>
         <div className="mt-4">
           <InstallReference />
+          <h3 className="label mt-6 mb-3 text-muted">Capture from a remote VM</h3>
+          <VmConnector />
         </div>
       </details>
     </div>
