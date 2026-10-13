@@ -4,15 +4,16 @@ import { ConnectModelPaths } from "../src/components/ConnectModelPaths";
 
 describe("ConnectModelPaths", () => {
   const html = renderToStaticMarkup(<ConnectModelPaths />);
-  it("lists MCP first, then Local, then API key", () => {
+  it("lists MCP first, then Local", () => {
     const iMcp = html.indexOf("Claude plan");
     const iLocal = html.indexOf("Ollama");
-    const iApi = html.search(/API key/i);
     expect(iMcp).toBeGreaterThanOrEqual(0);
     expect(iMcp).toBeLessThan(iLocal);
-    expect(iLocal).toBeLessThan(iApi);
   });
-  it("labels the API path as needing credits, not a subscription", () => {
-    expect(html).toMatch(/credits/i);
+  it("hides the API-key path until the MCP connector ships", () => {
+    // The API-key card (heading + "needs separate API credits" copy) is gone. The MCP card's own
+    // "not API credits" selling point is fine, so assert the card, not the word "credits" outright.
+    expect(html).not.toMatch(/API key/i);
+    expect(html).not.toMatch(/separate API credits/i);
   });
 });

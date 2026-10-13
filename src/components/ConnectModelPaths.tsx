@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { CoachModelPanel } from "./LlmStatusChip";
 
-type PathId = "mcp" | "local" | "api";
+type PathId = "mcp" | "local";
 
 /**
- * "Connect a model" — three ways to power the coach, in order of preference. Consumer Claude/ChatGPT
- * subscriptions can't authorize third-party API calls, so the compliant subscription route is MCP.
+ * "Connect a model" — the credit-free ways to power the coach. Consumer Claude/ChatGPT subscriptions
+ * can't authorize third-party API calls, so the compliant subscription route is MCP (headline), with a
+ * local model (Ollama) as the free offline fallback. The API-key path is hidden until the MCP connector
+ * ships — reintroduce it as an "advanced" card once there's a working credit-free option.
  */
 export function ConnectModelPaths() {
   const [open, setOpen] = useState<PathId | null>(null);
@@ -27,7 +29,7 @@ export function ConnectModelPaths() {
         <button type="button" onClick={() => toggle("mcp")} aria-expanded={open === "mcp"} className={`${btn} mt-2`}>Set up</button>
         {open === "mcp" && (
           <p className="mt-2 text-xs leading-relaxed text-faint">
-            The owlsh MCP connector is coming soon. Until it ships, use a local model (Ollama) for free offline coaching, or an API key below.
+            The owlsh MCP connector is coming soon. Until it ships, use a local model (Ollama) for free offline coaching.
           </p>
         )}
       </section>
@@ -37,15 +39,6 @@ export function ConnectModelPaths() {
         <p className="mt-1 text-xs leading-relaxed text-muted">Free and offline — runs on your machine; commands never leave the device.</p>
         <button type="button" onClick={() => toggle("local")} aria-expanded={open === "local"} className={`${btn} mt-2`}>{open === "local" ? "Hide" : "Configure"}</button>
         {open === "local" && <div className="mt-2"><CoachModelPanel /></div>}
-      </section>
-
-      <section className={card}>
-        <h3 className="text-sm font-medium text-fg">API key (advanced)</h3>
-        <p className="mt-1 text-xs leading-relaxed text-muted">
-          Bring a Claude, ChatGPT, Gemini or OpenRouter key. Needs separate API credits — a chat subscription doesn't cover API calls. Commands leave the device (redacted first).
-        </p>
-        <button type="button" onClick={() => toggle("api")} aria-expanded={open === "api"} className={`${btn} mt-2`}>{open === "api" ? "Hide" : "Configure"}</button>
-        {open === "api" && <div className="mt-2"><CoachModelPanel /></div>}
       </section>
     </div>
   );
