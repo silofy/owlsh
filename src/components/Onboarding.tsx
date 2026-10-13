@@ -6,7 +6,6 @@ import { setCoachMode } from "../lib/llm/mode";
 import { Check, ScanEye, OwlMark, ArrowUpRight, Terminal, Crosshair, ChevronDown, ClaudeMark, GeminiMark, ChatGptMark } from "./icons";
 
 const MARKS = { claude: ClaudeMark, gemini: GeminiMark, chatgpt: ChatGptMark } as const;
-import { InstallReference } from "./Install";
 import { VmConnector } from "./VmConnector";
 import {
   MCP_CLIENTS,
@@ -63,7 +62,7 @@ function useCopy() {
   return { copied, copy };
 }
 
-function CommandRow({ cmd, prompt = true, label = "Copy command" }: { cmd: string; prompt?: boolean; label?: string }) {
+export function CommandRow({ cmd, prompt = true, label = "Copy command" }: { cmd: string; prompt?: boolean; label?: string }) {
   const { copied, copy } = useCopy();
   return (
     <div className="flex items-start justify-between gap-3 overflow-x-auto rounded-md border border-edge bg-ink/70 px-3 py-2 ring-1 ring-inset ring-white/[0.02]">
@@ -203,11 +202,11 @@ export function StepMeet() {
 
 export function StepCapture() {
   const { sessionCards, switchSession, closeOnboarding, setOnboardingStep, onboardingStep, setupJump, setSetupJump } = useReport();
-  // Setup menu → "VM connector" deep-links here with the options section open.
-  const [optionsOpen, setOptionsOpen] = useState(setupJump === "connector");
+  // Setup menu → "VM connector" deep-links here and lands on the remote-VM choice.
+  const [where, setWhere] = useState<"own" | "vm">(setupJump === "connector" ? "vm" : "own");
   useEffect(() => {
     if (setupJump === "connector") {
-      setOptionsOpen(true);
+      setWhere("vm");
       setSetupJump(null);
     }
   }, [setupJump, setSetupJump]);
@@ -217,43 +216,88 @@ export function StepCapture() {
   const name = newest?.target?.name || newest?.machine?.name || "your run";
   const count = newest?.episodes ?? 0;
 
+  const options: { id: "own" | "vm"; icon: ReactNode; title: string; tag: string; desc: string }[] = [
+    { id: "own", icon: <Terminal size={16} />, title: "On your own machine", tag: "desktop · any OS", desc: "Kali / Parrot / WSL over OpenVPN. One watched shell, streaming live." },
+    { id: "vm", icon: <Crosshair size={16} />, title: "In a remote VM", tag: "Pwnbox · AttackBox", desc: "HTB Pwnbox or THM AttackBox — run the agent there, bring the run back." },
+  ];
+  const codeCls = "mono rounded bg-panel-2 px-1 py-0.5 text-fg";
+
   return (
     <div className="space-y-6">
       <p className="max-w-prose text-[15px] leading-relaxed text-muted">
-        Two commands turn any shell into a recorded session {"—"} play a box in another window and every command streams
-        into a live debrief here.
+        owlsh records a shell while you hack, then grades the run {"—"} graded debrief, coverage, and what you{"’"}d do differently. Pick where you{"’"}re working and copy the commands.
       </p>
 
-      <ol className="m-0 list-none p-0">
-        <li className="relative flex gap-4 pb-8">
-          <span aria-hidden className="absolute bottom-0 left-3 top-7 w-px bg-edge" />
-          <span className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-edge bg-panel-2 text-xs font-semibold text-fg">
-            1
-          </span>
-          <div className="min-w-0 flex-1 space-y-2">
-            <h3 className="font-display text-sm font-semibold text-fg">
-              Install the agent <span className="font-normal text-faint">{"·"} one-time</span>
-            </h3>
-            <p className="text-xs text-muted">Installs the owlsh capture agent.</p>
-            <CommandRow cmd="curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh" />
-            <p className="text-xs text-faint">
-              On Windows, install with{" "}
-              <code className="mono rounded bg-panel-2 px-1 py-0.5 text-fg">irm https://raw.githubusercontent.com/silofy/owlsh/main/install.ps1 | iex</code>
-              . Other platforms: <code className="mono rounded bg-panel-2 px-1 py-0.5 text-fg">--platform thm</code>.
-            </p>
-          </div>
-        </li>
-        <li className="relative flex gap-4">
-          <span className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-edge bg-panel-2 text-xs font-semibold text-fg">
-            2
-          </span>
-          <div className="min-w-0 flex-1 space-y-2">
-            <h3 className="font-display text-sm font-semibold text-fg">Attach to a box</h3>
-            <p className="text-xs text-muted">Start a watched shell against your target {"—"} swap in your box name.</p>
-            <CommandRow cmd="owlsh --attach --platform htb --target <box>" />
-          </div>
-        </li>
-      </ol>
+      <div>
+        <div id="capture-where" className="label mb-2 text-muted">Where do you hack?</div>
+        <div role="radiogroup" aria-labelledby="capture-where" className="space-y-2.5">
+          {options.map((o) => {
+            const on = where === o.id;
+            return (
+              <button
+                key={o.id}
+                type="button"
+                role="radio"
+                aria-checked={on}
+                onClick={() => setWhere(o.id)}
+                className={`flex w-full items-start gap-3 rounded-lg border p-3.5 text-left transition-colors motion-reduce:transition-none ${FOCUS} ${
+                  on ? "border-signal/60 bg-panel-2" : "border-edge bg-panel hover:bg-panel-2"
+                }`}
+              >
+                <span className="mt-0.5 shrink-0 text-muted">{o.icon}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex flex-wrap items-baseline gap-x-2">
+                    <span className="font-display text-sm font-semibold text-fg">{o.title}</span>
+                    <span className="label text-[10px] text-faint">{o.tag}</span>
+                  </span>
+                  <span className="mt-0.5 block text-xs text-muted">{o.desc}</span>
+                </span>
+                <span aria-hidden className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${on ? "border-signal" : "border-edge"}`}>
+                  {on && <span className="h-2 w-2 rounded-full bg-signal" />}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        {where === "own" ? (
+          <ol className="m-0 list-none p-0">
+            <li className="relative flex gap-4 pb-8">
+              <span aria-hidden className="absolute bottom-0 left-3 top-7 w-px bg-edge" />
+              <span className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-edge bg-panel-2 text-xs font-semibold text-fg">
+                1
+              </span>
+              <div className="min-w-0 flex-1 space-y-2">
+                <h3 className="font-display text-sm font-semibold text-fg">
+                  Install the agent <span className="font-normal text-faint">{"·"} one-time</span>
+                </h3>
+                <p className="text-xs text-muted">Downloads the prebuilt binary and verifies its checksum.</p>
+                <CommandRow cmd="curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh" />
+                <p className="text-xs text-faint">
+                  On Windows: <code className={codeCls}>irm https://raw.githubusercontent.com/silofy/owlsh/main/install.ps1 | iex</code>
+                </p>
+              </div>
+            </li>
+            <li className="relative flex gap-4">
+              <span className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-edge bg-panel-2 text-xs font-semibold text-fg">
+                2
+              </span>
+              <div className="min-w-0 flex-1 space-y-2">
+                <h3 className="font-display text-sm font-semibold text-fg">Run a watched shell</h3>
+                <p className="text-xs text-muted">Each command streams in live as you run it {"—"} <code className={codeCls}>exit</code> to stop.</p>
+                <CommandRow cmd="owlsh --attach --platform htb --target <box>" />
+                <p className="text-xs text-faint">
+                  Other platforms: <code className={codeCls}>--platform thm</code> (also offsec, immersive, local). Add <code className={codeCls}>--new</code> to force a fresh session.
+                </p>
+              </div>
+            </li>
+          </ol>
+        ) : (
+          <VmConnector />
+        )}
+      </div>
 
       <section className="space-y-3 rounded-lg border border-signal/30 bg-panel p-4">
         <h3 className="font-display text-sm font-semibold text-fg">Then your run lands here</h3>
@@ -295,21 +339,7 @@ export function StepCapture() {
         )}
       </section>
 
-      <details
-        className="group/all border-t border-edge pt-4"
-        open={optionsOpen}
-        onToggle={(e) => setOptionsOpen(e.currentTarget.open)}
-      >
-        <summary className="label flex cursor-pointer list-none items-center gap-2 text-muted [&::-webkit-details-marker]:hidden">
-          <ChevronDown size={12} className="transition-transform group-open/all:rotate-180" />
-          All setup options
-        </summary>
-        <div className="mt-4">
-          <InstallReference />
-          <h3 className="label mt-6 mb-3 text-muted">Capture from a remote VM</h3>
-          <VmConnector />
-        </div>
-      </details>
+      <p className="text-xs text-faint">After a run, load a write-up on the debrief to unlock the path comparison.</p>
     </div>
   );
 }

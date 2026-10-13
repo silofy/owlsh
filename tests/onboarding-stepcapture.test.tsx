@@ -3,9 +3,11 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { StepCapture } from "../src/components/Onboarding";
 
 describe("StepCapture", () => {
-  it("includes the VM connector under All setup options", () => {
+  it("offers the where-do-you-hack chooser with the own-machine path by default", () => {
     const html = renderToStaticMarkup(<StepCapture />);
-    expect(html).toContain("All setup options");
-    expect(html).toContain("remote VM");
+    expect(html).toContain("On your own machine");
+    expect(html).toContain("In a remote VM");
+    // static markup HTML-escapes the <box> placeholder
+    expect(html).toContain("owlsh --attach --platform htb --target &lt;box&gt;");
   });
 });

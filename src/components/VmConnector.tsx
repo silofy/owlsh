@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { loadPwnboxConfig, savePwnboxConfig, pullPwnbox, parseSshTarget, formatSshTarget, setConnectorPlatform, type PwnboxConfig } from "../lib/pwnbox";
 import { activePlatform, platformLabel } from "../lib/platform";
 import { connectorView } from "../lib/connector-view";
@@ -26,13 +26,58 @@ function Field({ label, value, onChange, placeholder, type = "text" }: { label: 
   );
 }
 
+// Local copy-command block (mirrors Onboarding's CommandRow; defined here to avoid an import cycle).
+function CmdRow({ cmd }: { cmd: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    try {
+      void navigator.clipboard?.writeText(cmd);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1400);
+    } catch {
+      /* clipboard blocked — the command stays selectable by hand */
+    }
+  };
+  return (
+    <div className="flex items-start justify-between gap-3 overflow-x-auto rounded-md border border-edge bg-ink/70 px-3 py-2 ring-1 ring-inset ring-white/[0.02]">
+      <code className="mono whitespace-pre text-[13px] text-fg">
+        <span className="select-none text-faint">$ </span>
+        {cmd}
+      </code>
+      <button
+        type="button"
+        onClick={copy}
+        aria-label="Copy command"
+        className="label shrink-0 rounded px-1.5 py-0.5 transition-colors hover:bg-panel-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/70"
+      >
+        <span aria-live="polite">{copied ? <span className="text-match">{"✓"} Copied</span> : <span className="text-faint hover:text-fg">{"⧉"} Copy</span>}</span>
+      </button>
+    </div>
+  );
+}
+
+const codeCls = "mono rounded bg-panel-2 px-1 py-0.5 text-fg";
+
+function Step({ n, last, title, children }: { n: number; last?: boolean; title: ReactNode; children: ReactNode }) {
+  return (
+    <li className={`relative flex gap-4 ${last ? "" : "pb-6"}`}>
+      {!last && <span aria-hidden className="absolute bottom-0 left-3 top-7 w-px bg-edge" />}
+      <span className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-edge bg-panel-2 text-xs font-semibold text-fg">{n}</span>
+      <div className="min-w-0 flex-1 space-y-2">
+        <h3 className="font-display text-sm font-semibold text-fg">{title}</h3>
+        {children}
+      </div>
+    </li>
+  );
+}
+
 /**
  * Platform-aware VM connector panel (body only; the Setup menu owns the row/toggle). SSH platforms
  * (HTB Pwnbox, THM AttackBox) get a one-line capture hint plus the optional live auto-pull; local/none
  * platforms get a one-line note and never start a pull.
  */
 export function VmConnector() {
-  const { report, sessionCards, openOnboarding, setOnboardingStep } = useReport();
+  const { report, sessionCards } = useReport();
   const [platform, setPlatform] = useState<PlatformId>(() => activePlatform(report, sessionCards));
   const [cfg, setCfg] = useState<PwnboxConfig>(loadPwnboxConfig);
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -42,6 +87,8 @@ export function VmConnector() {
   const busy = useRef(false);
 
   const view = connectorView(platform);
+  // the demo platform is not a real capture target; fall back to htb in the copied command
+  const cmdPlatform = PLATFORMS.includes(platform) ? platform : "htb";
 
   const pick = (p: PlatformId) => {
     setPlatform(p);
@@ -59,11 +106,6 @@ export function VmConnector() {
     setTarget(v);
     const { user, host, port } = parseSshTarget(v);
     set({ user, host, port });
-  };
-
-  const openSetup = () => {
-    setOnboardingStep(1);
-    openOnboarding();
   };
 
   // Gated on showSshForm so a local/none platform never starts a pull.
@@ -114,13 +156,19 @@ export function VmConnector() {
 
       {view.showSshForm ? (
         <>
-          <p className="text-sm text-muted">
-            Run the <span className="text-fg">owlsh agent</span> in your {view.label} terminal, then drag the export it writes onto the <span className="text-fg">History</span> tab.
-          </p>
-
-          <button type="button" onClick={openSetup} className="mt-3 w-full rounded-md bg-signal/15 px-3 py-1.5 text-xs font-medium text-signal transition-colors hover:bg-signal/25">
-            Full setup &amp; commands →
-          </button>
+          <ol className="m-0 list-none p-0">
+            <Step n={1} title={<>Install in {view.label}</>}>
+              <CmdRow cmd="curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh" />
+            </Step>
+            <Step n={2} title={<>Run it <span className="font-normal text-faint">{"·"} hack, then <code className={codeCls}>exit</code></span></>}>
+              <CmdRow cmd={`owlsh --export ~/.owlsh-exports/box.json --platform ${cmdPlatform} --target <box>`} />
+            </Step>
+            <Step n={3} last title="Bring it back">
+              <p className="text-xs text-muted">
+                Download <code className={codeCls}>~/.owlsh-exports/box.json</code> and drag it onto the <span className="text-fg">History</span> tab {"—"} it opens as a debrief. No keys, no config.
+              </p>
+            </Step>
+          </ol>
 
           {/* optional live auto-pull — collapsed by default; a previously enabled pull keeps running (effect above) */}
           <div className="mt-3 border-t border-edge pt-2.5">
@@ -157,7 +205,7 @@ export function VmConnector() {
                 <Field label={`${view.label} SSH`} value={target} onChange={onTarget} placeholder={view.hint ?? "username@hostname"} />
                 <Field label="SSH key (optional)" value={cfg.identity ?? ""} onChange={(v) => set({ identity: v })} placeholder="~/.ssh/key — blank = default key" />
                 <p className="text-xs text-faint">
-                  Needs key login (uses your {view.label} password once) — see <button type="button" onClick={openSetup} className="text-signal hover:underline">Setup</button>.
+                  Needs key login (uses your {view.label} password once).
                 </p>
               </div>
             )}
@@ -167,9 +215,6 @@ export function VmConnector() {
       ) : (
         <>
           <p className="text-sm text-muted">{view.note}</p>
-          <button type="button" onClick={openSetup} className="mt-3 w-full rounded-md bg-signal/15 px-3 py-1.5 text-xs font-medium text-signal transition-colors hover:bg-signal/25">
-            Full setup &amp; commands →
-          </button>
         </>
       )}
     </div>
