@@ -8,7 +8,9 @@ describe("SetupMenu (closed state)", () => {
     expect(html).toContain("Setup");
     expect(html).toContain("<svg");
   });
-  it("does not render the panels until opened", () => {
+  it("never renders inline config panels (they live in the wizard)", () => {
+    expect(html).not.toContain("Auto-pull over SSH");
+    expect(html).not.toContain("Use your Claude plan");
     expect(html).not.toMatch(/Claude plan/);
     expect(html).not.toMatch(/Ollama/);
     expect(html).not.toMatch(/Pwnbox|AttackBox/);
