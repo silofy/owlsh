@@ -4,6 +4,7 @@
 mod cloud;
 mod htb;
 mod llm;
+mod mcp_setup;
 mod net;
 mod pwnbox;
 mod secrets;
@@ -70,7 +71,9 @@ pub fn run() {
             secrets::has_api_key,
             secrets::clear_api_key,
             cloud::cloud_generate,
-            pwnbox::pull_pwnbox
+            pwnbox::pull_pwnbox,
+            mcp_setup::mcp_add,
+            mcp_setup::reveal_claude_config
         ])
         .run(tauri::generate_context!())
         .expect("error while running owlsh");
