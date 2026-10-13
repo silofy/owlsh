@@ -5,6 +5,9 @@ use std::path::Path;
 
 use serde_json::{json, Value};
 
+use super::coach::{coach_payload, next_tier, record_pull};
+use super::sanitize::{find_active, sanitize};
+
 const PROTOCOL_VERSION: &str = "2024-11-05";
 
 fn ok(id: Value, result: Value) -> String {
@@ -35,8 +38,37 @@ fn tool_schemas() -> Value {
     ])
 }
 
+fn text_result(text: String, is_error: bool) -> Value {
+    json!({"content": [{"type": "text", "text": text}], "isError": is_error})
+}
+
+fn call_tool(id: Value, params: Option<&Value>, dir: &Path) -> String {
+    let name = params.and_then(|p| p.get("name")).and_then(Value::as_str).unwrap_or("");
+    let args = params.and_then(|p| p.get("arguments"));
+    if name != "active_session" && name != "coach" {
+        return err(id, -32602, "Unknown tool");
+    }
+    let Some(active) = find_active(dir) else {
+        return ok(id, text_result("No active owlsh session is recording.".into(), true));
+    };
+    let session = sanitize(&active.value);
+    if name == "active_session" {
+        return ok(id, text_result(session.to_string(), false));
+    }
+    let tier = args
+        .and_then(|a| a.get("tier"))
+        .and_then(Value::as_u64)
+        .map(|t| t.clamp(1, 3) as u8)
+        .unwrap_or_else(|| next_tier(&active.path));
+    let phase = session.get("phase").and_then(Value::as_str).unwrap_or("unknown");
+    if let Err(e) = record_pull(&active.path, tier, phase) {
+        return ok(id, text_result(format!("Could not record the hint pull: {e}"), true));
+    }
+    ok(id, text_result(coach_payload(&active, tier).to_string(), false))
+}
+
 /// Handle one JSON-RPC request line. Returns the response line, or None for notifications.
-pub fn handle_message(line: &str, _dir: &Path) -> Option<String> {
+pub fn handle_message(line: &str, dir: &Path) -> Option<String> {
     let msg: Value = match serde_json::from_str(line) {
         Ok(v) => v,
         Err(_) => return Some(err(Value::Null, -32700, "Parse error")),
@@ -55,7 +87,7 @@ pub fn handle_message(line: &str, _dir: &Path) -> Option<String> {
         ),
         "tools/list" => ok(id, json!({"tools": tool_schemas()})),
         "ping" => ok(id, json!({})),
-        // tools/call dispatch lands in Task 4.
+        "tools/call" => call_tool(id, msg.get("params"), dir),
         _ => err(id, -32601, "Method not found"),
     })
 }
@@ -83,7 +115,11 @@ mod tests {
     use std::path::Path;
 
     fn call(body: &str) -> serde_json::Value {
-        let out = handle_message(body, Path::new("/nonexistent")).unwrap();
+        call_in(body, Path::new("/nonexistent"))
+    }
+
+    fn call_in(body: &str, dir: &Path) -> serde_json::Value {
+        let out = handle_message(body, dir).unwrap();
         serde_json::from_str(&out).unwrap()
     }
 
@@ -128,5 +164,50 @@ mod tests {
         let r = call("not json at all");
         assert_eq!(r["error"]["code"], -32700);
         assert!(r["id"].is_null());
+    }
+
+    #[test]
+    fn coach_with_no_active_session_errors_and_records_nothing() {
+        let dir = std::env::temp_dir().join(format!("owlsh-srv-empty-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let r = call_in(r#"{"jsonrpc":"2.0","id":9,"method":"tools/call","params":{"name":"coach","arguments":{}}}"#, &dir);
+        assert_eq!(r["result"]["isError"], true);
+        assert!(std::fs::read_dir(&dir).unwrap().next().is_none());
+        let r = call_in(r#"{"jsonrpc":"2.0","id":9,"method":"tools/call","params":{"name":"coach","arguments":{}}}"#, Path::new("/nonexistent"));
+        assert_eq!(r["result"]["isError"], true);
+    }
+
+    fn live_dir() -> std::path::PathBuf {
+        let dir = std::env::temp_dir().join(format!("owlsh-srv-live-{}-{:?}", std::process::id(), std::thread::current().id()).replace(['(', ')'], ""));
+        std::fs::create_dir_all(&dir).unwrap();
+        let rep = serde_json::json!({
+            "session": {"uuid": "u1"}, "recording": true, "phase": "Discovery",
+            "episodes": [], "golden_dag": [{"objective": "x"}], "writeup_text": "the full answer"
+        });
+        std::fs::write(dir.join("s.json"), rep.to_string()).unwrap();
+        dir
+    }
+
+    #[test]
+    fn active_session_and_coach_never_leak_and_coach_escalates_tiers() {
+        let dir = live_dir();
+        let a = call_in(r#"{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"active_session"}}"#, &dir);
+        let text = a["result"]["content"][0]["text"].as_str().unwrap();
+        assert!(!text.contains("golden_dag") && !text.contains("the full answer"));
+        assert!(!dir.join("s.json.hints").exists());
+        let body = r#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"coach"}}"#;
+        let c = call_in(body, &dir);
+        let text = c["result"]["content"][0]["text"].as_str().unwrap();
+        assert!(text.contains("coach, not a solver") && text.contains("tier 1"));
+        assert!(!text.contains("golden_dag") && !text.contains("the full answer"));
+        call_in(body, &dir);
+        call_in(body, &dir);
+        call_in(body, &dir);
+        let pulls: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(dir.join("s.json.hints")).unwrap()).unwrap();
+        let tiers: Vec<_> = pulls.as_array().unwrap().iter().map(|p| p["tier"].as_u64().unwrap()).collect();
+        assert_eq!(tiers, vec![1, 2, 3, 3]);
+        assert_eq!(pulls[0]["phase"], "Discovery");
+        let e = call_in(r#"{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"coach","arguments":{"tier":1}}}"#, &dir);
+        assert!(e["result"]["content"][0]["text"].as_str().unwrap().contains("tier 1"));
     }
 }
