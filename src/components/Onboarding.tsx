@@ -332,7 +332,7 @@ export function StepAI() {
     if (mounted.current) setDone(message);
   };
   // MCP coaching happens inside the user's Claude client, so coachMode is left untouched.
-  const useMcp = (label: string) => finish(`${label} connected — coaching happens inside your ${label} client.`);
+  const useMcp = (label: string) => finish(`${label} connected — coaching now happens on your ${label} plan.`);
   const useLocal = () => {
     setCoachMode("local");
     finish("Local AI coaching is on — your notes will be command-aware.");

@@ -129,15 +129,14 @@ export function VmConnector() {
               onClick={() => setAdvancedOpen((v) => !v)}
               aria-expanded={advancedOpen}
               aria-controls="vm-autopull"
-              className="label flex w-full items-center gap-1.5 text-faint transition-colors hover:text-muted focus:outline-none focus-visible:text-signal motion-reduce:transition-none"
+              className="label flex w-full items-center gap-1.5 text-faint transition-colors hover:text-muted focus:outline-none focus-visible:text-signal motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/70 rounded"
             >
               <ChevronDown className={`transition-transform motion-reduce:transition-none ${advancedOpen ? "rotate-180" : ""}`} />
               <span>Auto-pull over SSH</span>
               {cfg.enabled && <span className="ml-auto inline-block h-2 w-2 rounded-full" style={{ background: dot }} aria-label="auto-pull on" />}
             </button>
 
-            {advancedOpen && (
-            <div id="vm-autopull" className="mt-2.5">
+            <div id="vm-autopull" hidden={!advancedOpen} className="mt-2.5">
             <div className="flex items-center justify-between gap-3">
               <button type="button" onClick={() => set({ enabled: !cfg.enabled })} className="flex items-center gap-2" title="Auto-pull exports over SSH">
                 <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: dot }} />
@@ -163,7 +162,6 @@ export function VmConnector() {
               </div>
             )}
             </div>
-            )}
           </div>
         </>
       ) : (
