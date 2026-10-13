@@ -3,9 +3,11 @@ import { useReport } from "../store/report";
 import { STEP_COUNT, deriveChecklist } from "../lib/onboarding";
 import { llmStatus, pullModel, DEFAULT_MODEL } from "../lib/llm/runtime";
 import { setCoachMode } from "../lib/llm/mode";
-import { setApiKey, CLOUD_LABEL, type CloudName } from "../lib/llm/cloud";
 import { Check, ScanEye, OwlMark, ArrowUpRight, Terminal, Crosshair, ChevronDown } from "./icons";
 import { InstallReference } from "./Install";
+import { mcpClaudeCodeCommand, mcpDesktopConfigSnippet } from "../lib/hints/mcp-connect";
+
+const FOCUS = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/70";
 
 /** Tauri-only: never read `window` at module load — only inside handlers/effects. */
 const isDesktop = () => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -15,7 +17,7 @@ const NUMERALS = ["①", "②", "③", "④", "⑤", "⑥"]; // ①②③④…
 const STEPS = [
   { kicker: "The instrument", title: "Meet owlsh" },
   { kicker: "Your own box", title: "Capture your first run" },
-  { kicker: "Local AI", title: "Sharpen your coaching" },
+  { kicker: "Coach model", title: "Connect a model" },
   { kicker: "Preflight complete", title: "You're set" },
 ] as const;
 
@@ -52,21 +54,23 @@ function useCopy() {
   return { copied, copy };
 }
 
-function CommandRow({ cmd }: { cmd: string }) {
+function CommandRow({ cmd, prompt = true, label = "Copy command" }: { cmd: string; prompt?: boolean; label?: string }) {
   const { copied, copy } = useCopy();
   return (
-    <div className="flex items-center justify-between gap-3 overflow-x-auto rounded-md border border-edge bg-ink/70 px-3 py-2 ring-1 ring-inset ring-white/[0.02]">
+    <div className="flex items-start justify-between gap-3 overflow-x-auto rounded-md border border-edge bg-ink/70 px-3 py-2 ring-1 ring-inset ring-white/[0.02]">
       <code className="mono whitespace-pre text-[13px] text-fg">
-        <span className="select-none text-faint">$ </span>
+        {prompt && <span className="select-none text-faint">$ </span>}
         {cmd}
       </code>
       <button
         type="button"
         onClick={() => copy(cmd)}
-        className="label shrink-0 rounded px-1.5 py-0.5 transition-colors hover:bg-panel-2"
-        aria-label="Copy command"
+        className={`label shrink-0 rounded px-1.5 py-0.5 transition-colors hover:bg-panel-2 ${FOCUS}`}
+        aria-label={label}
       >
-        {copied ? <span className="text-match">{"✓"} copied</span> : <span className="text-faint hover:text-fg">{"⧉"} copy</span>}
+        <span aria-live="polite">
+          {copied ? <span className="text-match">{"\u2713"} Copied</span> : <span className="text-faint hover:text-fg">{"\u29c9"} Copy</span>}
+        </span>
       </button>
     </div>
   );
@@ -78,7 +82,7 @@ function Primary({ onClick, children }: { onClick: () => void; children: ReactNo
     <button
       type="button"
       onClick={onClick}
-      className="label inline-flex items-center gap-1.5 rounded-md bg-signal px-4 py-2 transition-[filter,transform] hover:brightness-110 active:scale-[0.98]"
+      className={`label inline-flex items-center gap-1.5 rounded-md bg-signal px-4 py-2 transition-[filter,transform] hover:brightness-110 active:scale-[0.98] ${FOCUS}`}
       style={{ color: "var(--color-ink)" }}
     >
       {children}
@@ -88,7 +92,7 @@ function Primary({ onClick, children }: { onClick: () => void; children: ReactNo
 
 function Ghost({ onClick, children }: { onClick: () => void; children: ReactNode }) {
   return (
-    <button type="button" onClick={onClick} className="label rounded-md px-2 py-1 text-faint transition-colors hover:text-muted">
+    <button type="button" onClick={onClick} className={`label rounded-md px-2 py-1 text-faint transition-colors hover:text-muted ${FOCUS}`}>
       {children}
     </button>
   );
@@ -290,19 +294,14 @@ export function StepCapture() {
   );
 }
 
-// ── step ③ Sharpen your coaching ───────────────────────────────────────────
+// ── step ③ Connect a model ─────────────────────────────────────────────────
 
-const CLOUD_PROVIDERS: CloudName[] = ["anthropic", "openai", "gemini", "openrouter"];
 type LocalPhase = "probing" | "ready" | "missing" | "downloading" | "error";
 
-function StepAI() {
+export function StepAI() {
   const { setOnboardingStep, onboardingStep, markOnboardingStep } = useReport();
   const desktop = isDesktop();
   const [local, setLocal] = useState<LocalPhase>("probing");
-  const [provider, setProvider] = useState<CloudName | null>(null);
-  const [key, setKey] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
 
   // Guards post-await setState: the content column is keyed by step, so leaving mid-request
@@ -331,41 +330,24 @@ function StepAI() {
     };
   }, [desktop]);
 
-  const finish = (label: string) => {
+  const finish = (message: string) => {
     markOnboardingStep("ai");
-    if (mounted.current) setDone(label);
+    if (mounted.current) setDone(message);
   };
+  // MCP coaching happens inside the user's Claude client, so coachMode is left untouched.
+  const useMcp = () => finish("Claude plan connected — coaching happens inside your Claude client.");
   const useLocal = () => {
     setCoachMode("local");
-    finish("Local AI");
+    finish("Local AI coaching is on — your notes will be command-aware.");
   };
   const download = async () => {
-    setErr(null);
     setLocal("downloading");
     try {
       const ok = await pullModel(DEFAULT_MODEL);
-      if (ok) {
-        setCoachMode("local");
-        finish("Local AI");
-      } else if (mounted.current) {
-        setLocal("error");
-      }
+      if (ok) useLocal();
+      else if (mounted.current) setLocal("error");
     } catch {
       if (mounted.current) setLocal("error");
-    }
-  };
-  const saveCloud = async () => {
-    if (!provider || !key.trim()) return;
-    setSaving(true);
-    setErr(null);
-    try {
-      await setApiKey(provider, key.trim());
-      setCoachMode(provider);
-      finish(CLOUD_LABEL[provider]);
-    } catch (e) {
-      if (mounted.current) setErr((e as Error).message);
-    } finally {
-      if (mounted.current) setSaving(false);
     }
   };
   const skip = () => {
@@ -376,7 +358,7 @@ function StepAI() {
   if (done) {
     return (
       <Readout tone="match">
-        <Check size={15} /> {done} coaching is on {"—"} your notes will be command-aware.
+        <Check size={15} /> {done}
       </Readout>
     );
   }
@@ -384,16 +366,37 @@ function StepAI() {
   return (
     <div className="space-y-4">
       <p className="max-w-prose text-[15px] leading-relaxed text-muted">
-        Coaching works out of the box on deterministic rules. A model rewrites each note into{" "}
+        Coaching works out of the box on deterministic rules. Connect a model and it rewrites each note into{" "}
         <span className="text-fg">command-aware advice</span>. Set one up now, or keep rules {"—"} your call.
       </p>
 
-      {/* Local model */}
-      <div className="space-y-2.5 rounded-lg border border-edge bg-panel/40 p-4">
+      {/* MCP: recommended */}
+      <section aria-labelledby="connect-mcp" className="space-y-3 rounded-lg border border-signal/50 bg-panel/40 p-4">
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 id="connect-mcp" className="font-display text-sm font-semibold text-fg">Use your Claude plan (owlsh MCP server)</h2>
+            <span className="label rounded bg-signal/15 px-1.5 py-0.5 text-[10px] text-signal">Recommended</span>
+          </div>
+          <p className="text-xs text-faint">Billed to the plan you already have {"—"} not API credits. owlsh connects as an MCP server.</p>
+        </div>
+        <p className="text-xs text-muted">
+          Claude Desktop: add this to <code className="mono text-fg">claude_desktop_config.json</code>, then restart it.
+        </p>
+        <CommandRow cmd={mcpDesktopConfigSnippet()} prompt={false} label="Copy Claude Desktop config" />
+        <p className="text-xs text-muted">Claude Code: run this once.</p>
+        <CommandRow cmd={mcpClaudeCodeCommand()} label="Copy Claude Code command" />
+        <p className="text-xs text-faint">Coaching then happens inside your Claude client, on your plan.</p>
+        <Primary onClick={useMcp}>{"✓"} I{"’"}ve added it</Primary>
+      </section>
+
+      {/* Local model: secondary */}
+      <section aria-labelledby="connect-local" className="space-y-2.5 rounded-lg border border-edge bg-panel/40 p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
-            <div className="font-display text-sm font-semibold text-fg">Local model {"·"} fully offline</div>
-            <div className="text-xs text-faint">Ollama runs {DEFAULT_MODEL} on your machine {"—"} commands never leave the device.</div>
+            <h2 id="connect-local" className="font-display text-sm font-semibold text-fg">Local (Ollama) {"·"} fully offline</h2>
+            <p className="text-xs text-faint">
+              Ollama runs {DEFAULT_MODEL} on your machine {"—"} free, and commands never leave the device.
+            </p>
           </div>
           {local === "ready" && <span className="label shrink-0 text-[10px] text-match">installed</span>}
         </div>
@@ -407,7 +410,7 @@ function StepAI() {
           <button
             type="button"
             onClick={download}
-            className="label inline-flex items-center gap-2 rounded-md border border-signal/40 bg-signal/10 px-4 py-2 text-signal transition-colors hover:bg-signal/15"
+            className={`label inline-flex items-center gap-2 rounded-md border border-signal/40 bg-signal/10 px-4 py-2 text-signal transition-colors hover:bg-signal/15 ${FOCUS}`}
           >
             {"⬇"} Download {DEFAULT_MODEL} (~2 GB)
           </button>
@@ -426,63 +429,13 @@ function StepAI() {
             <button
               type="button"
               onClick={download}
-              className="label inline-flex items-center gap-2 rounded-md border border-edge px-4 py-2 text-fg transition-colors hover:bg-panel-2"
+              className={`label inline-flex items-center gap-2 rounded-md border border-edge px-4 py-2 text-fg transition-colors hover:bg-panel-2 ${FOCUS}`}
             >
               Retry
             </button>
           </div>
         )}
-      </div>
-
-      {/* Cloud model */}
-      <div className="space-y-2.5 rounded-lg border border-edge bg-panel/40 p-4">
-        <div className="space-y-1">
-          <div className="font-display text-sm font-semibold text-fg">Cloud model {"·"} strongest coaching</div>
-          <div className="text-xs text-faint">
-            Pick a provider and paste a key. Commands are redacted before anything is sent; the key is stored only on your machine.
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {CLOUD_PROVIDERS.map((p) => (
-            <button
-              key={p}
-              type="button"
-              onClick={() => { setProvider(p); setErr(null); }}
-              style={provider === p ? { color: "var(--color-ink)" } : undefined}
-              className={`label rounded-md px-3 py-1.5 text-[11px] ring-1 transition-colors ${
-                provider === p ? "bg-signal ring-signal" : "text-muted ring-edge hover:ring-edge-bright"
-              }`}
-            >
-              {CLOUD_LABEL[p]}
-            </button>
-          ))}
-        </div>
-        {provider && (
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <input
-                type="password"
-                value={key}
-                onChange={(e) => setKey(e.target.value)}
-                autoComplete="off"
-                spellCheck={false}
-                placeholder={`${CLOUD_LABEL[provider]} API key`}
-                className="mono min-w-0 flex-1 rounded-md border border-edge bg-ink/60 px-2.5 py-1.5 text-xs text-fg outline-none focus:border-edge-bright"
-              />
-              <button
-                type="button"
-                onClick={saveCloud}
-                disabled={saving || !key.trim()}
-                className="label shrink-0 rounded-md bg-signal px-3 py-1.5 text-[11px] transition-[filter] hover:brightness-110 disabled:opacity-40"
-                style={{ color: "var(--color-ink)" }}
-              >
-                {saving ? "Saving…" : "Save & use"}
-              </button>
-            </div>
-            {err && <p className="text-xs text-stuck">{err}</p>}
-          </div>
-        )}
-      </div>
+      </section>
 
       <Ghost onClick={skip}>Skip {"—"} rules-based coaching is solid {"→"}</Ghost>
     </div>
