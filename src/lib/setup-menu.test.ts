@@ -1,10 +1,25 @@
 import { describe, it, expect } from "vitest";
-import { setupItems, setupIncomplete } from "./setup-menu";
+import { setupItems, setupIncomplete, setupItemTarget } from "./setup-menu";
 
 describe("setupItems", () => {
   it("includes guide, ai, connector always; widget only on desktop", () => {
     expect(setupItems({ desktop: false }).map((i) => i.id)).toEqual(["guide", "ai", "connector"]);
     expect(setupItems({ desktop: true }).map((i) => i.id)).toEqual(["guide", "ai", "connector", "widget"]);
+  });
+});
+
+describe("setupItemTarget", () => {
+  it("maps each item to its wizard step / action", () => {
+    expect(setupItemTarget("guide")).toEqual({ step: 0 });
+    expect(setupItemTarget("ai")).toEqual({ step: 2 });
+    expect(setupItemTarget("connector")).toEqual({ step: 1, jump: "connector" });
+    expect(setupItemTarget("widget")).toEqual({ widget: true });
+  });
+});
+
+describe("setupItems labels", () => {
+  it("labels the ai item 'Connect a model'", () => {
+    expect(setupItems({ desktop: false }).find((i) => i.id === "ai")?.label).toBe("Connect a model");
   });
 });
 
