@@ -75,11 +75,11 @@ export function CommandRow({ cmd, prompt = true, label = "Copy command" }: { cmd
       <button
         type="button"
         onClick={() => copy(cmd)}
-        className={`label m-1 shrink-0 self-start rounded bg-ink/70 px-1.5 py-0.5 transition-colors hover:bg-panel-2 ${FOCUS}`}
+        className={`m-1 shrink-0 self-start rounded px-2 py-1 text-xs font-medium transition-colors hover:bg-panel-2 ${FOCUS}`}
         aria-label={label}
       >
         <span aria-live="polite">
-          {copied ? <span className="text-match">{"\u2713"} Copied</span> : <span className="text-faint hover:text-fg">{"\u29c9"} Copy</span>}
+          {copied ? <span className="text-match">{"\u2713"} Copied</span> : <span className="text-muted hover:text-fg">Copy</span>}
         </span>
       </button>
     </div>
@@ -202,6 +202,24 @@ export function StepMeet() {
 
 // ── step ② Capture your first run ──────────────────────────────────────────
 
+/** A numbered step inside the capture panel — soft index chip, no connecting rail (that
+    bordered-circle-timeline look is the generic onboarding tell we're avoiding here). */
+function CaptureStep({ n, title, aside, body, children }: { n: number; title: string; aside?: string; body?: ReactNode; children: ReactNode }) {
+  return (
+    <li className="flex gap-3.5">
+      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-signal/15 text-[13px] font-semibold text-signal">{n}</span>
+      <div className="min-w-0 flex-1">
+        <h4 className="font-display text-sm font-semibold text-fg">
+          {title}
+          {aside && <span className="ml-2 font-normal text-muted">{aside}</span>}
+        </h4>
+        {body && <p className="mt-1 text-xs leading-relaxed text-muted">{body}</p>}
+        <div className="mt-2.5">{children}</div>
+      </div>
+    </li>
+  );
+}
+
 export function StepCapture() {
   const { sessionCards, switchSession, closeOnboarding, setOnboardingStep, onboardingStep, setupJump, setSetupJump } = useReport();
   // Setup menu → "VM connector" deep-links here and lands on the remote-VM choice.
@@ -219,20 +237,20 @@ export function StepCapture() {
   const count = newest?.episodes ?? 0;
 
   const options: { id: "own" | "vm"; icon: ReactNode; title: string; tag: string; desc: string }[] = [
-    { id: "own", icon: <Terminal size={16} />, title: "On your own machine", tag: "desktop · any OS", desc: "Kali / Parrot / WSL over OpenVPN. One watched shell, streaming live." },
-    { id: "vm", icon: <Crosshair size={16} />, title: "In a remote VM", tag: "Pwnbox · AttackBox", desc: "HTB Pwnbox or THM AttackBox — run the agent there, bring the run back." },
+    { id: "own", icon: <Terminal size={18} />, title: "On your own machine", tag: "Desktop, any OS", desc: "Kali, Parrot or WSL over OpenVPN. One watched shell, streaming live." },
+    { id: "vm", icon: <Crosshair size={18} />, title: "In a remote VM", tag: "Pwnbox or AttackBox", desc: "Run the agent on HTB Pwnbox or THM AttackBox, then bring the run back." },
   ];
   const codeCls = "mono rounded bg-panel-2 px-1 py-0.5 text-fg";
 
   return (
-    <div className="space-y-6">
-      <p className="max-w-prose text-[15px] leading-relaxed text-muted">
-        owlsh records a shell while you hack, then grades the run {"—"} graded debrief, coverage, and what you{"’"}d do differently. Pick where you{"’"}re working and copy the commands.
+    <div className="space-y-7">
+      <p className="max-w-prose text-[15px] leading-relaxed text-fg/90">
+        owlsh records a shell while you hack, then grades the run: a debrief of what you did, your coverage, and what you{"’"}d do differently. Choose where you{"’"}re working and copy the commands.
       </p>
 
-      <div>
-        <div id="capture-where" className="label mb-2 text-muted">Where do you hack?</div>
-        <div role="radiogroup" aria-labelledby="capture-where" className="space-y-2.5">
+      <div className="space-y-3">
+        <h3 className="font-display text-base font-semibold text-fg">Where do you hack?</h3>
+        <div role="radiogroup" aria-label="Where do you hack?" className="grid gap-2.5 sm:grid-cols-2">
           {options.map((o) => {
             const on = where === o.id;
             return (
@@ -242,66 +260,51 @@ export function StepCapture() {
                 role="radio"
                 aria-checked={on}
                 onClick={() => setWhere(o.id)}
-                className={`flex w-full items-start gap-3 rounded-lg border p-3.5 text-left transition-colors motion-reduce:transition-none ${FOCUS} ${
-                  on ? "border-signal/60 bg-panel-2" : "border-edge bg-panel hover:bg-panel-2"
+                className={`group flex flex-col gap-3 rounded-xl border p-4 text-left transition-colors motion-reduce:transition-none ${FOCUS} ${
+                  on ? "border-signal bg-signal/[0.06]" : "border-edge bg-panel hover:border-muted/50 hover:bg-panel-2"
                 }`}
               >
-                <span className="mt-0.5 shrink-0 text-muted">{o.icon}</span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex flex-wrap items-baseline gap-x-2">
-                    <span className="font-display text-sm font-semibold text-fg">{o.title}</span>
-                    <span className="label text-[10px] text-faint">{o.tag}</span>
+                <div className="flex items-center justify-between">
+                  <span className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${on ? "bg-signal/15 text-signal" : "bg-panel-2 text-muted group-hover:text-fg"}`}>
+                    {o.icon}
                   </span>
-                  <span className="mt-0.5 block text-xs text-muted">{o.desc}</span>
-                </span>
-                <span aria-hidden className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${on ? "border-signal" : "border-edge"}`}>
-                  {on && <span className="h-2 w-2 rounded-full bg-signal" />}
-                </span>
+                  <span aria-hidden className={`flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 transition-colors ${on ? "border-signal" : "border-edge group-hover:border-muted"}`}>
+                    {on && <span className="h-2 w-2 rounded-full bg-signal" />}
+                  </span>
+                </div>
+                <div>
+                  <div className="font-display text-sm font-semibold text-fg">{o.title}</div>
+                  <div className="mt-0.5 text-xs text-muted">{o.tag}</div>
+                  <p className="mt-1.5 text-xs leading-relaxed text-muted">{o.desc}</p>
+                </div>
               </button>
             );
           })}
         </div>
       </div>
 
-      <div>
+      <div className="rounded-xl border border-edge bg-panel p-5">
         {where === "own" ? (
-          <ol className="m-0 list-none p-0">
-            <li className="relative flex gap-4 pb-8">
-              <span aria-hidden className="absolute bottom-0 left-3 top-7 w-px bg-edge" />
-              <span className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-edge bg-panel-2 text-xs font-semibold text-fg">
-                1
-              </span>
-              <div className="min-w-0 flex-1 space-y-2">
-                <h3 className="font-display text-sm font-semibold text-fg">
-                  Install the agent <span className="font-normal text-faint">{"·"} one-time</span>
-                </h3>
-                <p className="text-xs text-muted">Downloads the prebuilt binary and verifies its checksum.</p>
-                <CommandRow cmd="curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh" />
-                <p className="text-xs text-faint">
-                  On Windows: <code className={codeCls}>irm https://raw.githubusercontent.com/silofy/owlsh/main/install.ps1 | iex</code>
-                </p>
-              </div>
-            </li>
-            <li className="relative flex gap-4">
-              <span className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-edge bg-panel-2 text-xs font-semibold text-fg">
-                2
-              </span>
-              <div className="min-w-0 flex-1 space-y-2">
-                <h3 className="font-display text-sm font-semibold text-fg">Run a watched shell</h3>
-                <p className="text-xs text-muted">Each command streams in live as you run it {"—"} <code className={codeCls}>exit</code> to stop.</p>
-                <CommandRow cmd="owlsh --attach --platform htb --target <box>" />
-                <p className="text-xs text-faint">
-                  Other platforms: <code className={codeCls}>--platform thm</code> (also offsec, immersive, local). Add <code className={codeCls}>--new</code> to force a fresh session.
-                </p>
-              </div>
-            </li>
+          <ol className="space-y-5">
+            <CaptureStep n={1} title="Install the agent" aside="one time" body="Downloads the prebuilt binary and verifies its checksum.">
+              <CommandRow cmd="curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh" />
+              <p className="mt-2 text-xs text-muted">
+                On Windows, run <code className={codeCls}>irm https://raw.githubusercontent.com/silofy/owlsh/main/install.ps1 | iex</code> instead.
+              </p>
+            </CaptureStep>
+            <CaptureStep n={2} title="Run a watched shell" body={<>Every command streams in live as you run it. Type <code className={codeCls}>exit</code> to stop.</>}>
+              <CommandRow cmd="owlsh --attach --platform htb --target <box>" />
+              <p className="mt-2 text-xs text-muted">
+                Other platforms: <code className={codeCls}>--platform thm</code>, plus offsec, immersive and local. Add <code className={codeCls}>--new</code> to force a fresh session.
+              </p>
+            </CaptureStep>
           </ol>
         ) : (
           <VmConnector />
         )}
       </div>
 
-      <section className="space-y-3 rounded-lg border border-signal/30 bg-panel p-4">
+      <section className="space-y-3 rounded-xl border border-signal/25 bg-signal/[0.04] p-5">
         <h3 className="font-display text-sm font-semibold text-fg">Then your run lands here</h3>
         {newest ? (
           <div className="space-y-3">
@@ -309,7 +312,7 @@ export function StepCapture() {
               <Check size={15} />
               <span>
                 Captured <span className="text-fg">{"“"}{name}{"”"}</span>
-                {count > 0 && <> {"—"} {count} commands</>}
+                {count > 0 && <>, {count} commands</>}
               </span>
             </Readout>
             <Primary
@@ -328,20 +331,26 @@ export function StepCapture() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal/60" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-signal/80" />
               </span>
-              <span className="text-muted">waiting for a session{"…"} run the attach command and it lands here live</span>
+              <span className="text-muted">Waiting for a session. Run the attach command and it lands here live.</span>
             </Readout>
             {!isDesktop() && (
-              <p className="flex items-start gap-1.5 text-xs text-faint">
+              <p className="flex items-start gap-1.5 text-xs text-muted">
                 <Terminal size={13} className="mt-px shrink-0" />
-                Live detection runs in the desktop app {"—"} you can still skip ahead and capture later.
+                Live detection runs in the desktop app. You can skip ahead and capture later.
               </p>
             )}
-            <Ghost onClick={() => setOnboardingStep(onboardingStep + 1)}>Skip for now {"—"} I{"’"}ll capture later {"→"}</Ghost>
+            <button
+              type="button"
+              onClick={() => setOnboardingStep(onboardingStep + 1)}
+              className={`rounded-md text-sm text-muted underline decoration-edge underline-offset-4 transition-colors hover:text-fg hover:decoration-muted ${FOCUS}`}
+            >
+              Skip for now, capture later
+            </button>
           </div>
         )}
       </section>
 
-      <p className="text-xs text-faint">After a run, load a write-up on the debrief to unlock the path comparison.</p>
+      <p className="text-xs text-muted">After a run, load a write-up on the debrief to unlock the path comparison.</p>
     </div>
   );
 }
@@ -662,10 +671,7 @@ export function Onboarding() {
         <main className="flex min-h-full flex-col px-7 py-8 lg:px-12 lg:py-11">
           <div key={step} className="flex-1">
             <div className="fade-in">
-              <div className="label mb-2 flex items-center gap-2 text-signal">
-                <span className="text-sm">{NUMERALS[step]}</span>
-                {meta.kicker}
-              </div>
+              <div className="mb-2 text-[13px] font-semibold text-signal">{meta.kicker}</div>
               <h1 className="font-display text-[26px] font-semibold leading-tight text-fg lg:text-3xl">{meta.title}</h1>
             </div>
             <div className="mt-6">{body}</div>
@@ -674,7 +680,7 @@ export function Onboarding() {
           {/* chrome */}
           <footer className="mt-10 flex items-center justify-between gap-4 border-t border-edge pt-5">
             <div>
-              {step > 0 && <Ghost onClick={() => setOnboardingStep(step - 1)}>{"←"} Back</Ghost>}
+              {step > 0 && <Ghost onClick={() => setOnboardingStep(step - 1)}>Back</Ghost>}
             </div>
             <div className="flex items-center gap-2">
               <Ghost onClick={closeOnboarding}>Skip</Ghost>
@@ -683,7 +689,7 @@ export function Onboarding() {
                   Enter owlsh <ArrowUpRight size={13} />
                 </Primary>
               ) : (
-                <Primary onClick={() => setOnboardingStep(step + 1)}>Next {"→"}</Primary>
+                <Primary onClick={() => setOnboardingStep(step + 1)}>Next</Primary>
               )}
             </div>
           </footer>

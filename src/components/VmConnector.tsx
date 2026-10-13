@@ -48,9 +48,9 @@ function CmdRow({ cmd }: { cmd: string }) {
         type="button"
         onClick={copy}
         aria-label="Copy command"
-        className="label shrink-0 rounded px-1.5 py-0.5 transition-colors hover:bg-panel-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/70"
+        className="shrink-0 rounded px-2 py-1 text-xs font-medium transition-colors hover:bg-panel-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/70"
       >
-        <span aria-live="polite">{copied ? <span className="text-match">{"✓"} Copied</span> : <span className="text-faint hover:text-fg">{"⧉"} Copy</span>}</span>
+        <span aria-live="polite">{copied ? <span className="text-match">{"✓"} Copied</span> : <span className="text-muted hover:text-fg">Copy</span>}</span>
       </button>
     </div>
   );
@@ -60,11 +60,10 @@ const codeCls = "mono rounded bg-panel-2 px-1 py-0.5 text-fg";
 
 function Step({ n, last, title, children }: { n: number; last?: boolean; title: ReactNode; children: ReactNode }) {
   return (
-    <li className={`relative flex gap-4 ${last ? "" : "pb-6"}`}>
-      {!last && <span aria-hidden className="absolute bottom-0 left-3 top-7 w-px bg-edge" />}
-      <span className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-edge bg-panel-2 text-xs font-semibold text-fg">{n}</span>
+    <li className={`flex gap-3.5 ${last ? "" : "pb-5"}`}>
+      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-signal/15 text-[13px] font-semibold text-signal">{n}</span>
       <div className="min-w-0 flex-1 space-y-2">
-        <h3 className="font-display text-sm font-semibold text-fg">{title}</h3>
+        <h4 className="font-display text-sm font-semibold text-fg">{title}</h4>
         {children}
       </div>
     </li>
@@ -138,8 +137,8 @@ export function VmConnector() {
 
   return (
     <div className="text-left">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <span className="label text-fg">Capture in {view.label}</span>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h4 className="font-display text-sm font-semibold text-fg">Capture in {view.label}</h4>
         <select
           aria-label="Platform"
           value={platform}
@@ -160,7 +159,7 @@ export function VmConnector() {
             <Step n={1} title={<>Install in {view.label}</>}>
               <CmdRow cmd="curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh" />
             </Step>
-            <Step n={2} title={<>Run it <span className="font-normal text-faint">{"·"} hack, then <code className={codeCls}>exit</code></span></>}>
+            <Step n={2} title={<>Run it <span className="font-normal text-muted">then hack and <code className={codeCls}>exit</code></span></>}>
               <CmdRow cmd={`owlsh --export ~/.owlsh-exports/box.json --platform ${cmdPlatform} --target <box>`} />
             </Step>
             <Step n={3} last title="Bring it back">
@@ -177,7 +176,7 @@ export function VmConnector() {
               onClick={() => setAdvancedOpen((v) => !v)}
               aria-expanded={advancedOpen}
               aria-controls="vm-autopull"
-              className="label flex w-full items-center gap-1.5 text-faint transition-colors hover:text-muted focus:outline-none focus-visible:text-signal motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/70 rounded"
+              className="flex w-full items-center gap-1.5 rounded text-xs font-medium text-muted transition-colors hover:text-fg focus:outline-none focus-visible:text-signal motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-signal/70"
             >
               <ChevronDown className={`transition-transform motion-reduce:transition-none ${advancedOpen ? "rotate-180" : ""}`} />
               <span>Auto-pull over SSH</span>
