@@ -218,56 +218,82 @@ export function StepCapture() {
   const count = newest?.episodes ?? 0;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <p className="max-w-prose text-[15px] leading-relaxed text-muted">
-        Install the capture agent once, then one command turns a shell into a recorded session. Play a box in another
-        window {"—"} each command streams into a live debrief here.
+        Two commands turn any shell into a recorded session {"—"} play a box in another window and every command streams
+        into a live debrief here.
       </p>
 
-      <CommandRow cmd="curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh" />
-      <CommandRow cmd="owlsh --attach --platform htb --target <box>" />
-      <p className="text-xs text-faint">
-        On Windows, install with{" "}
-        <code className="mono rounded bg-panel-2 px-1 py-0.5 text-fg">irm https://raw.githubusercontent.com/silofy/owlsh/main/install.ps1 | iex</code>
-        . Other platforms: <code className="mono rounded bg-panel-2 px-1 py-0.5 text-fg">--platform thm</code>.
-      </p>
-
-      {newest ? (
-        <div className="space-y-3">
-          <Readout tone="match">
-            <Check size={15} />
-            <span>
-              Captured <span className="text-fg">{"“"}{name}{"”"}</span>
-              {count > 0 && <> {"—"} {count} commands</>}
-            </span>
-          </Readout>
-          <Primary
-            onClick={() => {
-              switchSession(newest.id);
-              closeOnboarding();
-            }}
-          >
-            Open my debrief <ArrowUpRight size={13} />
-          </Primary>
-        </div>
-      ) : (
-        <div className="space-y-3 rounded-lg border border-edge bg-panel px-4 py-3.5">
-          <Readout tone="muted">
-            <span className="relative flex h-2 w-2 shrink-0">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal/60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-signal/80" />
-            </span>
-            <span className="text-muted">waiting for a session{"…"} run the command above and it lands here live</span>
-          </Readout>
-          {!isDesktop() && (
-            <p className="flex items-start gap-1.5 text-xs text-faint">
-              <Terminal size={13} className="mt-px shrink-0" />
-              Live detection runs in the desktop app {"—"} you can still skip ahead and capture later.
+      <ol className="m-0 list-none p-0">
+        <li className="relative flex gap-4 pb-8">
+          <span aria-hidden className="absolute bottom-0 left-3 top-7 w-px bg-edge" />
+          <span className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-edge bg-panel-2 text-xs font-semibold text-fg">
+            1
+          </span>
+          <div className="min-w-0 flex-1 space-y-2">
+            <h3 className="font-display text-sm font-semibold text-fg">
+              Install the agent <span className="font-normal text-faint">{"·"} one-time</span>
+            </h3>
+            <p className="text-xs text-muted">A one-time install of the owlsh capture agent.</p>
+            <CommandRow cmd="curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh" />
+            <p className="text-xs text-faint">
+              On Windows, install with{" "}
+              <code className="mono rounded bg-panel-2 px-1 py-0.5 text-fg">irm https://raw.githubusercontent.com/silofy/owlsh/main/install.ps1 | iex</code>
+              . Other platforms: <code className="mono rounded bg-panel-2 px-1 py-0.5 text-fg">--platform thm</code>.
             </p>
-          )}
-          <Ghost onClick={() => setOnboardingStep(onboardingStep + 1)}>Skip for now {"—"} I{"’"}ll capture later {"→"}</Ghost>
-        </div>
-      )}
+          </div>
+        </li>
+        <li className="relative flex gap-4">
+          <span className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-edge bg-panel-2 text-xs font-semibold text-fg">
+            2
+          </span>
+          <div className="min-w-0 flex-1 space-y-2">
+            <h3 className="font-display text-sm font-semibold text-fg">Attach to a box</h3>
+            <p className="text-xs text-muted">Start a watched shell against your target {"—"} swap in your box name.</p>
+            <CommandRow cmd="owlsh --attach --platform htb --target <box>" />
+          </div>
+        </li>
+      </ol>
+
+      <section className="space-y-3 rounded-lg border border-signal/30 bg-panel p-4">
+        <h3 className="font-display text-sm font-semibold text-fg">Then your run lands here</h3>
+        {newest ? (
+          <div className="space-y-3">
+            <Readout tone="match">
+              <Check size={15} />
+              <span>
+                Captured <span className="text-fg">{"“"}{name}{"”"}</span>
+                {count > 0 && <> {"—"} {count} commands</>}
+              </span>
+            </Readout>
+            <Primary
+              onClick={() => {
+                switchSession(newest.id);
+                closeOnboarding();
+              }}
+            >
+              Open my debrief <ArrowUpRight size={13} />
+            </Primary>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <Readout tone="muted">
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal/60" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-signal/80" />
+              </span>
+              <span className="text-muted">waiting for a session{"…"} run the command above and it lands here live</span>
+            </Readout>
+            {!isDesktop() && (
+              <p className="flex items-start gap-1.5 text-xs text-faint">
+                <Terminal size={13} className="mt-px shrink-0" />
+                Live detection runs in the desktop app {"—"} you can still skip ahead and capture later.
+              </p>
+            )}
+            <Ghost onClick={() => setOnboardingStep(onboardingStep + 1)}>Skip for now {"—"} I{"’"}ll capture later {"→"}</Ghost>
+          </div>
+        )}
+      </section>
 
       <details
         className="group/all border-t border-edge pt-4"
