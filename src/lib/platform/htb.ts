@@ -15,6 +15,7 @@ export const htbAdapter: PlatformAdapter = {
   id: "htb",
   label: "Hack The Box",
   kindNoun: "box",
+  connector: { kind: "ssh", label: "Pwnbox", hint: "username@hostname — from the Pwnbox panel" },
   detect(ctx: DetectContext) {
     if (ctx.platformHint === "htb") return 1;
     if (/\bhtb|pwnbox|hackthebox\b/i.test(ctx.contextPath ?? "")) return 0.9;

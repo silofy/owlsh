@@ -1,4 +1,5 @@
-import type { PlatformAdapter } from "./types";
+import type { PlatformAdapter, Connector } from "./types";
+import { getConnectorPlatform } from "../pwnbox";
 import type { PlatformId, Target, OwlshReport } from "../../types/report";
 import { htbAdapter } from "./htb";
 import { thmAdapter } from "./thm";
@@ -55,4 +56,20 @@ export function targetOf(report: OwlshReport): Target {
     platformHint: s.machine ? "htb" : undefined,
   };
   return resolveAdapter(ctx).identify(s.machine, ctx);
+}
+
+/** The connector descriptor for a platform; unknown/demo ids fall back to HTB's. */
+export function connectorFor(id: PlatformId): Connector {
+  return (adapterFor(id) ?? htbAdapter).connector;
+}
+
+/** Which platform the Setup menu should default to: the live report's, else the newest session
+ *  card's, else the last manual pick, else HTB. */
+export function activePlatform(
+  report: OwlshReport | null,
+  cards: { target: { platform: PlatformId } }[],
+): PlatformId {
+  if (report) return targetOf(report).platform;
+  if (cards[0]?.target?.platform) return cards[0].target.platform;
+  return getConnectorPlatform() ?? "htb";
 }

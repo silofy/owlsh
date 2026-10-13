@@ -6,6 +6,7 @@ export const localAdapter: PlatformAdapter = {
   id: "local",
   label: "Local / CTF",
   kindNoun: "host",
+  connector: { kind: "local", label: "Local capture", note: "Capture runs on this machine — nothing to connect." },
   detect: () => 0.1, // guaranteed floor so resolveAdapter always has a winner
   identify(machine: Machine | undefined, ctx: DetectContext): Target {
     const raw = ctx.targetScope ?? "session";

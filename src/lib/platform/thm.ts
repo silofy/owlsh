@@ -48,6 +48,7 @@ export const thmAdapter: PlatformAdapter = {
   id: "thm",
   label: "TryHackMe",
   kindNoun: "room",
+  connector: { kind: "ssh", label: "AttackBox", hint: "user@IP — click the ‘i’ on the booted AttackBox" },
   detect(ctx: DetectContext) {
     if (ctx.platformHint === "thm") return 1;
     if (/\bthm|tryhackme\b/i.test(ctx.contextPath ?? "")) return 0.9;
