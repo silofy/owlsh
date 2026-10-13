@@ -149,19 +149,17 @@ function ProgressRail({ step, stepDone }: { step: number; stepDone: boolean[] })
 
 // ── step ① Meet owlsh ────────────────────────────────────────────────
 
-function StepMeet() {
-  const { startLiveDemo, demo, markOnboardingStep } = useReport();
+export function StepMeet() {
+  const { markOnboardingStep } = useReport();
   const marked = useRef(false);
 
+  // The intro is the whole step: seeing it completes step 0 (key stays "demo").
   useEffect(() => {
-    if (demo?.phase === "compared" && !marked.current) {
+    if (!marked.current) {
       marked.current = true;
       markOnboardingStep("demo");
     }
-  }, [demo?.phase, markOnboardingStep]);
-
-  const streaming = demo != null && demo.phase !== "compared";
-  const played = demo != null;
+  }, [markOnboardingStep]);
 
   const pipeline: { icon: ReactNode; head: string; body: string; tone: string }[] = [
     { icon: <span className="animate-pulse">{"●"}</span>, head: "Record", body: "a watched shell streams every command as you hack", tone: "var(--color-signal)" },
@@ -189,33 +187,6 @@ function StepMeet() {
           </li>
         ))}
       </ul>
-
-      <div className="space-y-3">
-        <button
-          type="button"
-          onClick={() => startLiveDemo("saltmarsh")}
-          disabled={streaming}
-          className="label inline-flex items-center gap-2 rounded-md border border-signal/40 bg-signal/10 px-4 py-2 text-signal transition-colors hover:bg-signal/15 disabled:cursor-progress disabled:opacity-60"
-        >
-          {"▶"} {played && !streaming ? "Replay the demo" : "Play a 60-second demo"}
-        </button>
-
-        {demo != null && (
-          <Readout tone={demo.phase === "compared" ? "match" : "signal"}>
-            {demo.phase === "compared" ? (
-              <span>
-                {"✓"} Debrief graded {"—"} replayed {demo.total} commands and unlocked the write-up comparison
-              </span>
-            ) : demo.phase === "resolved" ? (
-              <span>{"◦"} run complete {"—"} grading the debrief{"…"}</span>
-            ) : (
-              <span>
-                {"▶"} streaming{"…"} <span className="tabular-nums">{demo.n}</span>/<span className="tabular-nums">{demo.total}</span>
-              </span>
-            )}
-          </Readout>
-        )}
-      </div>
     </div>
   );
 }
