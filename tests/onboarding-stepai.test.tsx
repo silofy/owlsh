@@ -12,4 +12,15 @@ describe("StepAI", () => {
   it("shows the MCP add command", () => {
     expect(html).toContain("claude mcp add owlsh -- owlsh mcp");
   });
+  it("offers Claude, Gemini and ChatGPT, plus Local; no API-key field", () => {
+    expect(html).toMatch(/Claude/);
+    expect(html).toMatch(/Gemini/);
+    expect(html).toMatch(/ChatGPT/);
+    expect(html).toMatch(/Ollama/);
+    expect(html).not.toMatch(/API key/i);
+  });
+  it("marks ChatGPT as advanced (needs a tunnel)", () => {
+    expect(html).toMatch(/advanced/i);
+    expect(html).toMatch(/tunnel/i);
+  });
 });

@@ -6,7 +6,13 @@ import { setCoachMode } from "../lib/llm/mode";
 import { Check, ScanEye, OwlMark, ArrowUpRight, Terminal, Crosshair, ChevronDown } from "./icons";
 import { InstallReference } from "./Install";
 import { VmConnector } from "./VmConnector";
-import { mcpClaudeCodeCommand, mcpDesktopConfigSnippet } from "../lib/hints/mcp-connect";
+import {
+  MCP_CLIENTS,
+  mcpClaudeCodeCommand,
+  mcpDesktopConfigSnippet,
+  mcpGeminiCommand,
+  mcpGeminiConfigSnippet,
+} from "../lib/hints/mcp-connect";
 
 const FOCUS = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/70";
 
@@ -282,6 +288,7 @@ export function StepCapture() {
 
 // ── step ③ Connect a model ─────────────────────────────────────────────────
 
+type McpClientId = (typeof MCP_CLIENTS)[number]["id"];
 type LocalPhase = "probing" | "ready" | "missing" | "downloading" | "error";
 
 export function StepAI() {
@@ -289,6 +296,8 @@ export function StepAI() {
   const desktop = isDesktop();
   const [local, setLocal] = useState<LocalPhase>("probing");
   const [done, setDone] = useState<string | null>(null);
+  // Claude is the recommended path, so it starts expanded; the others show label + note only.
+  const [open, setOpen] = useState<McpClientId | null>("claude");
 
   // Guards post-await setState: the content column is keyed by step, so leaving mid-request
   // unmounts this. The coaching choice still persists; only the visual state is gated.
@@ -321,7 +330,7 @@ export function StepAI() {
     if (mounted.current) setDone(message);
   };
   // MCP coaching happens inside the user's Claude client, so coachMode is left untouched.
-  const useMcp = () => finish("Claude plan connected — coaching happens inside your Claude client.");
+  const useMcp = (label: string) => finish(`${label} connected — coaching happens inside your ${label} client.`);
   const useLocal = () => {
     setCoachMode("local");
     finish("Local AI coaching is on — your notes will be command-aware.");
@@ -350,36 +359,90 @@ export function StepAI() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <p className="max-w-prose text-[15px] leading-relaxed text-muted">
         Coaching works out of the box on deterministic rules. Connect a model and it rewrites each note into{" "}
         <span className="text-fg">command-aware advice</span>. Set one up now, or keep rules {"—"} your call.
       </p>
 
-      {/* MCP: recommended */}
-      <section aria-labelledby="connect-mcp" className="space-y-3 rounded-lg border border-signal/50 bg-panel/40 p-4">
+      {/* Plan group: recommended (the only coloured card) */}
+      <section aria-labelledby="connect-plan" className="space-y-3 rounded-lg border border-signal/50 bg-panel p-4">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 id="connect-mcp" className="font-display text-sm font-semibold text-fg">Use your Claude plan (owlsh MCP server)</h2>
+            <h2 id="connect-plan" className="font-display text-sm font-semibold text-fg">Use a plan you already have</h2>
             <span className="label rounded bg-signal/15 px-1.5 py-0.5 text-[10px] text-signal">Recommended</span>
           </div>
-          <p className="text-xs text-faint">Billed to the plan you already have {"—"} not API credits. owlsh connects as an MCP server.</p>
+          <p className="text-xs text-faint">Billed to the plan you already have {"—"} not API credits. owlsh connects as a local MCP server.</p>
         </div>
-        <p className="text-xs text-muted">
-          Claude Desktop: add this to <code className="mono text-fg">claude_desktop_config.json</code>, then restart it.
-        </p>
-        <CommandRow cmd={mcpDesktopConfigSnippet()} prompt={false} label="Copy Claude Desktop config" />
-        <p className="text-xs text-muted">Claude Code: run this once.</p>
-        <CommandRow cmd={mcpClaudeCodeCommand()} label="Copy Claude Code command" />
-        <p className="text-xs text-faint">Coaching then happens inside your Claude client, on your plan.</p>
-        <Primary onClick={useMcp}>{"✓"} I{"’"}ve added it</Primary>
+        <ul className="space-y-3">
+          {MCP_CLIENTS.map((c) => {
+            const expanded = open === c.id;
+            const panelId = `connect-${c.id}-panel`;
+            return (
+              <li key={c.id} className="rounded-md border border-edge bg-panel-2 p-3">
+                <button
+                  type="button"
+                  onClick={() => setOpen(expanded ? null : c.id)}
+                  aria-expanded={expanded}
+                  aria-controls={panelId}
+                  className={`flex w-full items-center justify-between gap-3 rounded text-left ${FOCUS}`}
+                >
+                  <span className="flex flex-wrap items-center gap-2">
+                    <span className="font-display text-sm font-semibold text-fg">{c.label}</span>
+                    <span className="label text-[10px] text-faint">{c.tier === "advanced" ? "advanced" : "first-class"}</span>
+                  </span>
+                  <ChevronDown size={12} className={`shrink-0 text-faint transition-transform motion-reduce:transition-none ${expanded ? "rotate-180" : ""}`} />
+                </button>
+                {c.note && <p className="mt-2 text-xs text-muted">{c.note}</p>}
+                {expanded && (
+                  <div id={panelId} className="mt-3 space-y-3">
+                    {c.id === "claude" && (
+                      <>
+                        <p className="text-xs text-muted">Your Claude plan: run this once in Claude Code.</p>
+                        <CommandRow cmd={mcpClaudeCodeCommand()} label="Copy Claude Code command" />
+                        <p className="text-xs text-muted">
+                          Claude Desktop: add this to <code className="mono text-fg">claude_desktop_config.json</code>, then restart it.
+                        </p>
+                        <CommandRow cmd={mcpDesktopConfigSnippet()} prompt={false} label="Copy Claude Desktop config" />
+                      </>
+                    )}
+                    {c.id === "gemini" && (
+                      <>
+                        <p className="text-xs text-muted">Gemini CLI: run this once.</p>
+                        <CommandRow cmd={mcpGeminiCommand()} label="Copy Gemini command" />
+                        <p className="text-xs text-muted">
+                          Or add this to <code className="mono text-fg">~/.gemini/settings.json</code>.
+                        </p>
+                        <CommandRow cmd={mcpGeminiConfigSnippet()} prompt={false} label="Copy Gemini config" />
+                      </>
+                    )}
+                    {c.id === "chatgpt" && c.href && (
+                      <a
+                        href={c.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`inline-flex items-center gap-1 rounded text-xs text-signal underline decoration-signal/40 underline-offset-2 hover:decoration-signal ${FOCUS}`}
+                      >
+                        Set up the tunnel <ArrowUpRight size={12} />
+                      </a>
+                    )}
+                    <p className="text-xs text-faint">Coaching then happens inside {c.label}, on your plan.</p>
+                    <Primary onClick={() => useMcp(c.label)}>
+                      {"✓"} {c.id === "chatgpt" ? "Done" : `I’ve added it`}
+                    </Primary>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
       </section>
 
-      {/* Local model: secondary */}
-      <section aria-labelledby="connect-local" className="space-y-2.5 rounded-lg border border-edge bg-panel/40 p-4">
+      {/* Local model: neutral */}
+      <section aria-labelledby="connect-local" className="space-y-3 rounded-lg border border-edge bg-panel p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
-            <h2 id="connect-local" className="font-display text-sm font-semibold text-fg">Local (Ollama) {"·"} fully offline</h2>
+            <h2 id="connect-local" className="font-display text-sm font-semibold text-fg">Run a model locally (Ollama) {"·"} fully offline</h2>
             <p className="text-xs text-faint">
               Ollama runs {DEFAULT_MODEL} on your machine {"—"} free, and commands never leave the device.
             </p>
