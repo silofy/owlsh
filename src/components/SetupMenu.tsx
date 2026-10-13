@@ -59,7 +59,7 @@ export function SetupMenu() {
         <ChevronDown size={12} />
       </button>
       {open && (
-        <div className="absolute left-0 top-full z-20 mt-1 w-[22rem] max-w-[90vw] rounded-[3px] border border-edge bg-ink p-1.5 shadow-lg">
+        <div className="absolute left-0 top-full z-20 mt-1 min-w-[16rem] max-w-[90vw] rounded-lg border border-edge bg-panel p-2 shadow-xl">
           {items.map((it) => {
             const urgent = it.id === "guide" && incomplete;
             return (
@@ -67,11 +67,12 @@ export function SetupMenu() {
                 key={it.id}
                 type="button"
                 onClick={() => select(it.id)}
-                className={`flex w-full items-center justify-between rounded-[3px] px-2.5 py-2 text-left text-xs transition-colors hover:bg-edge/40 ${
+                className={`flex w-full flex-col gap-0.5 rounded-md px-3 py-2.5 text-left text-sm transition-colors hover:bg-panel-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/70 motion-reduce:transition-none ${
                   urgent ? "font-semibold text-signal" : "text-fg"
                 }`}
               >
                 <span>{urgent ? "Finish setup" : it.label}</span>
+                <span className="text-xs font-normal text-faint">{it.desc}</span>
               </button>
             );
           })}

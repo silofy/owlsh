@@ -23,6 +23,16 @@ describe("setupItems labels", () => {
   });
 });
 
+describe("setupItems descriptions", () => {
+  it("gives every item a non-empty one-line desc", () => {
+    for (const it of setupItems({ desktop: true })) {
+      expect(it.desc.trim().length).toBeGreaterThan(0);
+      expect(it.desc).not.toContain("\n");
+    }
+    expect(setupItems({ desktop: true }).find((i) => i.id === "guide")?.desc).toBe("Walk through activation");
+  });
+});
+
 describe("setupIncomplete", () => {
   it("is true until onboarded and a real capture exists", () => {
     expect(setupIncomplete({ onboarded: true, hasRealCapture: false })).toBe(true);
