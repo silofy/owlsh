@@ -3,7 +3,9 @@ import { useReport } from "../store/report";
 import { STEP_COUNT, deriveChecklist } from "../lib/onboarding";
 import { llmStatus, pullModel, DEFAULT_MODEL } from "../lib/llm/runtime";
 import { setCoachMode } from "../lib/llm/mode";
-import { Check, ScanEye, OwlMark, ArrowUpRight, Terminal, Crosshair, ChevronDown } from "./icons";
+import { Check, ScanEye, OwlMark, ArrowUpRight, Terminal, Crosshair, ChevronDown, ClaudeMark, GeminiMark, ChatGptMark } from "./icons";
+
+const MARKS = { claude: ClaudeMark, gemini: GeminiMark, chatgpt: ChatGptMark } as const;
 import { InstallReference } from "./Install";
 import { VmConnector } from "./VmConnector";
 import {
@@ -378,6 +380,7 @@ export function StepAI() {
           {MCP_CLIENTS.map((c) => {
             const expanded = open === c.id;
             const panelId = `connect-${c.id}-panel`;
+            const Mark = MARKS[c.id];
             return (
               <li key={c.id} className="rounded-md border border-edge bg-panel-2 p-3">
                 <button
@@ -388,6 +391,7 @@ export function StepAI() {
                   className={`flex w-full items-center justify-between gap-3 rounded text-left ${FOCUS}`}
                 >
                   <span className="flex flex-wrap items-center gap-2">
+                    <Mark size={16} className="shrink-0 text-fg" aria-hidden />
                     <span className="font-display text-sm font-semibold text-fg">{c.label}</span>
                     <span className="label text-[10px] text-faint">{c.tier === "advanced" ? "advanced" : "first-class"}</span>
                   </span>
@@ -486,7 +490,15 @@ export function StepAI() {
         )}
       </section>
 
-      <Ghost onClick={skip}>Skip {"—"} rules-based coaching is solid {"→"}</Ghost>
+      <div className="border-t border-edge pt-4">
+        <button
+          type="button"
+          onClick={skip}
+          className={`inline-flex items-center gap-1.5 rounded-md border border-edge px-3 py-2 text-sm text-muted transition-colors motion-reduce:transition-none hover:bg-panel-2 hover:text-fg ${FOCUS}`}
+        >
+          Keep rule-based coaching for now <span aria-hidden>{"→"}</span>
+        </button>
+      </div>
     </div>
   );
 }

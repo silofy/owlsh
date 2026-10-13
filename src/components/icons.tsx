@@ -155,3 +155,39 @@ export function OwlMark({ size = 24, className = "" }: { size?: number; classNam
     </svg>
   );
 }
+
+/* ── Provider brand marks ──────────────────────────────────────────────────────────────────────
+ * Simplified monochrome glyphs (currentColor) so they sit in the editorial-dark system. Not the
+ * official artwork: recognisable approximations that stay crisp at 16px. */
+type MarkProps = { size?: number; className?: string };
+
+/** Claude / Anthropic — radial sunburst of eight rounded rays. */
+export function ClaudeMark({ size = 16, className = "" }: MarkProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" className={`shrink-0 ${className}`} aria-hidden="true" focusable="false">
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((a) => (
+        <line key={a} x1="12" y1="3" x2="12" y2={a % 90 === 0 ? 8.5 : 7.5} transform={`rotate(${a} 12 12)`} />
+      ))}
+    </svg>
+  );
+}
+
+/** Gemini — four-point concave spark. */
+export function GeminiMark({ size = 16, className = "" }: MarkProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={`shrink-0 ${className}`} aria-hidden="true" focusable="false">
+      <path d="M12 1.5C12.6 7.6 16.4 11.4 22.5 12C16.4 12.6 12.6 16.4 12 22.5C11.4 16.4 7.6 12.6 1.5 12C7.6 11.4 11.4 7.6 12 1.5Z" />
+    </svg>
+  );
+}
+
+/** ChatGPT / OpenAI — interlaced three-loop knot (rosette). */
+export function ChatGptMark({ size = 16, className = "" }: MarkProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinejoin="round" className={`shrink-0 ${className}`} aria-hidden="true" focusable="false">
+      {[0, 60, 120].map((a) => (
+        <rect key={a} x="8.2" y="1.8" width="7.6" height="20.4" rx="3.8" transform={`rotate(${a} 12 12)`} />
+      ))}
+    </svg>
+  );
+}
