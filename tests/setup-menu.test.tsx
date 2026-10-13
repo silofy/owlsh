@@ -9,7 +9,7 @@ describe("SetupMenu (closed state)", () => {
     expect(html).toContain("<button");
     expect(html).toContain("Setup");
     expect(html).toContain("<svg");
-    // landmark strings confirmed in VmConnector.tsx / ConnectModelPaths.tsx
+    // landmark strings confirmed in VmConnector.tsx / Onboarding.tsx StepAI (MCP card)
     expect(html).not.toContain("Auto-pull over SSH");
     expect(html).not.toContain("Use your Claude plan");
   });
