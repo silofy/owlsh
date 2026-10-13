@@ -3,6 +3,7 @@ import { useReport } from "../store/report";
 import { MachineAvatar } from "./MachineAvatar";
 import { DIFFICULTY_COLOR } from "../lib/machine";
 import { loadPwnboxConfig } from "../lib/pwnbox";
+import { connectorFor } from "../lib/platform";
 import type { OwlshReport } from "../types/report";
 import type { SshLogFile } from "../lib/ssh/ingest";
 
@@ -87,6 +88,7 @@ export function LiveBridge() {
   const startedMs = card ? Date.parse(card.started_at) : NaN;
   const elapsed = Number.isNaN(startedMs) || now === 0 ? null : now - startedMs;
 
+  const connectorLabel = connectorFor(t?.platform ?? "htb").label;
   const diffColor = t?.difficulty?.label ? DIFFICULTY_COLOR[t.difficulty.label] : undefined;
 
   return (
@@ -108,8 +110,8 @@ export function LiveBridge() {
               {loadPwnboxConfig().enabled && (
                 <>
                   <span className="h-2.5 w-px bg-edge" aria-hidden />
-                  <span className="label flex items-center gap-1 text-match" title="Pwnbox SSH auto-pull is active — sessions are scp-pulled every 15s">
-                    <span aria-hidden>⟳</span> Pwnbox
+                  <span className="label flex items-center gap-1 text-match" title={`${connectorLabel} SSH auto-pull is active — sessions are scp-pulled every 15s`}>
+                    <span aria-hidden>⟳</span> {connectorLabel}
                   </span>
                 </>
               )}

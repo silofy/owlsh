@@ -18,19 +18,15 @@ import { PathComparison } from "./components/PathComparison";
 import { History } from "./components/History";
 import { Progress } from "./components/Progress";
 import { WriteupGate } from "./components/WriteupGate";
-import { LlmStatusChip } from "./components/LlmStatusChip";
-import { PwnboxSync } from "./components/PwnboxSync";
 import { AiBanner } from "./components/AiBanner";
 import { LiveBridge } from "./components/LiveBridge";
 import { DemoDriver } from "./components/DemoDriver";
 import { LiveDashboard } from "./components/LiveDashboard";
+import { SetupMenu } from "./components/SetupMenu";
 import { Onboarding } from "./components/Onboarding";
 import { isLiveRecording } from "./lib/live";
 import { pickOneLesson } from "./lib/one-lesson";
-import { shouldShowNudge } from "./lib/onboarding";
 import { OwlMark } from "./components/icons";
-import { ditherMask } from "./lib/dither";
-import { isDesktop } from "./lib/net";
 import { StepStrip } from "./components/StepStrip";
 import { DefenseRubric } from "./components/DefenseRubric";
 import type { OneLesson } from "./lib/one-lesson";
@@ -187,13 +183,10 @@ function DefenseDebrief({ report }: { report: DefenseReport }) {
 }
 
 export function App() {
-  const { report, view, gateDismissed, onboardingOpen, openOnboarding, setOnboardingStep, sessionCards, defenseReport } = useReport();
+  const { report, view, gateDismissed, onboardingOpen, defenseReport } = useReport();
   const { session } = report;
   const needsWriteup = report.golden_dag.length === 0 && !gateDismissed;
   const recording = isLiveRecording(report);
-
-  const hasRealCapture = sessionCards.some((c) => !c.demo);
-  const showNudge = !onboardingOpen && shouldShowNudge({ onboarded: true, hasRealCapture });
 
   const hasGhost = !!report.ghost?.items?.length;
   const num = { path: "01", audit: "02", ghost: "03", grade: hasGhost ? "04" : "03" };
@@ -215,37 +208,8 @@ export function App() {
                 <Tab id="debrief" label="Debrief" />
                 <Tab id="history" label="History" />
                 <Tab id="progress" label="Progress" />
+                <SetupMenu />
               </nav>
-            </div>
-            <div className="flex items-center gap-2.5 text-xs">
-              {showNudge ? (
-                <button
-                  type="button"
-                  onClick={() => { setOnboardingStep(1); openOnboarding(); }}
-                  className="group inline-flex items-center gap-2 rounded-[3px] border border-signal/45 px-3 py-1.5 font-mono text-[10.5px] font-medium uppercase tracking-[0.14em] text-signal transition-colors hover:border-signal hover:bg-signal/5"
-                  title="Finish setup — capture your first run"
-                >
-                  <span aria-hidden="true" className="setup-lamp inline-block h-2 w-2 bg-signal" style={ditherMask()} />
-                  Finish setup
-                  <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">→</span>
-                </button>
-              ) : (
-                <button type="button" onClick={openOnboarding} className="label text-faint hover:text-muted">
-                  Setup guide
-                </button>
-              )}
-              {isDesktop() && (
-                <button
-                  type="button"
-                  onClick={() => void import("@tauri-apps/api/core").then(({ invoke }) => invoke("open_widget"))}
-                  className="label rounded-[3px] border border-edge px-2.5 py-1.5 text-muted transition-colors hover:border-signal hover:text-fg"
-                  title="Open the live widget: a small always-on-top window to keep beside your terminal"
-                >
-                  Widget
-                </button>
-              )}
-              <PwnboxSync />
-              <LlmStatusChip />
             </div>
           </div>
         </div>

@@ -8,14 +8,14 @@ import { VmConnector } from "./VmConnector";
 
 /** Nav dropdown hosting the setup sections (guide / AI / VM connector / widget). One section open at a time. */
 export function SetupMenu() {
-  const { sessionCards, openOnboarding, setOnboardingStep } = useReport();
+  const { sessionCards, onboardingOpen, openOnboarding, setOnboardingStep } = useReport();
   const [open, setOpen] = useState(false);
   const [section, setSection] = useState<SetupItemId | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
   const desktop = isDesktop();
   const hasRealCapture = sessionCards.some((c) => !c.demo);
-  const incomplete = setupIncomplete({ onboarded: true, hasRealCapture });
+  const incomplete = setupIncomplete({ onboarded: !onboardingOpen, hasRealCapture });
   const items = setupItems({ desktop });
 
   useEffect(() => {
