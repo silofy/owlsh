@@ -5,6 +5,8 @@ import { headline, WIDGET_SIZES, type WidgetSize } from "../lib/widget/render";
 import { isDesktop } from "../lib/net";
 import { targetOf } from "../lib/platform";
 import { useHint } from "../lib/hints/use-hint";
+import { getCoachMode, hasApiKey } from "../lib/llm";
+import { shouldPromptConnect } from "../lib/hints/connect-cta";
 import { HintLine } from "./HintLine";
 import { LookupOptIn } from "./LookupOptIn";
 import demo from "../../fixtures/session-demo-full.json";
@@ -77,6 +79,18 @@ export function WidgetWindow() {
     };
   }, [desktop]);
 
+  // Simplification: the widget doesn't probe Ollama, so `ollamaReachable` is treated as false — in
+  // "local" mode the CTA shows until the user switches to a model the widget can see is configured.
+  // Cloud modes check the stored key (async, so assume "no key" until it resolves).
+  const mode = getCoachMode();
+  const [hasKey, setHasKey] = useState(false);
+  useEffect(() => {
+    if (mode === "rules" || mode === "local") return;
+    let alive = true;
+    hasApiKey(mode).then((k) => alive && setHasKey(k), () => {});
+    return () => { alive = false; };
+  }, [mode]);
+
   const { hint, pending, askLookup, penalty, ready, pull: pullHint, lookupDone } = useHint(report, path, desktop);
 
   useEffect(() => {
@@ -90,6 +104,18 @@ export function WidgetWindow() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   });
+
+  async function openMainWindow() {
+    if (!desktop) return;
+    try {
+      const { Window } = await import("@tauri-apps/api/window");
+      const main = await Window.getByLabel("main");
+      await main?.show();
+      await main?.setFocus();
+    } catch {
+      /* no main window — the line stays as a visible hint */
+    }
+  }
 
   async function close() {
     if (!desktop) return;
@@ -194,6 +220,11 @@ export function WidgetWindow() {
               box={targetOf(report).name}
               onDone={lookupDone}
             />
+          )}
+          {desktop && !hint && shouldPromptConnect(mode, false, hasKey) && (
+            <button type="button" onClick={() => void openMainWindow()} className="text-left text-faint hover:text-fg">
+              Connect a model for AI hints →
+            </button>
           )}
           <HintLine text={hint?.text ?? null} source={hint?.source ?? null} pending={pending} />
           <button
