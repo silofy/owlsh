@@ -7,7 +7,13 @@ type Guard = { allow(re: RegExp): void };
 export const test = base.extend<{ tauri: TauriFake; model: ModelFake; guard: Guard }>({
   guard: [
     async ({ page }, use) => {
-      const allowed: RegExp[] = [];
+      const allowed: RegExp[] = [
+        // The target avatar (MachineAvatar.resolveAvatar: HTB CDN / THM og:image) is fetched
+        // at runtime and is expected to be unreachable offline and in CI; the component already
+        // degrades to a generated emblem via onError. Ignore genuine network-connectivity
+        // failures to unreachable hosts, but still catch our own HTTP (e.g. 404) and JS errors.
+        /net::ERR_(CONNECTION_REFUSED|NAME_NOT_RESOLVED|FAILED|CONNECTION_RESET|CONNECTION_TIMED_OUT|ADDRESS_UNREACHABLE|INTERNET_DISCONNECTED)/,
+      ];
       const errors: string[] = [];
       page.on("console", (m) => {
         if (m.type() === "error") errors.push(m.text());
