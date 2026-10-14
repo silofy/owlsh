@@ -58,7 +58,9 @@ export function SetupMenu() {
         }`}
       >
         Setup
-        <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: incomplete ? "var(--color-detour)" : "var(--color-faint)" }} />
+        {incomplete && (
+          <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: "var(--color-detour)" }} title="Setup incomplete" />
+        )}
         <ChevronDown size={12} />
       </button>
       {open && (
