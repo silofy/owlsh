@@ -218,7 +218,7 @@ function PhaseCard({ p }: { p: PhaseAuditT }) {
   const missed = p.objectives.filter((o) => !o.reached).length;
   const clean = p.insights.length === 0 && p.manual.length === 0 && missed === 0;
   return (
-    <details className="rise rounded-lg border border-edge transition-colors hover:border-edge-bright">
+    <details className="rise relative z-0 rounded-lg border border-edge transition-colors hover:z-20 hover:border-edge-bright">
       <summary className="flex cursor-pointer list-none items-center gap-3.5 rounded-t-lg px-4 py-3 transition-colors hover:bg-panel-2" title={line}>
         <PhaseLevel value={p.efficiency} />
         <div className="flex min-w-0 flex-1 items-center justify-between gap-6">
@@ -322,7 +322,7 @@ function PhaseCard({ p }: { p: PhaseAuditT }) {
 /** Cross-cutting coaching with no single home phase — the Lighthouse "General" group. */
 function GeneralCard({ items }: { items: AuditItem[] }) {
   return (
-    <details className="rise rounded-lg border border-edge transition-colors hover:border-edge-bright">
+    <details className="rise relative z-0 rounded-lg border border-edge transition-colors hover:z-20 hover:border-edge-bright">
       <summary className="flex cursor-pointer list-none items-center gap-3.5 rounded-t-lg px-4 py-3 transition-colors hover:bg-panel-2" title="Cross-cutting: not tied to a single phase">
         <PhaseLevel value={null} />
         <div className="flex min-w-0 flex-1 items-center justify-between gap-6">
