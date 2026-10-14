@@ -86,6 +86,14 @@ body {
     color: var(--color-faint);
   }
 
+  /* In the onboarding wizard the mono-caps eyebrow is retired: labels read as quiet sentence-case
+     sans. Scoped to .onboarding-wizard so the eyebrow stays the brand voice everywhere else. */
+  .onboarding-wizard .label {
+    font-family: var(--font-display);
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
   /* section anchor: the top header tier for a numbered narrative section — same mono-caps
      identity as .label, but larger, heavier and full-bright so it clearly outranks the sub-labels
      (.label) nested inside it. This gap is the page's primary hierarchy. */

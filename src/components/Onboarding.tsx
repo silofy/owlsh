@@ -632,7 +632,7 @@ export function Onboarding() {
   const body = step === 0 ? <StepMeet /> : step === 1 ? <StepCapture /> : step === 2 ? <StepAI /> : <StepRecap />;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-ink text-fg">
+    <div className="onboarding-wizard fixed inset-0 z-50 overflow-y-auto bg-ink text-fg">
       {/* atmosphere — a single low, cool wash so the panel reads lit, not flat */}
       <div
         aria-hidden
