@@ -3,9 +3,22 @@ import { useReport } from "../store/report";
 import { STEP_COUNT, deriveChecklist } from "../lib/onboarding";
 import { llmStatus, pullModel, DEFAULT_MODEL } from "../lib/llm/runtime";
 import { setCoachMode } from "../lib/llm/mode";
-import { setApiKey, CLOUD_LABEL, type CloudName } from "../lib/llm/cloud";
-import { Check, ScanEye, OwlMark, ArrowUpRight, Terminal, Crosshair, ChevronDown } from "./icons";
-import { InstallReference } from "./Install";
+import { Check, ScanEye, OwlMark, ArrowUpRight, Terminal, Crosshair, ChevronDown, ClaudeMark, GeminiMark, ChatGptMark, OllamaMark } from "./icons";
+
+const MARKS = { claude: ClaudeMark, gemini: GeminiMark, chatgpt: ChatGptMark } as const;
+import { VmConnector } from "./VmConnector";
+import {
+  MCP_CLIENTS,
+  mcpClaudeCodeCommand,
+  mcpDesktopConfigSnippet,
+  mcpGeminiCommand,
+  mcpGeminiConfigSnippet,
+  mcpPlanStatus,
+  owlshBinPath,
+  type PlanStatus,
+} from "../lib/hints/mcp-connect";
+
+const FOCUS = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/70";
 
 /** Tauri-only: never read `window` at module load — only inside handlers/effects. */
 const isDesktop = () => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -15,7 +28,7 @@ const NUMERALS = ["①", "②", "③", "④", "⑤", "⑥"]; // ①②③④…
 const STEPS = [
   { kicker: "The instrument", title: "Meet owlsh" },
   { kicker: "Your own box", title: "Capture your first run" },
-  { kicker: "Local AI", title: "Sharpen your coaching" },
+  { kicker: "Coach model", title: "Connect a model" },
   { kicker: "Preflight complete", title: "You're set" },
 ] as const;
 
@@ -52,21 +65,25 @@ function useCopy() {
   return { copied, copy };
 }
 
-function CommandRow({ cmd }: { cmd: string }) {
+export function CommandRow({ cmd, prompt = true, label = "Copy command" }: { cmd: string; prompt?: boolean; label?: string }) {
   const { copied, copy } = useCopy();
   return (
-    <div className="flex items-center justify-between gap-3 overflow-x-auto rounded-md border border-edge bg-ink/70 px-3 py-2 ring-1 ring-inset ring-white/[0.02]">
-      <code className="mono whitespace-pre text-[13px] text-fg">
-        <span className="select-none text-faint">$ </span>
-        {cmd}
-      </code>
+    <div className="flex items-stretch gap-2 rounded-md border border-edge bg-ink/70 ring-1 ring-inset ring-white/[0.02]">
+      <div className="min-w-0 flex-1 overflow-x-auto px-3 py-2">
+        <code className="mono whitespace-pre text-[13px] text-fg">
+          {prompt && <span className="select-none text-faint">$ </span>}
+          {cmd}
+        </code>
+      </div>
       <button
         type="button"
         onClick={() => copy(cmd)}
-        className="label shrink-0 rounded px-1.5 py-0.5 transition-colors hover:bg-panel-2"
-        aria-label="Copy command"
+        className={`m-1 shrink-0 self-start rounded px-2 py-1 text-xs font-medium transition-colors hover:bg-panel-2 ${FOCUS}`}
+        aria-label={label}
       >
-        {copied ? <span className="text-match">{"✓"} copied</span> : <span className="text-faint hover:text-fg">{"⧉"} copy</span>}
+        <span aria-live="polite">
+          {copied ? <span className="text-match">{"\u2713"} Copied</span> : <span className="text-muted hover:text-fg">Copy</span>}
+        </span>
       </button>
     </div>
   );
@@ -78,7 +95,7 @@ function Primary({ onClick, children }: { onClick: () => void; children: ReactNo
     <button
       type="button"
       onClick={onClick}
-      className="label inline-flex items-center gap-1.5 rounded-md bg-signal px-4 py-2 transition-[filter,transform] hover:brightness-110 active:scale-[0.98]"
+      className={`label inline-flex items-center gap-1.5 rounded-md bg-signal px-4 py-2 transition-[filter,transform] hover:brightness-110 active:scale-[0.98] ${FOCUS}`}
       style={{ color: "var(--color-ink)" }}
     >
       {children}
@@ -88,7 +105,7 @@ function Primary({ onClick, children }: { onClick: () => void; children: ReactNo
 
 function Ghost({ onClick, children }: { onClick: () => void; children: ReactNode }) {
   return (
-    <button type="button" onClick={onClick} className="label rounded-md px-2 py-1 text-faint transition-colors hover:text-muted">
+    <button type="button" onClick={onClick} className={`label rounded-md px-2 py-1 text-faint transition-colors hover:text-muted ${FOCUS}`}>
       {children}
     </button>
   );
@@ -144,19 +161,17 @@ function ProgressRail({ step, stepDone }: { step: number; stepDone: boolean[] })
 
 // ── step ① Meet owlsh ────────────────────────────────────────────────
 
-function StepMeet() {
-  const { startLiveDemo, demo, markOnboardingStep } = useReport();
+export function StepMeet() {
+  const { markOnboardingStep } = useReport();
   const marked = useRef(false);
 
+  // The intro is the whole step: seeing it completes step 0 (key stays "demo").
   useEffect(() => {
-    if (demo?.phase === "compared" && !marked.current) {
+    if (!marked.current) {
       marked.current = true;
       markOnboardingStep("demo");
     }
-  }, [demo?.phase, markOnboardingStep]);
-
-  const streaming = demo != null && demo.phase !== "compared";
-  const played = demo != null;
+  }, [markOnboardingStep]);
 
   const pipeline: { icon: ReactNode; head: string; body: string; tone: string }[] = [
     { icon: <span className="animate-pulse">{"●"}</span>, head: "Record", body: "a watched shell streams every command as you hack", tone: "var(--color-signal)" },
@@ -184,126 +199,186 @@ function StepMeet() {
           </li>
         ))}
       </ul>
-
-      <div className="space-y-3">
-        <button
-          type="button"
-          onClick={() => startLiveDemo("saltmarsh")}
-          disabled={streaming}
-          className="label inline-flex items-center gap-2 rounded-md border border-signal/40 bg-signal/10 px-4 py-2 text-signal transition-colors hover:bg-signal/15 disabled:cursor-progress disabled:opacity-60"
-        >
-          {"▶"} {played && !streaming ? "Replay the demo" : "Play a 60-second demo"}
-        </button>
-
-        {demo != null && (
-          <Readout tone={demo.phase === "compared" ? "match" : "signal"}>
-            {demo.phase === "compared" ? (
-              <span>
-                {"✓"} Debrief graded {"—"} replayed {demo.total} commands and unlocked the write-up comparison
-              </span>
-            ) : demo.phase === "resolved" ? (
-              <span>{"◦"} run complete {"—"} grading the debrief{"…"}</span>
-            ) : (
-              <span>
-                {"▶"} streaming{"…"} <span className="tabular-nums">{demo.n}</span>/<span className="tabular-nums">{demo.total}</span>
-              </span>
-            )}
-          </Readout>
-        )}
-      </div>
     </div>
   );
 }
 
 // ── step ② Capture your first run ──────────────────────────────────────────
 
+/** A numbered step inside the capture panel — soft index chip, no connecting rail (that
+    bordered-circle-timeline look is the generic onboarding tell we're avoiding here). */
+function CaptureStep({ n, title, aside, body, children }: { n: number; title: string; aside?: string; body?: ReactNode; children: ReactNode }) {
+  return (
+    <li className="flex gap-3.5">
+      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-signal/15 text-[13px] font-semibold text-signal">{n}</span>
+      <div className="min-w-0 flex-1">
+        <h4 className="font-display text-sm font-semibold text-fg">
+          {title}
+          {aside && <span className="ml-2 font-normal text-muted">{aside}</span>}
+        </h4>
+        {body && <p className="mt-1 text-xs leading-relaxed text-muted">{body}</p>}
+        <div className="mt-2.5">{children}</div>
+      </div>
+    </li>
+  );
+}
+
 export function StepCapture() {
-  const { sessionCards, switchSession, closeOnboarding, setOnboardingStep, onboardingStep } = useReport();
+  const { sessionCards, switchSession, closeOnboarding, setOnboardingStep, onboardingStep, setupJump, setSetupJump } = useReport();
+  // Setup menu → "VM connector" deep-links here and lands on the remote-VM choice.
+  const [where, setWhere] = useState<"own" | "vm">(setupJump === "connector" ? "vm" : "own");
+  useEffect(() => {
+    if (setupJump === "connector") {
+      setWhere("vm");
+      setSetupJump(null);
+    }
+  }, [setupJump, setSetupJump]);
 
   const realCards = sessionCards.filter((c) => !c.demo);
   const newest = realCards.slice().sort((a, b) => Date.parse(b.ended_at) - Date.parse(a.ended_at))[0];
   const name = newest?.target?.name || newest?.machine?.name || "your run";
   const count = newest?.episodes ?? 0;
 
+  const options: { id: "own" | "vm"; icon: ReactNode; title: string; tag: string; desc: string }[] = [
+    { id: "own", icon: <Terminal size={18} />, title: "On your own machine", tag: "Desktop, any OS", desc: "Kali, Parrot or WSL over OpenVPN. One watched shell, streaming live." },
+    { id: "vm", icon: <Crosshair size={18} />, title: "In a remote VM", tag: "Pwnbox or AttackBox", desc: "Run the agent on HTB Pwnbox or THM AttackBox, then bring the run back." },
+  ];
+  const codeCls = "mono rounded bg-panel-2 px-1 py-0.5 text-fg";
+
   return (
-    <div className="space-y-5">
-      <p className="max-w-prose text-[15px] leading-relaxed text-muted">
-        Install the capture agent once, then one command turns a shell into a recorded session. Play a box in another
-        window {"—"} each command streams into a live debrief here.
+    <div className="space-y-7">
+      <p className="max-w-prose text-[15px] leading-relaxed text-fg/90">
+        owlsh records a shell while you hack, then grades the run: a debrief of what you did, your coverage, and what you{"’"}d do differently. Choose where you{"’"}re working and copy the commands.
       </p>
 
-      <CommandRow cmd="curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh" />
-      <CommandRow cmd="owlsh --attach --platform htb --target <box>" />
-      <p className="text-xs text-faint">
-        On Windows, install with{" "}
-        <code className="mono rounded bg-panel-2 px-1 py-0.5 text-fg">irm https://raw.githubusercontent.com/silofy/owlsh/main/install.ps1 | iex</code>
-        . Other platforms: <code className="mono rounded bg-panel-2 px-1 py-0.5 text-fg">--platform thm</code>.
-      </p>
+      <div className="space-y-3">
+        <h3 className="font-display text-base font-semibold text-fg">Where do you hack?</h3>
+        <div role="radiogroup" aria-label="Where do you hack?" className="grid gap-2.5 sm:grid-cols-2">
+          {options.map((o) => {
+            const on = where === o.id;
+            return (
+              <button
+                key={o.id}
+                type="button"
+                role="radio"
+                aria-checked={on}
+                onClick={() => setWhere(o.id)}
+                className={`group flex flex-col gap-3 rounded-xl border p-4 text-left transition-colors motion-reduce:transition-none ${FOCUS} ${
+                  on ? "border-signal bg-signal/[0.06]" : "border-edge bg-panel hover:border-muted/50 hover:bg-panel-2"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${on ? "bg-signal/15 text-signal" : "bg-panel-2 text-muted group-hover:text-fg"}`}>
+                    {o.icon}
+                  </span>
+                  <span aria-hidden className={`flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 transition-colors ${on ? "border-signal" : "border-edge group-hover:border-muted"}`}>
+                    {on && <span className="h-2 w-2 rounded-full bg-signal" />}
+                  </span>
+                </div>
+                <div>
+                  <div className="font-display text-sm font-semibold text-fg">{o.title}</div>
+                  <div className="mt-0.5 text-xs text-muted">{o.tag}</div>
+                  <p className="mt-1.5 text-xs leading-relaxed text-muted">{o.desc}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
-      {newest ? (
-        <div className="space-y-3">
-          <Readout tone="match">
-            <Check size={15} />
-            <span>
-              Captured <span className="text-fg">{"“"}{name}{"”"}</span>
-              {count > 0 && <> {"—"} {count} commands</>}
-            </span>
-          </Readout>
-          <Primary
-            onClick={() => {
-              switchSession(newest.id);
-              closeOnboarding();
-            }}
-          >
-            Open my debrief <ArrowUpRight size={13} />
-          </Primary>
+      {where === "own" ? (
+        <div className="rounded-xl border border-edge bg-panel p-5">
+          <ol className="space-y-5">
+            <CaptureStep n={1} title="Install the agent" aside="one time" body="Downloads the prebuilt binary and verifies its checksum.">
+              <CommandRow cmd="curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh" />
+              <p className="mt-2 text-xs text-muted">
+                On Windows, run <code className={codeCls}>irm https://raw.githubusercontent.com/silofy/owlsh/main/install.ps1 | iex</code> instead.
+              </p>
+            </CaptureStep>
+            <CaptureStep n={2} title="Run a watched shell" body={<>Every command streams in live as you run it. Type <code className={codeCls}>exit</code> to stop.</>}>
+              <CommandRow cmd="owlsh --attach --platform htb --target <box>" />
+              <p className="mt-2 text-xs text-muted">
+                Other platforms: <code className={codeCls}>--platform thm</code>, plus offsec, immersive and local. Add <code className={codeCls}>--new</code> to force a fresh session.
+              </p>
+            </CaptureStep>
+          </ol>
         </div>
       ) : (
-        <div className="space-y-3 rounded-lg border border-edge bg-panel px-4 py-3.5">
-          <Readout tone="muted">
-            <span className="relative flex h-2 w-2 shrink-0">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal/60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-signal/80" />
-            </span>
-            <span className="text-muted">waiting for a session{"…"} run the command above and it lands here live</span>
-          </Readout>
-          {!isDesktop() && (
-            <p className="flex items-start gap-1.5 text-xs text-faint">
-              <Terminal size={13} className="mt-px shrink-0" />
-              Live detection runs in the desktop app {"—"} you can still skip ahead and capture later.
-            </p>
-          )}
-          <Ghost onClick={() => setOnboardingStep(onboardingStep + 1)}>Skip for now {"—"} I{"’"}ll capture later {"→"}</Ghost>
-        </div>
+        <VmConnector />
       )}
 
-      <details className="group/all border-t border-edge pt-4">
-        <summary className="label flex cursor-pointer list-none items-center gap-2 text-muted [&::-webkit-details-marker]:hidden">
-          <ChevronDown size={12} className="transition-transform group-open/all:rotate-180" />
-          All setup options
-        </summary>
-        <div className="mt-4">
-          <InstallReference />
-        </div>
-      </details>
+      <section className="space-y-3 rounded-xl border border-signal/25 bg-signal/[0.04] p-5">
+        <h3 className="font-display text-sm font-semibold text-fg">Then your run lands here</h3>
+        {newest ? (
+          <div className="space-y-3">
+            <Readout tone="match">
+              <Check size={15} />
+              <span>
+                Captured <span className="text-fg">{"“"}{name}{"”"}</span>
+                {count > 0 && <>, {count} commands</>}
+              </span>
+            </Readout>
+            <Primary
+              onClick={() => {
+                switchSession(newest.id);
+                closeOnboarding();
+              }}
+            >
+              Open my debrief <ArrowUpRight size={13} />
+            </Primary>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <Readout tone="muted">
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal/60" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-signal/80" />
+              </span>
+              <span className="text-muted">Waiting for a session. Run the attach command and it lands here live.</span>
+            </Readout>
+            {!isDesktop() && (
+              <p className="flex items-start gap-1.5 text-xs text-muted">
+                <Terminal size={13} className="mt-px shrink-0" />
+                Live detection runs in the desktop app. You can skip ahead and capture later.
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={() => setOnboardingStep(onboardingStep + 1)}
+              className={`rounded-md text-sm text-muted underline decoration-edge underline-offset-4 transition-colors hover:text-fg hover:decoration-muted ${FOCUS}`}
+            >
+              Skip for now, capture later
+            </button>
+          </div>
+        )}
+      </section>
+
+      <p className="text-xs text-muted">After a run, load a write-up on the debrief to unlock the path comparison.</p>
     </div>
   );
 }
 
-// ── step ③ Sharpen your coaching ───────────────────────────────────────────
+// ── step ③ Connect a model ─────────────────────────────────────────────────
 
-const CLOUD_PROVIDERS: CloudName[] = ["anthropic", "openai", "gemini", "openrouter"];
+type McpClientId = (typeof MCP_CLIENTS)[number]["id"];
 type LocalPhase = "probing" | "ready" | "missing" | "downloading" | "error";
 
-function StepAI() {
+export function StepAI() {
   const { setOnboardingStep, onboardingStep, markOnboardingStep } = useReport();
   const desktop = isDesktop();
   const [local, setLocal] = useState<LocalPhase>("probing");
-  const [provider, setProvider] = useState<CloudName | null>(null);
-  const [key, setKey] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
+  // Claude is the recommended path, so it starts expanded; the others show label + note only.
+  const [open, setOpen] = useState<McpClientId | null>("claude");
+  // Live "is owlsh registered with Claude Code?" status, so the recommended card can confirm the
+  // connection instead of asking the user to take it on faith. null = not probed yet. No `mounted`
+  // guard here: a click fires while mounted, and the auto-probe effect below uses its own `alive`
+  // flag — the shared `mounted` ref is false-forever under StrictMode and would swallow the update.
+  const [plan, setPlan] = useState<PlanStatus | null>(null);
+  const checkPlan = () => mcpPlanStatus().then(setPlan);
+  // Resolve the owlsh binary's absolute path so the copyable commands don't depend on it being on
+  // PATH; falls back to the bare name `owlsh`.
+  const [bin, setBin] = useState("owlsh");
 
   // Guards post-await setState: the content column is keyed by step, so leaving mid-request
   // unmounts this. The coaching choice still persists; only the visual state is gated.
@@ -331,41 +406,38 @@ function StepAI() {
     };
   }, [desktop]);
 
-  const finish = (label: string) => {
+  // Probe the plan connection once on open (desktop only) so an already-registered owlsh shows as
+  // connected without the user having to ask.
+  useEffect(() => {
+    if (!desktop) return;
+    let alive = true;
+    mcpPlanStatus().then((s) => { if (alive) setPlan(s); }, () => {});
+    owlshBinPath().then((b) => { if (alive) setBin(b); }, () => {});
+    return () => { alive = false; };
+  }, [desktop]);
+
+  const finish = (message: string) => {
     markOnboardingStep("ai");
-    if (mounted.current) setDone(label);
+    if (mounted.current) setDone(message);
+  };
+  // MCP coaching happens inside the user's Claude client, but we still record `plan` as the chosen
+  // mode so the header chip, widget, and `[h]` affordance all reflect the connection afterwards.
+  const useMcp = (label: string) => {
+    setCoachMode("plan");
+    finish(`${label} connected — coaching now happens on your ${label} plan.`);
   };
   const useLocal = () => {
     setCoachMode("local");
-    finish("Local AI");
+    finish("Local AI coaching is on — your notes will be command-aware.");
   };
   const download = async () => {
-    setErr(null);
     setLocal("downloading");
     try {
       const ok = await pullModel(DEFAULT_MODEL);
-      if (ok) {
-        setCoachMode("local");
-        finish("Local AI");
-      } else if (mounted.current) {
-        setLocal("error");
-      }
+      if (ok) useLocal();
+      else if (mounted.current) setLocal("error");
     } catch {
       if (mounted.current) setLocal("error");
-    }
-  };
-  const saveCloud = async () => {
-    if (!provider || !key.trim()) return;
-    setSaving(true);
-    setErr(null);
-    try {
-      await setApiKey(provider, key.trim());
-      setCoachMode(provider);
-      finish(CLOUD_LABEL[provider]);
-    } catch (e) {
-      if (mounted.current) setErr((e as Error).message);
-    } finally {
-      if (mounted.current) setSaving(false);
     }
   };
   const skip = () => {
@@ -376,24 +448,115 @@ function StepAI() {
   if (done) {
     return (
       <Readout tone="match">
-        <Check size={15} /> {done} coaching is on {"—"} your notes will be command-aware.
+        <Check size={15} /> {done}
       </Readout>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <p className="max-w-prose text-[15px] leading-relaxed text-muted">
-        Coaching works out of the box on deterministic rules. A model rewrites each note into{" "}
+        Coaching works out of the box on deterministic rules. Connect a model and it rewrites each note into{" "}
         <span className="text-fg">command-aware advice</span>. Set one up now, or keep rules {"—"} your call.
       </p>
 
-      {/* Local model */}
-      <div className="space-y-2.5 rounded-lg border border-edge bg-panel/40 p-4">
+      {/* Plan group: recommended (the only coloured card) */}
+      <section aria-labelledby="connect-plan" className="space-y-3 rounded-lg border border-edge bg-panel p-4">
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 id="connect-plan" className="font-display text-sm font-semibold text-fg">Use a plan you already have</h2>
+            <span className="label rounded bg-signal/15 px-1.5 py-0.5 text-[10px] text-signal">Recommended</span>
+          </div>
+          <p className="text-xs text-muted">Billed to the plan you already have, not API credits. owlsh connects as a local MCP server.</p>
+        </div>
+        <ul className="space-y-3">
+          {MCP_CLIENTS.map((c) => {
+            const expanded = open === c.id;
+            const panelId = `connect-${c.id}-panel`;
+            const Mark = MARKS[c.id];
+            return (
+              <li key={c.id} className="rounded-md border border-edge bg-panel-2 p-3">
+                <button
+                  type="button"
+                  onClick={() => setOpen(expanded ? null : c.id)}
+                  aria-expanded={expanded}
+                  aria-controls={panelId}
+                  className={`flex w-full items-center justify-between gap-3 rounded text-left ${FOCUS}`}
+                >
+                  <span className="flex flex-wrap items-center gap-2">
+                    <Mark size={16} className="shrink-0 text-fg" aria-hidden />
+                    <span className="font-display text-sm font-semibold text-fg">{c.label}</span>
+                    <span className="label text-[10px] text-faint">{c.tier === "advanced" ? "advanced" : "first-class"}</span>
+                  </span>
+                  <ChevronDown size={12} className={`shrink-0 text-faint transition-transform motion-reduce:transition-none ${expanded ? "rotate-180" : ""}`} />
+                </button>
+                {c.note && <p className="mt-2 text-xs text-muted">{c.note}</p>}
+                {expanded && (
+                  <div id={panelId} className="mt-3 space-y-3">
+                    {c.id === "claude" && (
+                      <>
+                        <p className="text-xs text-muted">Your Claude plan: run this once in Claude Code.</p>
+                        <CommandRow cmd={mcpClaudeCodeCommand(bin)} label="Copy Claude Code command" />
+                        <p className="text-xs text-muted">
+                          Claude Desktop: add this to <code className="mono text-fg">claude_desktop_config.json</code>, then restart it.
+                        </p>
+                        <CommandRow cmd={mcpDesktopConfigSnippet(bin)} prompt={false} label="Copy Claude Desktop config" />
+                      </>
+                    )}
+                    {c.id === "gemini" && (
+                      <>
+                        <p className="text-xs text-muted">Gemini CLI: run this once.</p>
+                        <CommandRow cmd={mcpGeminiCommand(bin)} label="Copy Gemini command" />
+                        <p className="text-xs text-muted">
+                          Or add this to <code className="mono text-fg">~/.gemini/settings.json</code>.
+                        </p>
+                        <CommandRow cmd={mcpGeminiConfigSnippet(bin)} prompt={false} label="Copy Gemini config" />
+                      </>
+                    )}
+                    {c.id === "chatgpt" && c.href && (
+                      <a
+                        href={c.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`inline-flex items-center gap-1 rounded text-xs text-signal underline decoration-signal/40 underline-offset-2 hover:decoration-signal ${FOCUS}`}
+                      >
+                        Set up the tunnel <ArrowUpRight size={12} />
+                      </a>
+                    )}
+                    {c.id === "claude" && desktop && (
+                      <div className="flex flex-wrap items-center gap-3 text-xs">
+                        {plan?.connected ? (
+                          <span className="flex items-center gap-1 text-match"><Check size={12} /> Connected — owlsh is registered with Claude Code</span>
+                        ) : (
+                          <span className="text-faint">{plan ? "Not detected in Claude Code yet." : "Checking…"}</span>
+                        )}
+                        <button type="button" onClick={() => void checkPlan()} className={`text-signal hover:underline ${FOCUS}`}>Re-check</button>
+                      </div>
+                    )}
+                    <p className="text-xs text-faint">Coaching then happens inside {c.label}, on your plan.</p>
+                    <Primary onClick={() => useMcp(c.label)}>
+                      {"✓"} {c.id === "chatgpt" ? "Done" : `I’ve added it`}
+                    </Primary>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      {/* Local model: neutral */}
+      <section aria-labelledby="connect-local" className="space-y-3 rounded-lg border border-edge bg-panel p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
-            <div className="font-display text-sm font-semibold text-fg">Local model {"·"} fully offline</div>
-            <div className="text-xs text-faint">Ollama runs {DEFAULT_MODEL} on your machine {"—"} commands never leave the device.</div>
+            <h2 id="connect-local" className="flex items-center gap-2 font-display text-sm font-semibold text-fg">
+              <OllamaMark size={16} className="text-fg" />
+              Run a model locally
+              <span className="font-normal text-muted">fully offline</span>
+            </h2>
+            <p className="text-xs text-muted">
+              Ollama runs {DEFAULT_MODEL} on your machine, free, and commands never leave the device.
+            </p>
           </div>
           {local === "ready" && <span className="label shrink-0 text-[10px] text-match">installed</span>}
         </div>
@@ -407,7 +570,7 @@ function StepAI() {
           <button
             type="button"
             onClick={download}
-            className="label inline-flex items-center gap-2 rounded-md border border-signal/40 bg-signal/10 px-4 py-2 text-signal transition-colors hover:bg-signal/15"
+            className={`label inline-flex items-center gap-2 rounded-md border border-signal/40 bg-signal/10 px-4 py-2 text-signal transition-colors hover:bg-signal/15 ${FOCUS}`}
           >
             {"⬇"} Download {DEFAULT_MODEL} (~2 GB)
           </button>
@@ -426,65 +589,23 @@ function StepAI() {
             <button
               type="button"
               onClick={download}
-              className="label inline-flex items-center gap-2 rounded-md border border-edge px-4 py-2 text-fg transition-colors hover:bg-panel-2"
+              className={`label inline-flex items-center gap-2 rounded-md border border-edge px-4 py-2 text-fg transition-colors hover:bg-panel-2 ${FOCUS}`}
             >
               Retry
             </button>
           </div>
         )}
-      </div>
+      </section>
 
-      {/* Cloud model */}
-      <div className="space-y-2.5 rounded-lg border border-edge bg-panel/40 p-4">
-        <div className="space-y-1">
-          <div className="font-display text-sm font-semibold text-fg">Cloud model {"·"} strongest coaching</div>
-          <div className="text-xs text-faint">
-            Pick a provider and paste a key. Commands are redacted before anything is sent; the key is stored only on your machine.
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {CLOUD_PROVIDERS.map((p) => (
-            <button
-              key={p}
-              type="button"
-              onClick={() => { setProvider(p); setErr(null); }}
-              style={provider === p ? { color: "var(--color-ink)" } : undefined}
-              className={`label rounded-md px-3 py-1.5 text-[11px] ring-1 transition-colors ${
-                provider === p ? "bg-signal ring-signal" : "text-muted ring-edge hover:ring-edge-bright"
-              }`}
-            >
-              {CLOUD_LABEL[p]}
-            </button>
-          ))}
-        </div>
-        {provider && (
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <input
-                type="password"
-                value={key}
-                onChange={(e) => setKey(e.target.value)}
-                autoComplete="off"
-                spellCheck={false}
-                placeholder={`${CLOUD_LABEL[provider]} API key`}
-                className="mono min-w-0 flex-1 rounded-md border border-edge bg-ink/60 px-2.5 py-1.5 text-xs text-fg outline-none focus:border-edge-bright"
-              />
-              <button
-                type="button"
-                onClick={saveCloud}
-                disabled={saving || !key.trim()}
-                className="label shrink-0 rounded-md bg-signal px-3 py-1.5 text-[11px] transition-[filter] hover:brightness-110 disabled:opacity-40"
-                style={{ color: "var(--color-ink)" }}
-              >
-                {saving ? "Saving…" : "Save & use"}
-              </button>
-            </div>
-            {err && <p className="text-xs text-stuck">{err}</p>}
-          </div>
-        )}
+      <div className="border-t border-edge pt-4">
+        <button
+          type="button"
+          onClick={skip}
+          className={`inline-flex items-center gap-1.5 rounded-md border border-edge px-3 py-2 text-sm text-muted transition-colors motion-reduce:transition-none hover:bg-panel-2 hover:text-fg ${FOCUS}`}
+        >
+          Keep rule-based coaching for now <span aria-hidden>{"→"}</span>
+        </button>
       </div>
-
-      <Ghost onClick={skip}>Skip {"—"} rules-based coaching is solid {"→"}</Ghost>
     </div>
   );
 }
@@ -547,7 +668,7 @@ export function Onboarding() {
   const body = step === 0 ? <StepMeet /> : step === 1 ? <StepCapture /> : step === 2 ? <StepAI /> : <StepRecap />;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-ink text-fg">
+    <div className="onboarding-wizard fixed inset-0 z-50 overflow-y-auto bg-ink text-fg">
       {/* atmosphere — a single low, cool wash so the panel reads lit, not flat */}
       <div
         aria-hidden
@@ -561,10 +682,7 @@ export function Onboarding() {
           <div className="space-y-8">
             <div className="flex items-center gap-2.5">
               <OwlMark size={36} />
-              <div>
-                <div className="font-display text-[15px] font-semibold leading-tight text-fg">owlsh</div>
-                <div className="label text-[10px] text-faint">activation</div>
-              </div>
+              <div className="font-display text-[15px] font-semibold leading-tight text-fg">owlsh</div>
             </div>
             <ProgressRail step={step} stepDone={stepDone} />
           </div>
@@ -587,13 +705,10 @@ export function Onboarding() {
         </aside>
 
         {/* content */}
-        <main className="flex min-h-full flex-col px-7 py-8 lg:px-12 lg:py-11">
+        <main className="flex min-h-full min-w-0 flex-col px-7 py-8 lg:px-12 lg:py-11">
           <div key={step} className="flex-1">
             <div className="fade-in">
-              <div className="label mb-2 flex items-center gap-2 text-signal">
-                <span className="text-sm">{NUMERALS[step]}</span>
-                {meta.kicker}
-              </div>
+              <div className="mb-2 text-[13px] font-semibold text-signal">{meta.kicker}</div>
               <h1 className="font-display text-[26px] font-semibold leading-tight text-fg lg:text-3xl">{meta.title}</h1>
             </div>
             <div className="mt-6">{body}</div>
@@ -602,7 +717,7 @@ export function Onboarding() {
           {/* chrome */}
           <footer className="mt-10 flex items-center justify-between gap-4 border-t border-edge pt-5">
             <div>
-              {step > 0 && <Ghost onClick={() => setOnboardingStep(step - 1)}>{"←"} Back</Ghost>}
+              {step > 0 && <Ghost onClick={() => setOnboardingStep(step - 1)}>Back</Ghost>}
             </div>
             <div className="flex items-center gap-2">
               <Ghost onClick={closeOnboarding}>Skip</Ghost>
@@ -611,7 +726,7 @@ export function Onboarding() {
                   Enter owlsh <ArrowUpRight size={13} />
                 </Primary>
               ) : (
-                <Primary onClick={() => setOnboardingStep(step + 1)}>Next {"→"}</Primary>
+                <Primary onClick={() => setOnboardingStep(step + 1)}>Next</Primary>
               )}
             </div>
           </footer>

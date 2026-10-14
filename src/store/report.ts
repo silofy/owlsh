@@ -211,7 +211,7 @@ const DEFAULT_ID =
 // a live replay) without ever being the session the app lands on.
 for (const d of DEMOS) REPORTS[d.id] = d.report;
 
-type View = "debrief" | "history" | "progress";
+type View = "debrief" | "history" | "progress" | "start";
 
 interface ReportState extends Derived {
   sessions: { id: string; label: string }[];
@@ -251,6 +251,8 @@ interface ReportState extends Derived {
   onboardingStep: number;
   /** Completion of steps not derivable from app state (capture completion is derived, not stored). */
   onboardingDone: { demo: boolean; ai: boolean };
+  /** One-shot request from the Setup menu for the wizard to auto-open a section; the wizard clears it. */
+  setupJump: "connector" | null;
 
   setView: (v: View) => void;
   /** Dismiss the write-up gate for this session and show the run-only report. */
@@ -284,6 +286,8 @@ interface ReportState extends Derived {
   setOnboardingStep: (n: number) => void;
   /** Mark a non-derivable step complete and persist. */
   markOnboardingStep: (key: "demo" | "ai") => void;
+  /** Request (or clear) a wizard section auto-open. */
+  setSetupJump: (j: "connector" | null) => void;
 }
 
 const RESET = { hoveredSeq: null, selectedSeq: null, zoomWin: null, playheadMs: 0, playing: false, gateDismissed: false } as const;
@@ -367,10 +371,12 @@ export const useReport = create<ReportState>((set, get) => ({
   onboardingOpen: readOnboardingOpen(),
   onboardingStep: readOnboardingProgress().step,
   onboardingDone: readOnboardingProgress().done,
+  setupJump: null,
 
   setView: (view) => set({ view }),
   setGateDismissed: (gateDismissed) => set({ gateDismissed }),
   openOnboarding: () => set({ onboardingOpen: true }),
+  setSetupJump: (setupJump) => set({ setupJump }),
   closeOnboarding: () => {
     persistOnboarded();
     set({ onboardingOpen: false });

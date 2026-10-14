@@ -19,15 +19,10 @@ export function clampStep(n: number): number {
   return Math.floor(n);
 }
 
-/** The header "finish setup" pill shows once onboarding is dismissed but no real run exists yet. */
-export function shouldShowNudge(input: { onboarded: boolean; hasRealCapture: boolean }): boolean {
-  return input.onboarded && !input.hasRealCapture;
-}
-
 /** The step ④ recap list. Capture completion is derived from app state, not stored. */
 export function deriveChecklist(input: { demoDone: boolean; hasRealCapture: boolean; aiDone: boolean }): { key: "demo" | "capture" | "ai"; label: string; done: boolean }[] {
   return [
-    { key: "demo", label: "Watched a demo run", done: input.demoDone },
+    { key: "demo", label: "Met owlsh", done: input.demoDone },
     { key: "capture", label: "Captured your own run", done: input.hasRealCapture },
     { key: "ai", label: "Turned on AI coaching", done: input.aiDone },
   ];

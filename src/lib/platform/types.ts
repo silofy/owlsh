@@ -7,10 +7,19 @@ export interface NativePathInput {
   raw?: string;
 }
 
+export interface Connector {
+  kind: "ssh" | "local" | "none";
+  label: string;
+  hint?: string; // ssh: connection-string placeholder / where to find it
+  note?: string; // local/none: one-line explanation shown instead of a form
+}
+
 export interface PlatformAdapter {
   id: PlatformId;
   label: string; // "Hack The Box", "TryHackMe", ...
   kindNoun: string; // "box", "room", "lab", "target", "host"
+  /** How captures reach owlsh for this platform's attack VM. */
+  connector: Connector;
   /** 0..1 confidence this session belongs to this platform. Never throws. */
   detect(ctx: DetectContext): number;
   /** Neutral identity. Always returns a Target, never throws. */

@@ -6,6 +6,7 @@ export const offsecAdapter: PlatformAdapter = {
   id: "offsec",
   label: "OffSec",
   kindNoun: "lab",
+  connector: { kind: "local", label: "Kali (local)", note: "owlsh runs on your own Kali — capture is local, nothing to connect." },
   detect(ctx: DetectContext) {
     if (ctx.platformHint === "offsec") return 1;
     if (/\boffsec|proving\s*grounds|pwk\b/i.test(ctx.contextPath ?? "")) return 0.9;

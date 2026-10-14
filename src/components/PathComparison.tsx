@@ -6,7 +6,7 @@ import { humanizeObjective } from "../lib/audits";
 import { isLiveRecording } from "../lib/live";
 import { ditherMask, ditherTrack } from "../lib/dither";
 import { routeSteps, routeCounts, type RouteStep, type RouteStatus } from "../lib/route";
-import { Check, Circle, Flag } from "./icons";
+import { Check, Circle, Flag, ChevronDown } from "./icons";
 
 const LEGEND: [ReactNode, string, string][] = [
   [<Check key="did" size={12} />, "did", "var(--color-match)"],
@@ -128,9 +128,10 @@ export function PathComparison({ num }: { num?: string } = {}) {
             type="button"
             aria-expanded={mapOpen}
             onClick={() => setMapOpen((o) => !o)}
-            className="flex h-11 w-full items-center justify-center rounded-[3px] border border-edge-bright font-mono text-[11.5px] font-medium uppercase tracking-[0.16em] text-muted transition-colors hover:border-muted hover:bg-panel hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"
+            className="label flex w-full items-center justify-center gap-2 rounded-md border border-edge bg-panel-2 px-4 py-3 text-fg transition-[color,border-color,filter] hover:border-signal/60 hover:text-signal hover:brightness-125 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"
           >
-            {mapOpen ? "Hide path map ↑" : "Show full path map ↓"}
+            {mapOpen ? "Hide path map" : "Show full path map"}
+            <ChevronDown size={13} className={`transition-transform motion-reduce:transition-none ${mapOpen ? "rotate-180" : ""}`} />
           </button>
           {mapOpen && (
             <div>

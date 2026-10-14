@@ -6,6 +6,7 @@ export const immersiveAdapter: PlatformAdapter = {
   id: "immersive",
   label: "Immersive Labs",
   kindNoun: "lab",
+  connector: { kind: "none", label: "Immersive", note: "Browser-only labs — no shell to connect. Run owlsh locally while VPN'd, or use a platform with a shell." },
   detect(ctx: DetectContext) {
     if (ctx.platformHint === "immersive") return 1;
     if (/\bimmersive\b/i.test(ctx.contextPath ?? "")) return 0.9;

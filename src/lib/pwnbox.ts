@@ -1,3 +1,4 @@
+import type { PlatformId } from "../types/report";
 /**
  * Pwnbox SSH sync config + invoker. owlsh scp-pulls the in-Pwnbox agent's exports into
  * ~/.owlsh/sessions/, where the existing live-bridge poll picks them up. Tauri-only; config lives
@@ -73,4 +74,14 @@ export async function pullPwnbox(c: PwnboxConfig): Promise<string[]> {
     identity: c.identity || null,
     remoteDir: c.remoteDir || null,
   })) as string[];
+}
+
+const PLATFORM_KEY = "owlsh.connectorPlatform";
+
+export function getConnectorPlatform(): PlatformId | null {
+  try { return (localStorage.getItem(PLATFORM_KEY) as PlatformId) || null; } catch { return null; }
+}
+
+export function setConnectorPlatform(p: PlatformId): void {
+  try { localStorage.setItem(PLATFORM_KEY, p); } catch { /* ignore */ }
 }

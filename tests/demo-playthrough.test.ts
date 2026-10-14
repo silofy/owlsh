@@ -43,7 +43,7 @@ describe("demo playthrough (Saltmarsh)", () => {
     // History is exactly the curated demos plus any defense (blue-team) debrief — no dev/sample
     // fixtures leak in.
     expect(s.sessionCards.filter((c) => c.mode !== "defense").every((c) => c.demo)).toBe(true);
-    expect(new Set(s.sessionCards.map((c) => c.machine.name))).toEqual(new Set(["Saltmarsh", "Dunmoor"]));
+    expect(new Set(s.sessionCards.map((c) => c.machine.name))).toEqual(new Set(["Saltmarsh", "Dunmoor", "Tidewatch"]));
   });
 
   it("marks a live snapshot as recording and resolves when it ends", () => {
