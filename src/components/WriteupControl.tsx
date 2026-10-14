@@ -121,8 +121,14 @@ export function WriteupControl() {
     }
   }
 
+  // one bold primary (the recommended auto-fetch), one quiet outline for the alternative sources,
+  // one shared "action" style for the URL / paste submit buttons — so the hierarchy reads at a glance.
+  const btnPrimary =
+    "rounded-md bg-signal px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-signal/90 disabled:opacity-40";
   const btnSecondary =
-    "rounded-md border border-edge px-2.5 py-1 text-xs text-muted transition-colors hover:border-edge-bright hover:bg-panel-2 hover:text-fg disabled:opacity-40";
+    "inline-flex items-center gap-1 rounded-md border border-edge px-3 py-1.5 text-xs text-muted transition-colors hover:border-edge-bright hover:bg-panel-2 hover:text-fg disabled:opacity-40";
+  const btnAction =
+    "label inline-flex shrink-0 items-center justify-center rounded-md border border-signal/35 bg-signal/15 px-3 py-1.5 text-signal transition-colors hover:border-signal/70 hover:bg-signal/25 disabled:opacity-40 disabled:hover:border-signal/35 disabled:hover:bg-signal/15";
 
   return (
     <details className="group border-b border-edge">
@@ -156,26 +162,20 @@ export function WriteupControl() {
         </span>
       </summary>
 
-      <div className="space-y-2.5 pb-3">
+      <div className="space-y-4 pb-4">
         {!writeup && (
-          <p className="text-xs leading-relaxed text-faint">
-            We grade <span className="text-muted">how</span> you worked, not <span className="text-muted">what</span> you did — link this box's write-up to compare your route against the intended solution: detours, skipped steps, and missed objectives.
+          <p className="max-w-[62ch] text-[13px] leading-relaxed text-muted">
+            We grade <span className="text-fg">how</span> you worked, not <span className="text-fg">what</span> you did. Link this box's write-up and we'll line your route up against the intended solution — detours, skipped steps, and missed objectives.
           </p>
         )}
 
-        {/* load actions */}
+        {/* one-click sources — the recommended path, 0xdf as the single bold action */}
         <div className="flex flex-wrap items-center gap-2">
-          <span className="label shrink-0 text-faint">Load from</span>
-          <button
-            type="button"
-            onClick={from0xdf}
-            disabled={working}
-            title={`Auto-fetch 0xdf's write-up for ${box.name}`}
-            className="rounded-md bg-signal px-2.5 py-1 text-xs font-medium text-ink transition-colors hover:bg-signal/90 disabled:opacity-40"
-          >
+          <span className="label mr-0.5 shrink-0 text-faint">Fetch for {box.name}</span>
+          <button type="button" onClick={from0xdf} disabled={working} title={`Auto-fetch 0xdf's write-up for ${box.name}`} className={btnPrimary}>
             0xdf
           </button>
-          <button type="button" onClick={() => openExternal(writeupSearchUrl("ippsec", box.name))} title="IppSec is video — opens his walkthrough on YouTube" className={`${btnSecondary} inline-flex items-center gap-1`}>
+          <button type="button" onClick={() => openExternal(writeupSearchUrl("ippsec", box.name))} title="IppSec is video — opens his walkthrough on YouTube" className={btnSecondary}>
             IppSec <ExternalLink size={12} />
           </button>
           {isDesktop() ? (
@@ -183,63 +183,81 @@ export function WriteupControl() {
               HTB{htbReady ? "" : " ⚙"}
             </button>
           ) : (
-            <button type="button" onClick={() => openExternal(writeupSearchUrl("htb", box.name))} title="HTB write-ups are auth-gated — opens a search" className={`${btnSecondary} inline-flex items-center gap-1`}>
+            <button type="button" onClick={() => openExternal(writeupSearchUrl("htb", box.name))} title="HTB write-ups are auth-gated — opens a search" className={btnSecondary}>
               HTB <ExternalLink size={12} />
             </button>
           )}
-          <span className="mx-1 text-faint">or</span>
-          <input
-            type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && fromUrl(url)}
-            placeholder="paste a write-up URL…"
-            className="mono min-w-0 flex-1 rounded-md border border-edge bg-ink/60 px-2 py-1 text-xs text-fg placeholder:text-faint focus:border-signal focus:outline-none"
-          />
-          <button type="button" onClick={() => fromUrl(url)} disabled={working || !url.trim()} className="label rounded-md bg-signal/20 px-2.5 py-1 text-signal transition-colors hover:bg-signal/30 disabled:opacity-40">
-            Fetch
-          </button>
         </div>
 
         {showToken && (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 rounded-md border border-edge-bright bg-panel-2/40 p-2">
             <input
               type="password"
               value={tokenInput}
               onChange={(e) => setTokenInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && saveToken()}
               placeholder="Paste your HTB App Token (profile → settings) — stored locally, needs VIP"
-              className="mono min-w-0 flex-1 rounded-md border border-edge bg-ink/60 px-2 py-1 text-xs text-fg placeholder:text-faint focus:border-signal focus:outline-none"
+              className="mono min-w-0 flex-1 rounded-md border border-edge bg-ink/60 px-2.5 py-1.5 text-xs text-fg placeholder:text-faint focus:border-signal focus:outline-none"
             />
-            <button type="button" onClick={saveToken} disabled={working || !tokenInput.trim()} className="label rounded-md bg-fg px-2.5 py-1 text-ink transition-colors hover:bg-fg/90 disabled:opacity-40">
+            <button type="button" onClick={saveToken} disabled={working || !tokenInput.trim()} className="label shrink-0 rounded-md bg-fg px-3 py-1.5 text-ink transition-colors hover:bg-fg/90 disabled:opacity-40">
               Save &amp; fetch
             </button>
           </div>
         )}
 
-        {/* paste */}
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          rows={3}
-          placeholder={
-            isThm
-              ? "…or paste the room's tasks here (Task 1 — Title, Task 2 — Title, …). Read locally — nothing is uploaded."
-              : "…or paste the write-up text here. Read locally to extract the intended path — nothing is uploaded."
-          }
-          className="mono w-full resize-y rounded-md border border-edge bg-ink/60 px-2 py-1.5 text-xs text-fg placeholder:text-faint focus:border-signal focus:outline-none"
-        />
-        <div className="flex items-center gap-3">
-          <button type="button" onClick={() => extract(text, "pasted")} disabled={working || !text.trim()} className="label rounded-md bg-signal/20 px-2.5 py-1 text-signal transition-colors hover:bg-signal/30 disabled:opacity-40">
-            {working ? "Working…" : "Analyze"}
+        {/* the split: one-click above, bring-your-own below */}
+        <div className="flex items-center gap-3 text-faint">
+          <span className="h-px flex-1 bg-edge" />
+          <span className="label">or bring your own</span>
+          <span className="h-px flex-1 bg-edge" />
+        </div>
+
+        {/* paste a URL */}
+        <div className="flex items-center gap-2">
+          <input
+            type="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && fromUrl(url)}
+            placeholder="paste a write-up URL…"
+            className="mono min-w-0 flex-1 rounded-md border border-edge bg-ink/60 px-2.5 py-1.5 text-xs text-fg placeholder:text-faint focus:border-signal focus:outline-none"
+          />
+          <button type="button" onClick={() => fromUrl(url)} disabled={working || !url.trim()} className={btnAction}>
+            Fetch
           </button>
-          {status.kind === "error" && status.msg ? (
-            <span className="text-xs text-detour">{status.msg}</span>
-          ) : working ? (
-            <span className="text-xs text-faint">{status.msg}</span>
-          ) : (
-            <span className="text-xs text-faint">Offline — your session stays on this machine.</span>
-          )}
+        </div>
+
+        {/* …or paste the text */}
+        <div className="space-y-2">
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={3}
+            placeholder={
+              isThm
+                ? "…or paste the room's tasks here (Task 1 — Title, Task 2 — Title, …). Read locally — nothing is uploaded."
+                : "…or paste the write-up text here. Read locally to extract the intended path — nothing is uploaded."
+            }
+            className="mono w-full resize-y rounded-md border border-edge bg-ink/60 px-2.5 py-2 text-xs leading-relaxed text-fg placeholder:text-faint focus:border-signal focus:outline-none"
+          />
+          <div className="flex items-center justify-between gap-3">
+            {status.kind === "error" && status.msg ? (
+              <span className="text-xs text-detour">{status.msg}</span>
+            ) : working ? (
+              <span className="text-xs text-faint">{status.msg}</span>
+            ) : (
+              <span className="flex items-center gap-1.5 text-xs text-faint">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                  <rect x="3" y="11" width="18" height="11" rx="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                Offline — your session stays on this machine.
+              </span>
+            )}
+            <button type="button" onClick={() => extract(text, "pasted")} disabled={working || !text.trim()} className={btnAction}>
+              {working ? "Working…" : "Analyze"}
+            </button>
+          </div>
         </div>
       </div>
     </details>
