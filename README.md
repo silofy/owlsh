@@ -101,12 +101,12 @@ Then capture, which differs by where you're working:
 
 Two scripted runs you can watch build live in your browser, no install. These are fictional practice boxes on an invented platform ("Breachyard") — not real machines, write-ups or artwork:
 
-- **[Breachyard Saltmarsh](https://silofy.github.io/owlsh-demos/?demo=saltmarsh)** (medium) — Samba print-job RCE → `rclone` creds → wide-links pivot → writable systemd drop-in to root.
-- **[Breachyard Dunmoor](https://silofy.github.io/owlsh-demos/?demo=dunmoor)** (easy) — upload-filter bypass to a `www-data` shell → SUID-python GTFOBins jump to root.
+- **[Breachyard Saltmarsh](https://silofy.github.io/owlsh/?demo=saltmarsh)** (medium) — Samba print-job RCE → `rclone` creds → wide-links pivot → writable systemd drop-in to root.
+- **[Breachyard Dunmoor](https://silofy.github.io/owlsh/?demo=dunmoor)** (easy) — upload-filter bypass to a `www-data` shell → SUID-python GTFOBins jump to root.
 
 ## The debrief
 
-When the run ends, the live panel settles into a single-column, lesson-first report: the verdict, then the one thing to fix, then the detail — so "what do I do differently next time" is answered before you scroll. [See it in the demo ▶](https://silofy.github.io/owlsh-demos/?demo=abducted)
+When the run ends, the live panel settles into a single-column, lesson-first report: the verdict, then the one thing to fix, then the detail — so "what do I do differently next time" is answered before you scroll. [See it in the demo ▶](https://silofy.github.io/owlsh/?demo=abducted)
 
 ![The graded debrief](docs/screenshots/grade.png)
 
