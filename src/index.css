@@ -1,6 +1,14 @@
 @import "tailwindcss";
 
 /*
+ * Tailwind v4 gates `hover:` behind `@media (hover: hover)`. The Tauri WebView2
+ * runtime reports `hover: none`, which silently disables every hover utility and
+ * group-hover tooltip in the desktop app (they work in a normal browser). Redefine
+ * the variant so `hover:` applies on any real :hover, pointer device or not.
+ */
+@custom-variant hover (&:hover);
+
+/*
  * Editorial dark: neutral black ground, one mint signal, the actor legend unchanged;
  * Hanken Grotesk + Spline Sans Mono.
  */
