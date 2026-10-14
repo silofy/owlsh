@@ -146,6 +146,8 @@ In the desktop app, click **Widget** in the header for the same view as a small,
 
 The model only ever sees your **session so far** (recent commands and their output) and, when a write-up is linked, the intended path as **abstract objective labels with a satisfied / unsatisfied flag — never the write-up text**. A fail-closed guard then strips anything concrete (IPs, paths, CVEs, credentials, or any step you haven't reached), so a hint nudges your process but never hands you the answer. Local coaching stays on your machine; only an opt-in cloud model sends commands, redacted first.
 
+> **In plain terms:** a hint is a friend who can see your moves but not the answer key. With no AI connected it's a generic pep-talk; plug in your own AI and it reacts to *your* actual run; add a write-up and it knows exactly which step you're stuck on. Every hint you take nudges your score down a little, so you only reach for one when you're genuinely stuck.
+
 **Draft a report** — turn a graded run into an OSCP/CPTS-style Markdown report (findings with severity, evidence, reproduction and remediation), deterministic and offline:
 
 ```sh
