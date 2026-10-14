@@ -35,8 +35,6 @@ crates/capture/events.ndjson
 dogfood-window.png
 ui-v2-*.png
 
-.vercel
-
 # Superpowers scratch (SDD ledgers, brainstorm mockups)
 .superpowers/
 
