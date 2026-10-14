@@ -15,6 +15,11 @@ report.html
 tsconfig.tsbuildinfo
 dev.log
 fixtures/session-live-capture.json
+dist-embed
+
+# e2e output
+playwright-report
+test-results
 
 # tester packaging output
 *.zip
