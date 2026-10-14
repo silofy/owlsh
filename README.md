@@ -160,3 +160,7 @@ By default your session never leaves the machine, and redaction runs before anyt
 ## License
 
 [AGPL-3.0](LICENSE). Use, study and modify owlsh freely; if you distribute a modified version, or run one as a network service, publish your changes under the same license.
+
+**Commercial licensing.** The AGPL suits individuals, labs and open-source use. If you want to embed owlsh in a closed-source product, or offer it as a hosted service without AGPL's source-sharing obligations, a commercial license is available — reach out via [owlsh.com](https://owlsh.com).
+
+Contributions are welcome under a lightweight [Contributor License Agreement](CLA.md) — see [CONTRIBUTING.md](CONTRIBUTING.md).
