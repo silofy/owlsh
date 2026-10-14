@@ -109,7 +109,7 @@ export function Section({
         className={`group/sec relative ${i != null ? "rise" : ""} ${className}`}
         style={i != null ? ({ "--i": i } as CSSProperties) : undefined}
       >
-        <summary className="-mx-2 flex cursor-pointer list-none items-baseline justify-between gap-4 rounded-md px-2 py-1.5 transition-colors hover:bg-panel-2/60 [&::-webkit-details-marker]:hidden">
+        <summary className="-mx-2 flex cursor-pointer list-none items-baseline justify-between gap-4 rounded-md px-2 py-1.5 transition-colors hover:bg-panel-2 [&::-webkit-details-marker]:hidden">
           <div className="flex items-baseline gap-2.5">
             <ChevronDown className="text-muted transition-transform duration-200 group-hover/sec:text-fg group-open/sec:rotate-180" />
             {titleEl}
@@ -185,7 +185,7 @@ export function Collapse({
       className={`group/sec relative ${className}`}
       onToggle={controlled ? (e) => onToggle?.((e.currentTarget as HTMLDetailsElement).open) : undefined}
     >
-      <summary data-shot={summaryDataShot} className="-mx-2 flex cursor-pointer list-none items-baseline gap-2.5 rounded-md px-2 py-1.5 transition-colors hover:bg-panel-2/60 [&::-webkit-details-marker]:hidden">
+      <summary data-shot={summaryDataShot} className="-mx-2 flex cursor-pointer list-none items-baseline gap-2.5 rounded-md px-2 py-1.5 transition-colors hover:bg-panel-2 [&::-webkit-details-marker]:hidden">
         <ChevronDown className="text-muted transition-transform duration-200 group-hover/sec:text-fg group-open/sec:rotate-180" />
         <h2 className="section-title">{title}</h2>
         {subtitle && <InfoTip text={subtitle} />}
@@ -223,7 +223,7 @@ export function LedgerRow({
 }) {
   return (
     <div
-      className={`grid items-center gap-2 px-1.5 py-1 text-sm transition-colors ${active ? "bg-panel-2" : "hover:bg-panel-2/45"} ${onClick ? "cursor-pointer" : ""}`}
+      className={`grid items-center gap-2 px-1.5 py-1 text-sm transition-colors ${active ? "bg-panel-2" : onClick ? "hover:bg-panel-2" : "hover:bg-panel-2/60"} ${onClick ? "cursor-pointer" : ""}`}
       style={{ gridTemplateColumns: cols }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}

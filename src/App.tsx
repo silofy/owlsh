@@ -216,8 +216,8 @@ export function App() {
               <button
                 type="button"
                 onClick={() => setView("start")}
-                className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/70 ${
-                  view === "start" ? "border-signal bg-signal/10 text-signal" : "border-edge text-muted hover:border-muted hover:text-fg"
+                className={`label inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/70 ${
+                  view === "start" ? "border-signal bg-signal/10 text-signal" : "border-edge text-muted hover:border-muted hover:bg-panel-2 hover:text-fg"
                 }`}
               >
                 <Plus size={14} /> New session
