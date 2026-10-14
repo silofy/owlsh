@@ -138,6 +138,14 @@ npm run widget -- --report <session.json> --size medium   # small | medium | lar
 
 In the desktop app, click **Widget** in the header for the same view as a small, always-on-top window you can park beside your terminal. It follows your newest capture, and hints you pull there are recorded the same way. Three sizes: **small** (phase and one line), **medium** (stats and your open threads), **large** (adds your latest finds and pace) — switch with S/M/L in its header or the `s` key.
 
+**Hints, and what they cost** — hints are opt-in (`h`) and escalate one tier at a time — a **process** nudge, then an **area**, then a **class of technique** — and each pull is recorded and costs independence points (−3 / −6 / −10). Taking none costs nothing. They get sharper the more you connect:
+
+- **No model connected** → three fixed methodology prompts (*"re-read your own output: anything you found but haven't followed up?"*).
+- **A connected model** (local MCP — Claude or Gemini — or Ollama) → session-aware hints drawn from your recent commands and the model's own knowledge of the box.
+- **+ a linked write-up** → the model is also told which intended objectives you've already hit and which you haven't, so the nudge points at the right gap.
+
+The model only ever sees your **session so far** (recent commands and their output) and, when a write-up is linked, the intended path as **abstract objective labels with a satisfied / unsatisfied flag — never the write-up text**. A fail-closed guard then strips anything concrete (IPs, paths, CVEs, credentials, or any step you haven't reached), so a hint nudges your process but never hands you the answer. Local coaching stays on your machine; only an opt-in cloud model sends commands, redacted first.
+
 **Draft a report** — turn a graded run into an OSCP/CPTS-style Markdown report (findings with severity, evidence, reproduction and remediation), deterministic and offline:
 
 ```sh
