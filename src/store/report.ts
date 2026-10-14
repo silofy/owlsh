@@ -211,7 +211,7 @@ const DEFAULT_ID =
 // a live replay) without ever being the session the app lands on.
 for (const d of DEMOS) REPORTS[d.id] = d.report;
 
-type View = "debrief" | "history" | "progress";
+type View = "debrief" | "history" | "progress" | "start";
 
 interface ReportState extends Derived {
   sessions: { id: string; label: string }[];

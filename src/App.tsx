@@ -23,10 +23,11 @@ import { LiveBridge } from "./components/LiveBridge";
 import { DemoDriver } from "./components/DemoDriver";
 import { LiveDashboard } from "./components/LiveDashboard";
 import { SetupMenu } from "./components/SetupMenu";
+import { StartCapture } from "./components/StartCapture";
 import { Onboarding } from "./components/Onboarding";
 import { isLiveRecording } from "./lib/live";
 import { pickOneLesson } from "./lib/one-lesson";
-import { OwlMark } from "./components/icons";
+import { OwlMark, Plus } from "./components/icons";
 import { StepStrip } from "./components/StepStrip";
 import { DefenseRubric } from "./components/DefenseRubric";
 import type { OneLesson } from "./lib/one-lesson";
@@ -183,7 +184,7 @@ function DefenseDebrief({ report }: { report: DefenseReport }) {
 }
 
 export function App() {
-  const { report, view, gateDismissed, onboardingOpen, defenseReport } = useReport();
+  const { report, view, setView, sessionCards, gateDismissed, onboardingOpen, defenseReport } = useReport();
   const { session } = report;
   const needsWriteup = report.golden_dag.length === 0 && !gateDismissed;
   const recording = isLiveRecording(report);
@@ -211,6 +212,17 @@ export function App() {
                 <SetupMenu />
               </nav>
             </div>
+            <div className="flex items-center">
+              <button
+                type="button"
+                onClick={() => setView("start")}
+                className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/70 ${
+                  view === "start" ? "border-signal bg-signal/10 text-signal" : "border-edge text-muted hover:border-muted hover:text-fg"
+                }`}
+              >
+                <Plus size={14} /> New session
+              </button>
+            </div>
           </div>
         </div>
         {/* AI transparency strip — present when the local model is refining coaching */}
@@ -225,10 +237,14 @@ export function App() {
           viewport edges without ever causing a horizontal scrollbar. */}
       <main className="overflow-x-clip">
         <div className="mx-auto max-w-6xl px-5 py-5">
-          {view === "history" ? (
+          {view === "start" ? (
+            <StartCapture />
+          ) : view === "history" ? (
             <History />
           ) : view === "progress" ? (
             <Progress />
+          ) : sessionCards.length === 0 ? (
+            <StartCapture />
           ) : defenseReport ? (
             <DefenseDebrief report={defenseReport} />
           ) : needsWriteup ? (
