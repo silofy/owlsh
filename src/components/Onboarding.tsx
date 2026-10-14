@@ -3,7 +3,7 @@ import { useReport } from "../store/report";
 import { STEP_COUNT, deriveChecklist } from "../lib/onboarding";
 import { llmStatus, pullModel, DEFAULT_MODEL } from "../lib/llm/runtime";
 import { setCoachMode } from "../lib/llm/mode";
-import { Check, ScanEye, OwlMark, ArrowUpRight, Terminal, Crosshair, ChevronDown, ClaudeMark, GeminiMark, ChatGptMark } from "./icons";
+import { Check, ScanEye, OwlMark, ArrowUpRight, Terminal, Crosshair, ChevronDown, ClaudeMark, GeminiMark, ChatGptMark, OllamaMark } from "./icons";
 
 const MARKS = { claude: ClaudeMark, gemini: GeminiMark, chatgpt: ChatGptMark } as const;
 import { VmConnector } from "./VmConnector";
@@ -283,8 +283,8 @@ export function StepCapture() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-edge bg-panel p-5">
-        {where === "own" ? (
+      {where === "own" ? (
+        <div className="rounded-xl border border-edge bg-panel p-5">
           <ol className="space-y-5">
             <CaptureStep n={1} title="Install the agent" aside="one time" body="Downloads the prebuilt binary and verifies its checksum.">
               <CommandRow cmd="curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh" />
@@ -299,10 +299,10 @@ export function StepCapture() {
               </p>
             </CaptureStep>
           </ol>
-        ) : (
-          <VmConnector />
-        )}
-      </div>
+        </div>
+      ) : (
+        <VmConnector />
+      )}
 
       <section className="space-y-3 rounded-xl border border-signal/25 bg-signal/[0.04] p-5">
         <h3 className="font-display text-sm font-semibold text-fg">Then your run lands here</h3>
@@ -435,13 +435,13 @@ export function StepAI() {
       </p>
 
       {/* Plan group: recommended (the only coloured card) */}
-      <section aria-labelledby="connect-plan" className="space-y-3 rounded-lg border border-signal/50 bg-panel p-4">
+      <section aria-labelledby="connect-plan" className="space-y-3 rounded-lg border border-edge bg-panel p-4">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <h2 id="connect-plan" className="font-display text-sm font-semibold text-fg">Use a plan you already have</h2>
             <span className="label rounded bg-signal/15 px-1.5 py-0.5 text-[10px] text-signal">Recommended</span>
           </div>
-          <p className="text-xs text-faint">Billed to the plan you already have {"—"} not API credits. owlsh connects as a local MCP server.</p>
+          <p className="text-xs text-muted">Billed to the plan you already have, not API credits. owlsh connects as a local MCP server.</p>
         </div>
         <ul className="space-y-3">
           {MCP_CLIENTS.map((c) => {
@@ -513,9 +513,13 @@ export function StepAI() {
       <section aria-labelledby="connect-local" className="space-y-3 rounded-lg border border-edge bg-panel p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
-            <h2 id="connect-local" className="font-display text-sm font-semibold text-fg">Run a model locally (Ollama) {"·"} fully offline</h2>
-            <p className="text-xs text-faint">
-              Ollama runs {DEFAULT_MODEL} on your machine {"—"} free, and commands never leave the device.
+            <h2 id="connect-local" className="flex items-center gap-2 font-display text-sm font-semibold text-fg">
+              <OllamaMark size={16} className="text-fg" />
+              Run a model locally
+              <span className="font-normal text-muted">fully offline</span>
+            </h2>
+            <p className="text-xs text-muted">
+              Ollama runs {DEFAULT_MODEL} on your machine, free, and commands never leave the device.
             </p>
           </div>
           {local === "ready" && <span className="label shrink-0 text-[10px] text-match">installed</span>}
@@ -668,7 +672,7 @@ export function Onboarding() {
         </aside>
 
         {/* content */}
-        <main className="flex min-h-full flex-col px-7 py-8 lg:px-12 lg:py-11">
+        <main className="flex min-h-full min-w-0 flex-col px-7 py-8 lg:px-12 lg:py-11">
           <div key={step} className="flex-1">
             <div className="fade-in">
               <div className="mb-2 text-[13px] font-semibold text-signal">{meta.kicker}</div>

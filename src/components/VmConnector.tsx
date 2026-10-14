@@ -1,20 +1,24 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { loadPwnboxConfig, savePwnboxConfig, pullPwnbox, parseSshTarget, formatSshTarget, setConnectorPlatform, type PwnboxConfig } from "../lib/pwnbox";
-import { activePlatform, platformLabel } from "../lib/platform";
+import { activePlatform } from "../lib/platform";
 import { connectorView } from "../lib/connector-view";
 import { useReport } from "../store/report";
 import type { PlatformId } from "../types/report";
-import { ChevronDown } from "./icons";
 
 type Sync = { kind: "idle" | "ok" | "error"; msg?: string; at?: number };
 
-// the five real platforms; "breachyard" is a demo platform and is not offered
-const PLATFORMS: PlatformId[] = ["htb", "thm", "offsec", "immersive", "local"];
+// Only HTB (Pwnbox) and THM (AttackBox) are remote VMs with a shell to connect to; OffSec/Immersive/
+// Local are local or browser-only and belong in the "on your own machine" path, not here.
+const SSH_PLATFORMS: PlatformId[] = ["htb", "thm"];
+const VM_PLATFORMS: { id: PlatformId; title: string; tag: string; desc: string }[] = [
+  { id: "htb", title: "Hack The Box", tag: "Pwnbox", desc: "Browser VM with a full shell — run the agent over SSH." },
+  { id: "thm", title: "TryHackMe", tag: "AttackBox", desc: "In-browser AttackBox — run the agent over SSH." },
+];
 
 function Field({ label, value, onChange, placeholder, type = "text" }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="label">{label}</span>
+      <span className="text-xs font-medium text-muted">{label}</span>
       <input
         type={type}
         value={value}
@@ -23,6 +27,27 @@ function Field({ label, value, onChange, placeholder, type = "text" }: { label: 
         className="mono rounded border border-edge bg-ink/60 px-2 py-1 text-xs text-fg placeholder:text-faint focus:border-signal focus:outline-none"
       />
     </label>
+  );
+}
+
+// A real on/off switch (role=switch) — replaces the bare status dot the connector used before.
+function Switch({ on, onChange, label }: { on: boolean; onChange: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      onClick={onChange}
+      className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/70 ${
+        on ? "bg-signal" : "bg-panel-2 ring-1 ring-inset ring-edge"
+      }`}
+    >
+      <span
+        className="inline-block h-3.5 w-3.5 rounded-full transition-transform motion-reduce:transition-none"
+        style={{ background: on ? "var(--color-ink)" : "var(--color-faint)", transform: on ? "translateX(19px)" : "translateX(3px)" }}
+      />
+    </button>
   );
 }
 
@@ -77,17 +102,15 @@ function Step({ n, last, title, children }: { n: number; last?: boolean; title: 
  */
 export function VmConnector() {
   const { report, sessionCards } = useReport();
-  const [platform, setPlatform] = useState<PlatformId>(() => activePlatform(report, sessionCards));
+  const initial = activePlatform(report, sessionCards);
+  const [platform, setPlatform] = useState<PlatformId>(SSH_PLATFORMS.includes(initial) ? initial : "htb");
   const [cfg, setCfg] = useState<PwnboxConfig>(loadPwnboxConfig);
-  const [advancedOpen, setAdvancedOpen] = useState(false);
-  const [showConfig, setShowConfig] = useState(false);
   const [target, setTarget] = useState(() => formatSshTarget(loadPwnboxConfig()));
   const [sync, setSync] = useState<Sync>({ kind: "idle" });
   const busy = useRef(false);
 
   const view = connectorView(platform);
-  // the demo platform is not a real capture target; fall back to htb in the copied command
-  const cmdPlatform = PLATFORMS.includes(platform) ? platform : "htb";
+  const cmdPlatform = platform;
 
   const pick = (p: PlatformId) => {
     setPlatform(p);
@@ -132,90 +155,80 @@ export function VmConnector() {
     };
   }, [view.showSshForm, cfg.enabled, cfg.host, cfg.user, cfg.port, cfg.identity, cfg.remoteDir]);
 
-  const statusColor = sync.kind === "error" ? "var(--color-detour)" : sync.kind === "ok" ? "var(--color-match)" : "var(--color-faint)";
-  const dot = cfg.enabled ? statusColor : "var(--color-faint)";
+  const statusColor = sync.kind === "error" ? "var(--color-detour)" : sync.kind === "ok" ? "var(--color-match)" : "var(--color-muted)";
 
   return (
-    <div className="text-left">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h4 className="font-display text-sm font-semibold text-fg">Capture in {view.label}</h4>
-        <select
-          aria-label="Platform"
-          value={platform}
-          onChange={(e) => pick(e.target.value as PlatformId)}
-          className="mono rounded border border-edge bg-ink/60 px-2 py-1 text-xs text-fg focus:border-signal focus:outline-none"
-        >
-          {PLATFORMS.map((p) => (
-            <option key={p} value={p}>
-              {platformLabel(p)}
-            </option>
-          ))}
-        </select>
+    <div className="space-y-5 text-left">
+      {/* platform chooser — a sibling of the steps panel, like the "Where do you hack?" cards */}
+      <div className="space-y-3">
+        <h3 className="font-display text-base font-semibold text-fg">Which remote VM?</h3>
+        <div role="radiogroup" aria-label="Which remote VM?" className="grid gap-2.5 sm:grid-cols-2">
+          {VM_PLATFORMS.map((p) => {
+            const on = platform === p.id;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                role="radio"
+                aria-checked={on}
+                onClick={() => pick(p.id)}
+                className={`group flex flex-col gap-1 rounded-xl border p-4 text-left transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/70 ${
+                  on ? "border-signal bg-signal/[0.06]" : "border-edge bg-panel hover:border-muted/50 hover:bg-panel-2"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-display text-sm font-semibold text-fg">{p.title}</span>
+                  <span aria-hidden className={`flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 transition-colors ${on ? "border-signal" : "border-edge group-hover:border-muted"}`}>
+                    {on && <span className="h-2 w-2 rounded-full bg-signal" />}
+                  </span>
+                </div>
+                <div className="text-xs text-muted">{p.tag}</div>
+                <p className="mt-0.5 text-xs leading-relaxed text-muted">{p.desc}</p>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {view.showSshForm ? (
-        <>
-          <ol className="m-0 list-none p-0">
-            <Step n={1} title={<>Install in {view.label}</>}>
-              <CmdRow cmd="curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh" />
-            </Step>
-            <Step n={2} title={<>Run it <span className="font-normal text-muted">then hack and <code className={codeCls}>exit</code></span></>}>
-              <CmdRow cmd={`owlsh --export ~/.owlsh-exports/box.json --platform ${cmdPlatform} --target <box>`} />
-            </Step>
-            <Step n={3} last title="Bring it back">
-              <p className="text-xs text-muted">
-                Download <code className={codeCls}>~/.owlsh-exports/box.json</code> and drag it onto the <span className="text-fg">History</span> tab {"—"} it opens as a debrief. No keys, no config.
-              </p>
-            </Step>
-          </ol>
+      {/* steps panel */}
+      <div className="rounded-xl border border-edge bg-panel p-5">
+        <ol className="m-0 list-none p-0">
+          <Step n={1} title={<>Install in {view.label}</>}>
+            <CmdRow cmd="curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh" />
+          </Step>
+          <Step n={2} title={<>Run it <span className="font-normal text-muted">then hack and <code className={codeCls}>exit</code></span></>}>
+            <CmdRow cmd={`owlsh --export ~/.owlsh-exports/box.json --platform ${cmdPlatform} --target <box>`} />
+          </Step>
+          <Step n={3} last title="Bring it back">
+            <p className="text-xs leading-relaxed text-muted">
+              Download <code className={codeCls}>~/.owlsh-exports/box.json</code> and drag it onto the <span className="text-fg">History</span> tab — it opens as a debrief. No keys, no config.
+            </p>
+          </Step>
+        </ol>
 
-          {/* optional live auto-pull — collapsed by default; a previously enabled pull keeps running (effect above) */}
-          <div className="mt-3 border-t border-edge pt-2.5">
-            <button
-              type="button"
-              onClick={() => setAdvancedOpen((v) => !v)}
-              aria-expanded={advancedOpen}
-              aria-controls="vm-autopull"
-              className="flex w-full items-center gap-1.5 rounded text-xs font-medium text-muted transition-colors hover:text-fg focus:outline-none focus-visible:text-signal motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-signal/70"
-            >
-              <ChevronDown className={`transition-transform motion-reduce:transition-none ${advancedOpen ? "rotate-180" : ""}`} />
-              <span>Auto-pull over SSH</span>
-              {cfg.enabled && <span className="ml-auto inline-block h-2 w-2 rounded-full" style={{ background: dot }} aria-label="auto-pull on" />}
-            </button>
-
-            <div id="vm-autopull" hidden={!advancedOpen} className="mt-2.5">
-            <div className="flex items-center justify-between gap-3">
-              <button type="button" onClick={() => set({ enabled: !cfg.enabled })} className="flex items-center gap-2" title="Auto-pull exports over SSH">
-                <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: dot }} />
-                <span className="label text-muted">Enable</span>
-              </button>
-              <span className="text-xs" style={{ color: cfg.enabled ? statusColor : "var(--color-faint)" }}>
-                {cfg.enabled ? sync.msg ?? "starting…" : "off"}
-              </span>
-            </div>
-
-            {cfg.enabled && (
-              <button type="button" onClick={() => setShowConfig((v) => !v)} className="mt-2 label flex items-center gap-1.5 text-faint transition-colors hover:text-muted">
-                <ChevronDown className={`transition-transform ${showConfig ? "rotate-180" : ""}`} /> Connection
-              </button>
-            )}
-            {cfg.enabled && showConfig && (
-              <div className="mt-2 space-y-2.5">
-                <Field label={`${view.label} SSH`} value={target} onChange={onTarget} placeholder={view.hint ?? "username@hostname"} />
-                <Field label="SSH key (optional)" value={cfg.identity ?? ""} onChange={(v) => set({ identity: v })} placeholder="~/.ssh/key — blank = default key" />
-                <p className="text-xs text-faint">
-                  Needs key login (uses your {view.label} password once).
-                </p>
+        {/* optional live auto-pull — a real toggle; connection fields reveal only when it's on */}
+        <div className="mt-5 border-t border-edge pt-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <div className="text-sm font-medium text-fg">
+                Auto-pull over SSH <span className="font-normal text-muted">optional</span>
               </div>
-            )}
+              <div className="mt-0.5 text-xs" style={{ color: cfg.enabled ? statusColor : "var(--color-muted)" }}>
+                {cfg.enabled ? (sync.msg ? `Live · ${sync.msg}` : "Live · starting…") : "Pull new exports in the background, no dragging."}
+              </div>
             </div>
+            <Switch on={cfg.enabled} onChange={() => set({ enabled: !cfg.enabled })} label="Auto-pull over SSH" />
           </div>
-        </>
-      ) : (
-        <>
-          <p className="text-sm text-muted">{view.note}</p>
-        </>
-      )}
+
+          {cfg.enabled && (
+            <div className="mt-3 space-y-2.5">
+              <Field label={`${view.label} SSH`} value={target} onChange={onTarget} placeholder={view.hint ?? "username@hostname"} />
+              <Field label="SSH key (optional)" value={cfg.identity ?? ""} onChange={(v) => set({ identity: v })} placeholder="~/.ssh/key — blank = default key" />
+              <p className="text-xs text-muted">Needs key login (uses your {view.label} password once).</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
