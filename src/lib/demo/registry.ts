@@ -1,8 +1,9 @@
 import type { DemoDef } from "./build";
 import { SALTMARSH } from "./saltmarsh";
 import { DUNMOOR } from "./dunmoor";
+import { TIDEWATCH } from "./tidewatch";
 
-export const DEMOS: DemoDef[] = [SALTMARSH, DUNMOOR];
+export const DEMOS: DemoDef[] = [SALTMARSH, DUNMOOR, TIDEWATCH];
 export const LEGACY_DEMO_ID = DEMOS[0].id;
 
 const BY_ID = new Map(DEMOS.flatMap((d) => [[d.id, d], [d.slug, d]] as const));
