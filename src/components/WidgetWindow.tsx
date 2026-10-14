@@ -5,6 +5,8 @@ import { headline, WIDGET_SIZES, type WidgetSize } from "../lib/widget/render";
 import { isDesktop } from "../lib/net";
 import { targetOf } from "../lib/platform";
 import { useHint } from "../lib/hints/use-hint";
+import { getCoachMode, hasApiKey } from "../lib/llm";
+import { shouldPromptConnect } from "../lib/hints/connect-cta";
 import { HintLine } from "./HintLine";
 import { LookupOptIn } from "./LookupOptIn";
 import demo from "../../fixtures/session-demo-full.json";
@@ -77,10 +79,24 @@ export function WidgetWindow() {
     };
   }, [desktop]);
 
+  // Simplification: the widget doesn't probe Ollama, so `ollamaReachable` is treated as false — in
+  // "local" mode the CTA shows until the user switches to a model the widget can see is configured.
+  // Cloud modes check the stored key (async; the CTA waits until it resolves).
+  const mode = getCoachMode();
+  const [hasKey, setHasKey] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (mode === "rules" || mode === "local") return;
+    let alive = true;
+    hasApiKey(mode).then((k) => alive && setHasKey(k), () => {});
+    return () => { alive = false; };
+  }, [mode]);
+
   const { hint, pending, askLookup, penalty, ready, pull: pullHint, lookupDone } = useHint(report, path, desktop);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Escape always closes — the widget is frameless (no OS close button), so this is the reliable exit.
+      if (e.key === "Escape") { void close(); return; }
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === "h" && ready) void pullHint();
       if (e.key === "s") void applySize(WIDGET_SIZES[(WIDGET_SIZES.indexOf(size) + 1) % WIDGET_SIZES.length]);
@@ -89,10 +105,24 @@ export function WidgetWindow() {
     return () => window.removeEventListener("keydown", onKey);
   });
 
+  async function openMainWindow() {
+    if (!desktop) return;
+    try {
+      const { Window } = await import("@tauri-apps/api/window");
+      const main = await Window.getByLabel("main");
+      await main?.show();
+      await main?.setFocus();
+    } catch {
+      /* no main window — the line stays as a visible hint */
+    }
+  }
+
   async function close() {
     if (!desktop) return;
+    // Hide, don't close: the window is declared in the config and reused on reopen, so destroying it
+    // would mean falling back to a runtime-created window (which doesn't reliably init on Windows).
     const { getCurrentWindow } = await import("@tauri-apps/api/window");
-    await getCurrentWindow().close();
+    await getCurrentWindow().hide();
   }
 
   const s = report ? deriveWidgetState(report, now) : null;
@@ -190,6 +220,11 @@ export function WidgetWindow() {
               box={targetOf(report).name}
               onDone={lookupDone}
             />
+          )}
+          {desktop && !hint && (mode === "rules" || mode === "local" || hasKey !== null) && shouldPromptConnect(mode, false, hasKey === true) && (
+            <button type="button" onClick={() => void openMainWindow()} className="text-left text-faint hover:text-fg">
+              Connect a model for AI hints →
+            </button>
           )}
           <HintLine text={hint?.text ?? null} source={hint?.source ?? null} pending={pending} />
           <button

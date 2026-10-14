@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { shouldOpenOnboarding, ONBOARDED_KEY, ONBOARDED_VALUE } from "./onboarding";
-import { STEP_COUNT, clampStep, shouldShowNudge, deriveChecklist } from "./onboarding";
+import { STEP_COUNT, clampStep, deriveChecklist } from "./onboarding";
 
 describe("shouldOpenOnboarding", () => {
   it("opens on a fresh install (no stored flag)", () => {
@@ -27,12 +27,6 @@ describe("activation-flow step logic", () => {
     expect(clampStep(0)).toBe(0);
     expect(clampStep(STEP_COUNT - 1)).toBe(STEP_COUNT - 1);
     expect(clampStep(STEP_COUNT + 5)).toBe(STEP_COUNT - 1);
-  });
-
-  it("nudges only when onboarded but no real capture yet", () => {
-    expect(shouldShowNudge({ onboarded: true, hasRealCapture: false })).toBe(true);
-    expect(shouldShowNudge({ onboarded: true, hasRealCapture: true })).toBe(false);
-    expect(shouldShowNudge({ onboarded: false, hasRealCapture: false })).toBe(false);
   });
 
   it("derives a 3-item checklist reflecting completion", () => {

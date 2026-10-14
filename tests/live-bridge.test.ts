@@ -1,4 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { LiveBridge } from "../src/components/LiveBridge";
 import { useReport } from "../src/store/report";
 import fixture from "../fixtures/session-htb-easy.json";
 import type { OwlshReport } from "../src/types/report";
@@ -55,5 +58,37 @@ describe("live bridge", () => {
     useReport.getState().ingestLiveReport(ended);
     const card = useReport.getState().sessionCards.find((c) => c.id === "htb:live-4");
     expect(card?.recording).toBe(false);
+  });
+});
+
+describe("live banner connector label", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  function bannerFor(platform: "htb" | "thm"): string {
+    vi.stubGlobal("localStorage", { getItem: () => JSON.stringify({ enabled: true }) });
+    useReport.setState({
+      liveBanner: { id: `${platform}:x`, name: "Box" },
+      sessionCards: [{ id: `${platform}:x`, started_at: new Date().toISOString(), target: { name: "Box", platform } }],
+    } as never);
+    // server render reads zustand's frozen initial snapshot, so patch it for this render and restore after
+    const snap = useReport.getInitialState() as unknown as Record<string, unknown>;
+    const keep = { liveBanner: snap.liveBanner, sessionCards: snap.sessionCards };
+    Object.assign(snap, { liveBanner: useReport.getState().liveBanner, sessionCards: useReport.getState().sessionCards });
+    try {
+      return renderToStaticMarkup(createElement(LiveBridge));
+    } finally {
+      Object.assign(snap, keep);
+    }
+  }
+
+  it("shows AttackBox for a THM target with sync enabled", () => {
+    const html = bannerFor("thm");
+    expect(html).toContain("AttackBox");
+    expect(html).not.toContain(">Pwnbox<");
+    expect(html).not.toMatch(/ Pwnbox/);
+  });
+
+  it("still shows Pwnbox for HTB", () => {
+    expect(bannerFor("htb")).toMatch(/ Pwnbox/);
   });
 });

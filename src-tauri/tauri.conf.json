@@ -17,6 +17,20 @@
         "height": 920,
         "minWidth": 900,
         "minHeight": 600
+      },
+      {
+        "label": "widget",
+        "url": "index.html?widget=1",
+        "title": "owlsh — widget",
+        "width": 360,
+        "height": 330,
+        "minWidth": 300,
+        "minHeight": 240,
+        "alwaysOnTop": true,
+        "decorations": false,
+        "resizable": true,
+        "visible": false,
+        "skipTaskbar": true
       }
     ],
     "security": {

@@ -4,6 +4,7 @@
 mod cloud;
 mod htb;
 mod llm;
+mod mcp_setup;
 mod net;
 mod pwnbox;
 mod secrets;
@@ -14,21 +15,26 @@ mod sessions;
 #[tauri::command]
 fn open_widget(app: tauri::AppHandle) -> Result<(), String> {
     use tauri::Manager;
+    // The widget window is declared in tauri.conf.json (hidden at startup) so its webview initializes at
+    // launch on the UI thread — a window created at runtime from a command can fail to init on Windows.
     if let Some(w) = app.get_webview_window("widget") {
         let _ = w.show();
         let _ = w.set_focus();
         return Ok(());
     }
-    tauri::WebviewWindowBuilder::new(&app, "widget", tauri::WebviewUrl::App("index.html?widget=1".into()))
-        .title("owlsh — widget")
-        .inner_size(360.0, 330.0)
-        .min_inner_size(300.0, 240.0)
-        .always_on_top(true)
-        .decorations(false)
-        .resizable(true)
-        .build()
-        .map(|_| ())
-        .map_err(|e| e.to_string())
+    // Fallback only if the window was destroyed: rebuild on the main thread (WebView2 needs the UI thread).
+    let handle = app.clone();
+    app.run_on_main_thread(move || {
+        let _ = tauri::WebviewWindowBuilder::new(&handle, "widget", tauri::WebviewUrl::App("index.html?widget=1".into()))
+            .title("owlsh — widget")
+            .inner_size(360.0, 330.0)
+            .min_inner_size(300.0, 240.0)
+            .always_on_top(true)
+            .decorations(false)
+            .resizable(true)
+            .build();
+    })
+    .map_err(|e| e.to_string())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -65,7 +71,9 @@ pub fn run() {
             secrets::has_api_key,
             secrets::clear_api_key,
             cloud::cloud_generate,
-            pwnbox::pull_pwnbox
+            pwnbox::pull_pwnbox,
+            mcp_setup::mcp_add,
+            mcp_setup::reveal_claude_config
         ])
         .run(tauri::generate_context!())
         .expect("error while running owlsh");

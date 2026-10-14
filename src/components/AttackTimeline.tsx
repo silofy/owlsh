@@ -6,7 +6,8 @@ import { ZoomControls } from "./ZoomControls";
 import { techniqueName } from "../lib/attack";
 import { fmtDuration, fmtClock } from "../lib/format";
 import { ghostMarkers, verdictMeta, connectorLabel } from "../lib/ghost/ghost-view";
-import { ChevronDown } from "./icons";
+import { ChevronDown, ArrowUpRight } from "./icons";
+import { TechniqueChip } from "./TechniqueChip";
 
 const GHOST_H = 14; // ghost-overlay lane height in viewBox units — thin, secondary to the ribbon
 
@@ -68,7 +69,6 @@ export function AttackTimeline() {
       title="How the run unfolded"
       subtitle={`MITRE phases, tinted by efficiency · ${metrics.technique_breadth} distinct ATT&CK techniques`}
       right={<ActorLegend />}
-      srTitle
     >
       <ZoomControls zoomed={zoomed} w0={w0} w1={w1} zoomOut={zoomOut} reset={reset} />
 
@@ -199,7 +199,7 @@ export function AttackTimeline() {
           connector shows the gap when a late pivot left them apart. Absent when there's no golden tree. */}
       {markers.length > 0 && (
         <div className="mt-1 overflow-x-auto">
-          <svg viewBox={`0 0 ${AXIS_W} ${GHOST_H}`} preserveAspectRatio="none" className="h-3.5 w-full">
+          <svg viewBox={`0 0 ${AXIS_W} ${GHOST_H}`} preserveAspectRatio="none" className="h-3.5 w-full" role="img" aria-label="ghost overlay — each objective's unlock instant (dim) vs. when you reached it (bright, colored by verdict)">
             {markers.map((m) => {
               const meta = verdictMeta(m.verdict);
               const ux = m.unlockMs != null ? zx(m.unlockMs) : null;
@@ -236,7 +236,6 @@ export function AttackTimeline() {
               );
             })}
           </svg>
-          <div className="mt-0.5 text-[10px] text-faint">ghost: dim = unlocked · bright = your step, colored by verdict</div>
         </div>
       )}
 
@@ -292,29 +291,34 @@ export function AttackTimeline() {
         )}
       </div>
 
-      {/* the techniques behind the count — substantiate "N distinct", each deep-links to its first step */}
+      {/* the techniques behind the count — each row explains itself (hover the id for the plain-English
+          card + MITRE link) and deep-links to where you first used it, so "N distinct" is substantiated. */}
       {techniques.length > 0 && (
-        <details className="group mt-2 rounded-lg border border-edge bg-panel-2/30">
-          <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2">
+        <details className="group relative z-0 mt-2 rounded-lg border border-edge bg-panel-2/30 transition-colors hover:border-edge-bright open:z-10">
+          <summary className="flex cursor-pointer list-none items-center gap-2 rounded-t-lg px-3 py-2 transition-colors hover:bg-panel-2">
             <ChevronDown className="text-faint transition-transform group-open:rotate-180" />
-            <span className="label text-faint">ATT&CK techniques</span>
-            <span className="text-xs text-muted">· {techniques.length} distinct</span>
+            <span className="label text-muted">ATT&CK techniques</span>
+            <span className="text-xs text-faint">· {techniques.length} distinct</span>
           </summary>
-          <div className="grid gap-x-6 gap-y-0.5 border-t border-edge px-3 py-2 sm:grid-cols-2">
+          <div className="grid gap-x-6 gap-y-px border-t border-edge p-2 sm:grid-cols-2">
             {techniques.map((t) => (
-              <button
+              <div
                 key={t.id}
-                type="button"
-                onClick={() => s.reveal(t.seqs[0])}
                 onMouseEnter={() => s.hover(t.seqs[0])}
                 onMouseLeave={() => s.hover(null)}
-                className="grid grid-cols-[5rem_1fr_auto] items-baseline gap-2 rounded px-1.5 py-1 text-left text-sm transition-colors hover:bg-panel-2/60"
-                title={`First used at step ${t.seqs[0]} — click to inspect`}
+                className="grid grid-cols-[4.5rem_minmax(0,1fr)_auto] items-baseline gap-2.5 rounded px-1.5 py-1.5 text-sm transition-colors hover:bg-panel-2"
               >
-                <span className="mono text-xs text-fg">{t.id}</span>
+                <TechniqueChip id={t.id} />
                 <span className="truncate text-muted">{techniqueName(t.id)}</span>
-                <span className="mono text-xs text-faint">{t.seqs.length}×</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => s.reveal(t.seqs[0])}
+                  className="label flex shrink-0 items-center gap-1 whitespace-nowrap text-faint transition-colors hover:text-signal focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"
+                  title={`Used ${t.seqs.length}×; first at step ${t.seqs[0]} — click to inspect`}
+                >
+                  {t.seqs.length}× <span className="text-edge-bright">·</span> step {t.seqs[0]} <ArrowUpRight size={12} />
+                </button>
+              </div>
             ))}
           </div>
         </details>

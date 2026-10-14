@@ -8,9 +8,9 @@ describe("setup has one entry point: the wizard", () => {
     expect(renderToStaticMarkup(<App />)).not.toMatch(/>Install</);
   });
 
-  it("carries every Install-page section inside the wizard's capture step", () => {
+  it("shows the capture path chooser", () => {
     const html = renderToStaticMarkup(<StepCapture />);
-    for (const s of ["All setup options", "On your own machine", "In Pwnbox", "live auto-pull", "Reference path", "AI-refined coaching"]) {
+    for (const s of ["On your own machine", "In a remote VM", "curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh"]) {
       expect(html).toContain(s);
     }
   });

@@ -100,7 +100,7 @@ function InsightRow({ item }: { item: AuditItem }) {
   const linked = item.evidence_seq != null;
   return (
     <li
-      className={`rounded-lg border border-edge bg-panel-2/30 p-3 transition-colors hover:border-edge-bright ${linked ? "cursor-pointer" : ""}`}
+      className={`rounded-lg border border-edge bg-panel-2/30 p-3 transition-colors ${linked ? "cursor-pointer hover:border-edge-bright hover:bg-panel-2" : ""}`}
       onMouseEnter={() => linked && s.hover(item.evidence_seq!)}
       onMouseLeave={() => linked && s.hover(null)}
       onClick={() => linked && s.reveal(item.evidence_seq!)}
@@ -135,8 +135,8 @@ function Group({ title, items, dot, defaultOpen = false }: { title: string; item
   const s = useReport();
   if (items.length === 0) return null;
   return (
-    <details className="group mt-2 rounded-lg border border-edge bg-panel-2/20" open={defaultOpen}>
-      <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2">
+    <details className="group mt-2 rounded-lg border border-edge bg-panel-2/20 transition-colors hover:border-edge-bright" open={defaultOpen}>
+      <summary className="flex cursor-pointer list-none items-center gap-2 rounded-t-lg px-3 py-2 transition-colors hover:bg-panel-2">
         <ChevronDown className="text-faint transition-transform group-open:rotate-180" />
         <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: dot }} />
         <span className="label text-muted">{title}</span>
@@ -148,7 +148,7 @@ function Group({ title, items, dot, defaultOpen = false }: { title: string; item
           return (
             <li
               key={it.id}
-              className={`px-3 py-2 transition-colors ${linked ? "cursor-pointer hover:bg-panel-2/50" : ""}`}
+              className={`px-3 py-2 transition-colors ${linked ? "cursor-pointer hover:bg-panel-2" : ""}`}
               onMouseEnter={() => linked && s.hover(it.evidence_seq!)}
               onMouseLeave={() => linked && s.hover(null)}
               onClick={() => linked && s.reveal(it.evidence_seq!)}
@@ -184,7 +184,7 @@ function Objectives({ items }: { items: PhaseAuditT["objectives"] }) {
         {items.map((o) => (
           <li
             key={o.slug}
-            className={`flex items-baseline gap-2 rounded px-1.5 py-1 text-sm ${o.reached ? "cursor-pointer hover:bg-panel-2/50" : ""}`}
+            className={`flex items-baseline gap-2 rounded px-1.5 py-1 text-sm ${o.reached ? "cursor-pointer hover:bg-panel-2" : ""}`}
             onMouseEnter={() => o.reached && o.seq != null && s.hover(o.seq)}
             onMouseLeave={() => o.reached && s.hover(null)}
             onClick={() => o.reached && o.seq != null && s.reveal(o.seq)}
@@ -218,8 +218,8 @@ function PhaseCard({ p }: { p: PhaseAuditT }) {
   const missed = p.objectives.filter((o) => !o.reached).length;
   const clean = p.insights.length === 0 && p.manual.length === 0 && missed === 0;
   return (
-    <details className="rise rounded-lg border border-edge">
-      <summary className="flex cursor-pointer list-none items-center gap-3.5 px-4 py-3" title={line}>
+    <details className="rise relative z-0 rounded-lg border border-edge transition-colors hover:z-20 hover:border-edge-bright">
+      <summary className="flex cursor-pointer list-none items-center gap-3.5 rounded-t-lg px-4 py-3 transition-colors hover:bg-panel-2" title={line}>
         <PhaseLevel value={p.efficiency} />
         <div className="flex min-w-0 flex-1 items-center justify-between gap-6">
           <span className="font-display text-sm font-semibold text-fg">{p.label}</span>
@@ -322,8 +322,8 @@ function PhaseCard({ p }: { p: PhaseAuditT }) {
 /** Cross-cutting coaching with no single home phase — the Lighthouse "General" group. */
 function GeneralCard({ items }: { items: AuditItem[] }) {
   return (
-    <details className="rise rounded-lg border border-edge">
-      <summary className="flex cursor-pointer list-none items-center gap-3.5 px-4 py-3" title="Cross-cutting: not tied to a single phase">
+    <details className="rise relative z-0 rounded-lg border border-edge transition-colors hover:z-20 hover:border-edge-bright">
+      <summary className="flex cursor-pointer list-none items-center gap-3.5 rounded-t-lg px-4 py-3 transition-colors hover:bg-panel-2" title="Cross-cutting: not tied to a single phase">
         <PhaseLevel value={null} />
         <div className="flex min-w-0 flex-1 items-center justify-between gap-6">
           <span className="font-display text-sm font-semibold text-fg">General</span>

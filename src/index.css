@@ -1,6 +1,14 @@
 @import "tailwindcss";
 
 /*
+ * Tailwind v4 gates `hover:` behind `@media (hover: hover)`. The Tauri WebView2
+ * runtime reports `hover: none`, which silently disables every hover utility and
+ * group-hover tooltip in the desktop app (they work in a normal browser). Redefine
+ * the variant so `hover:` applies on any real :hover, pointer device or not.
+ */
+@custom-variant hover (&:hover);
+
+/*
  * Editorial dark: neutral black ground, one mint signal, the actor legend unchanged;
  * Hanken Grotesk + Spline Sans Mono.
  */
@@ -84,6 +92,14 @@ body {
     font-weight: 500;
     font-size: 0.65625rem; /* 10.5px */
     color: var(--color-faint);
+  }
+
+  /* In the onboarding wizard the mono-caps eyebrow is retired: labels read as quiet sentence-case
+     sans. Scoped to .onboarding-wizard so the eyebrow stays the brand voice everywhere else. */
+  .onboarding-wizard .label {
+    font-family: var(--font-display);
+    text-transform: none;
+    letter-spacing: normal;
   }
 
   /* section anchor: the top header tier for a numbered narrative section — same mono-caps
@@ -296,24 +312,12 @@ body {
   display: none;
 }
 
-@keyframes lamp {
-  50% {
-    opacity: 0.35;
-  }
-}
-.setup-lamp {
-  animation: lamp 1.8s ease-in-out infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
-  }
-  .setup-lamp {
-    animation: none;
   }
 }
 
