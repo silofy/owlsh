@@ -1,17 +1,20 @@
 /**
- * The chosen coaching model, persisted locally. Default is `local` — try Ollama, fall back to rules —
- * preserving the offline-first behavior. Cloud modes are a deliberate opt-in the user selects.
+ * The chosen coaching model, persisted locally. `plan` (the recommended path) coaches through the
+ * user's own Claude/Gemini client over MCP — owlsh is the server, so it produces no hint in-app;
+ * the client does. `local` tries Ollama and falls back to rules (offline-first); cloud modes are a
+ * deliberate key-based opt-in. Default stays `local` so a fresh user with nothing installed still
+ * gets a working offline fallback rather than a dead button.
  */
 import type { CloudName } from "./cloud";
 
-export type CoachMode = "rules" | "local" | CloudName;
+export type CoachMode = "rules" | "local" | "plan" | CloudName;
 
 const KEY = "owlsh.coachMode";
 
 export function getCoachMode(): CoachMode {
   try {
     const v = localStorage.getItem(KEY);
-    if (v === "rules" || v === "local" || v === "anthropic" || v === "openai" || v === "gemini" || v === "openrouter") return v;
+    if (v === "rules" || v === "local" || v === "plan" || v === "anthropic" || v === "openai" || v === "gemini" || v === "openrouter") return v;
   } catch {
     /* no localStorage (SSR / tests) */
   }

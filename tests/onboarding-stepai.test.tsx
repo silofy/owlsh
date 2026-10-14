@@ -10,7 +10,7 @@ describe("StepAI", () => {
     expect(html).not.toMatch(/API key/i);
   });
   it("shows the MCP add command", () => {
-    expect(html).toContain("claude mcp add owlsh -- owlsh mcp");
+    expect(html).toContain("claude mcp add owlsh --scope user -- owlsh mcp");
   });
   it("offers Claude, Gemini and ChatGPT, plus Local; no API-key field", () => {
     expect(html).toMatch(/Claude/);

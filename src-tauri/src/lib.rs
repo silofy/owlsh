@@ -73,6 +73,8 @@ pub fn run() {
             cloud::cloud_generate,
             pwnbox::pull_pwnbox,
             mcp_setup::mcp_add,
+            mcp_setup::mcp_status,
+            mcp_setup::owlsh_bin_path,
             mcp_setup::reveal_claude_config
         ])
         .run(tauri::generate_context!())

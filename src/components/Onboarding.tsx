@@ -13,6 +13,9 @@ import {
   mcpDesktopConfigSnippet,
   mcpGeminiCommand,
   mcpGeminiConfigSnippet,
+  mcpPlanStatus,
+  owlshBinPath,
+  type PlanStatus,
 } from "../lib/hints/mcp-connect";
 
 const FOCUS = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/70";
@@ -367,6 +370,15 @@ export function StepAI() {
   const [done, setDone] = useState<string | null>(null);
   // Claude is the recommended path, so it starts expanded; the others show label + note only.
   const [open, setOpen] = useState<McpClientId | null>("claude");
+  // Live "is owlsh registered with Claude Code?" status, so the recommended card can confirm the
+  // connection instead of asking the user to take it on faith. null = not probed yet. No `mounted`
+  // guard here: a click fires while mounted, and the auto-probe effect below uses its own `alive`
+  // flag — the shared `mounted` ref is false-forever under StrictMode and would swallow the update.
+  const [plan, setPlan] = useState<PlanStatus | null>(null);
+  const checkPlan = () => mcpPlanStatus().then(setPlan);
+  // Resolve the owlsh binary's absolute path so the copyable commands don't depend on it being on
+  // PATH; falls back to the bare name `owlsh`.
+  const [bin, setBin] = useState("owlsh");
 
   // Guards post-await setState: the content column is keyed by step, so leaving mid-request
   // unmounts this. The coaching choice still persists; only the visual state is gated.
@@ -394,12 +406,26 @@ export function StepAI() {
     };
   }, [desktop]);
 
+  // Probe the plan connection once on open (desktop only) so an already-registered owlsh shows as
+  // connected without the user having to ask.
+  useEffect(() => {
+    if (!desktop) return;
+    let alive = true;
+    mcpPlanStatus().then((s) => { if (alive) setPlan(s); }, () => {});
+    owlshBinPath().then((b) => { if (alive) setBin(b); }, () => {});
+    return () => { alive = false; };
+  }, [desktop]);
+
   const finish = (message: string) => {
     markOnboardingStep("ai");
     if (mounted.current) setDone(message);
   };
-  // MCP coaching happens inside the user's Claude client, so coachMode is left untouched.
-  const useMcp = (label: string) => finish(`${label} connected — coaching now happens on your ${label} plan.`);
+  // MCP coaching happens inside the user's Claude client, but we still record `plan` as the chosen
+  // mode so the header chip, widget, and `[h]` affordance all reflect the connection afterwards.
+  const useMcp = (label: string) => {
+    setCoachMode("plan");
+    finish(`${label} connected — coaching now happens on your ${label} plan.`);
+  };
   const useLocal = () => {
     setCoachMode("local");
     finish("Local AI coaching is on — your notes will be command-aware.");
@@ -470,21 +496,21 @@ export function StepAI() {
                     {c.id === "claude" && (
                       <>
                         <p className="text-xs text-muted">Your Claude plan: run this once in Claude Code.</p>
-                        <CommandRow cmd={mcpClaudeCodeCommand()} label="Copy Claude Code command" />
+                        <CommandRow cmd={mcpClaudeCodeCommand(bin)} label="Copy Claude Code command" />
                         <p className="text-xs text-muted">
                           Claude Desktop: add this to <code className="mono text-fg">claude_desktop_config.json</code>, then restart it.
                         </p>
-                        <CommandRow cmd={mcpDesktopConfigSnippet()} prompt={false} label="Copy Claude Desktop config" />
+                        <CommandRow cmd={mcpDesktopConfigSnippet(bin)} prompt={false} label="Copy Claude Desktop config" />
                       </>
                     )}
                     {c.id === "gemini" && (
                       <>
                         <p className="text-xs text-muted">Gemini CLI: run this once.</p>
-                        <CommandRow cmd={mcpGeminiCommand()} label="Copy Gemini command" />
+                        <CommandRow cmd={mcpGeminiCommand(bin)} label="Copy Gemini command" />
                         <p className="text-xs text-muted">
                           Or add this to <code className="mono text-fg">~/.gemini/settings.json</code>.
                         </p>
-                        <CommandRow cmd={mcpGeminiConfigSnippet()} prompt={false} label="Copy Gemini config" />
+                        <CommandRow cmd={mcpGeminiConfigSnippet(bin)} prompt={false} label="Copy Gemini config" />
                       </>
                     )}
                     {c.id === "chatgpt" && c.href && (
@@ -496,6 +522,16 @@ export function StepAI() {
                       >
                         Set up the tunnel <ArrowUpRight size={12} />
                       </a>
+                    )}
+                    {c.id === "claude" && desktop && (
+                      <div className="flex flex-wrap items-center gap-3 text-xs">
+                        {plan?.connected ? (
+                          <span className="flex items-center gap-1 text-match"><Check size={12} /> Connected — owlsh is registered with Claude Code</span>
+                        ) : (
+                          <span className="text-faint">{plan ? "Not detected in Claude Code yet." : "Checking…"}</span>
+                        )}
+                        <button type="button" onClick={() => void checkPlan()} className={`text-signal hover:underline ${FOCUS}`}>Re-check</button>
+                      </div>
                     )}
                     <p className="text-xs text-faint">Coaching then happens inside {c.label}, on your plan.</p>
                     <Primary onClick={() => useMcp(c.label)}>
