@@ -128,7 +128,7 @@ export function PathComparison({ num }: { num?: string } = {}) {
             type="button"
             aria-expanded={mapOpen}
             onClick={() => setMapOpen((o) => !o)}
-            className="label inline-flex items-center gap-2 self-start rounded-md border border-edge bg-panel-2 px-4 py-2.5 text-fg transition-[color,border-color,filter] hover:border-signal/60 hover:text-signal hover:brightness-125 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"
+            className="label flex w-full items-center justify-center gap-2 rounded-md border border-edge bg-panel-2 px-4 py-3 text-fg transition-[color,border-color,filter] hover:border-signal/60 hover:text-signal hover:brightness-125 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"
           >
             {mapOpen ? "Hide path map" : "Show full path map"}
             <ChevronDown size={13} className={`transition-transform motion-reduce:transition-none ${mapOpen ? "rotate-180" : ""}`} />

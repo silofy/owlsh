@@ -122,11 +122,11 @@ export function WriteupControl() {
   }
 
   const btnSecondary =
-    "rounded-md border border-edge px-2.5 py-1 text-xs text-muted transition-colors hover:border-edge-bright hover:text-fg disabled:opacity-40";
+    "rounded-md border border-edge px-2.5 py-1 text-xs text-muted transition-colors hover:border-edge-bright hover:bg-panel-2 hover:text-fg disabled:opacity-40";
 
   return (
     <details className="group border-b border-edge">
-      <summary className="-mx-2 flex cursor-pointer list-none items-center gap-2 rounded-md px-2 py-2.5 transition-colors hover:bg-panel-2/60 [&::-webkit-details-marker]:hidden">
+      <summary className="-mx-2 flex cursor-pointer list-none items-center gap-2 rounded-md border border-transparent px-2 py-2.5 transition-colors hover:border-edge-bright hover:bg-panel-2 [&::-webkit-details-marker]:hidden">
         <div className="flex min-w-0 flex-col gap-0.5">
           <span className="flex items-center gap-1.5 text-muted transition-colors group-hover:text-fg">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="shrink-0">

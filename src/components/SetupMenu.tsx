@@ -67,7 +67,7 @@ export function SetupMenu() {
                 key={it.id}
                 type="button"
                 onClick={() => select(it.id)}
-                className={`flex w-full flex-col gap-0.5 rounded-md px-3 py-2.5 text-left text-sm transition-colors hover:bg-panel-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/70 motion-reduce:transition-none ${
+                className={`flex w-full flex-col gap-0.5 rounded-md border border-transparent px-3 py-2.5 text-left text-sm transition-colors hover:border-edge-bright hover:bg-panel-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/70 motion-reduce:transition-none ${
                   urgent ? "font-semibold text-signal" : "text-fg"
                 }`}
               >

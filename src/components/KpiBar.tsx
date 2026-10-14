@@ -15,7 +15,7 @@ function MetricCard({ c }: { c: Cell }) {
       type="button"
       onClick={() => goTo(c.to)}
       title={`Open “${c.section}”`}
-      className="group flex h-full flex-col justify-between gap-2 rounded-lg border border-edge bg-panel px-3 pt-3 pb-2.5 text-left transition-colors hover:border-edge-bright hover:bg-panel-2/50"
+      className="group flex h-full flex-col justify-between gap-2 rounded-lg border border-edge bg-panel px-3 pt-3 pb-2.5 text-left transition-colors hover:border-edge-bright hover:bg-panel-2"
     >
       <div className="flex items-center justify-between">
         <span className="label text-xs">{c.label}</span>
@@ -60,7 +60,7 @@ export function KpiBar() {
         type="button"
         onClick={() => goTo("bridge")}
         title="Open “Coaching & grade” — the rubric and playbook"
-        className="group flex min-w-[15rem] flex-col justify-between rounded-lg border border-edge bg-panel px-5 pt-3 pb-4 text-left transition-colors hover:border-edge-bright hover:bg-panel-2/50 lg:min-w-[17rem]"
+        className="group flex min-w-[15rem] flex-col justify-between rounded-lg border border-edge bg-panel px-5 pt-3 pb-4 text-left transition-colors hover:border-edge-bright hover:bg-panel-2 lg:min-w-[17rem]"
       >
         <div className="flex items-center justify-between">
           <span className="label text-xs">Grade</span>
