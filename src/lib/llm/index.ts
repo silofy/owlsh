@@ -24,7 +24,10 @@ export * from "./refine";
  */
 export async function resolveProvider(opts?: { url?: string; model?: string; mode?: CoachMode }): Promise<LlmProvider> {
   const mode = opts?.mode ?? getCoachMode();
-  if (mode === "rules") return new NullProvider();
+  // `plan` coaches through the user's own Claude/Gemini client (owlsh is the MCP *server*), so there
+  // is no in-app provider to call — the widget falls back to deterministic rules, and the AI hint is
+  // produced in the client via the `coach` tool.
+  if (mode === "rules" || mode === "plan") return new NullProvider();
   if (mode === "anthropic" || mode === "openai" || mode === "gemini" || mode === "openrouter") {
     const cloud = new CloudProvider(mode);
     return (await cloud.available()) ? cloud : new NullProvider();

@@ -23,6 +23,7 @@ import { LiveBridge } from "./components/LiveBridge";
 import { DemoDriver } from "./components/DemoDriver";
 import { LiveDashboard } from "./components/LiveDashboard";
 import { SetupMenu } from "./components/SetupMenu";
+import { CoachStatusChip } from "./components/CoachStatus";
 import { StartCapture } from "./components/StartCapture";
 import { Onboarding } from "./components/Onboarding";
 import { isLiveRecording } from "./lib/live";
@@ -212,7 +213,8 @@ export function App() {
                 <SetupMenu />
               </nav>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
+              <CoachStatusChip />
               <button
                 type="button"
                 onClick={() => setView("start")}

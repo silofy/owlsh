@@ -6,7 +6,8 @@ import { isDesktop } from "../lib/net";
 import { targetOf } from "../lib/platform";
 import { useHint } from "../lib/hints/use-hint";
 import { getCoachMode, hasApiKey } from "../lib/llm";
-import { shouldPromptConnect } from "../lib/hints/connect-cta";
+import { connectCta } from "../lib/hints/connect-cta";
+import { mcpPlanStatus, coachInClientPrompt } from "../lib/hints/mcp-connect";
 import { HintLine } from "./HintLine";
 import { LookupOptIn } from "./LookupOptIn";
 import demo from "../../fixtures/session-demo-full.json";
@@ -85,11 +86,35 @@ export function WidgetWindow() {
   const mode = getCoachMode();
   const [hasKey, setHasKey] = useState<boolean | null>(null);
   useEffect(() => {
-    if (mode === "rules" || mode === "local") return;
+    // Only the cloud (API-key) modes have a key to check.
+    if (mode !== "anthropic" && mode !== "openai" && mode !== "gemini" && mode !== "openrouter") return;
     let alive = true;
     hasApiKey(mode).then((k) => alive && setHasKey(k), () => {});
     return () => { alive = false; };
   }, [mode]);
+
+  // `plan` mode: ask whether the user's Claude client has owlsh registered, so the CTA can offer the
+  // real "Coach this run in Claude" affordance rather than a dead "connect a model" nudge.
+  const [planConnected, setPlanConnected] = useState(false);
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (mode !== "plan") return;
+    let alive = true;
+    mcpPlanStatus().then((s) => alive && setPlanConnected(s.connected), () => {});
+    return () => { alive = false; };
+  }, [mode]);
+
+  async function copyCoachPrompt() {
+    try {
+      await navigator.clipboard.writeText(coachInClientPrompt(1));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard blocked — the prompt is short enough to retype */
+    }
+  }
+
+  const cta = connectCta(mode, { ollamaReachable: false, hasKey: hasKey === true, planConnected });
 
   const { hint, pending, askLookup, penalty, ready, pull: pullHint, lookupDone } = useHint(report, path, desktop);
 
@@ -221,10 +246,16 @@ export function WidgetWindow() {
               onDone={lookupDone}
             />
           )}
-          {desktop && !hint && (mode === "rules" || mode === "local" || hasKey !== null) && shouldPromptConnect(mode, false, hasKey === true) && (
-            <button type="button" onClick={() => void openMainWindow()} className="text-left text-faint hover:text-fg">
-              Connect a model for AI hints →
-            </button>
+          {desktop && !hint && (mode !== "anthropic" && mode !== "openai" && mode !== "gemini" && mode !== "openrouter" ? true : hasKey !== null) && cta !== "none" && (
+            cta === "coach-elsewhere" ? (
+              <button type="button" onClick={() => void copyCoachPrompt()} className="text-left text-signal hover:text-fg">
+                {copied ? "Copied — paste into your Claude client" : "Coach this run in Claude →"}
+              </button>
+            ) : (
+              <button type="button" onClick={() => void openMainWindow()} className="text-left text-faint hover:text-fg">
+                Connect a model for AI hints →
+              </button>
+            )
           )}
           <HintLine text={hint?.text ?? null} source={hint?.source ?? null} pending={pending} />
           <button
