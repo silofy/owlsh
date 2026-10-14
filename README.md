@@ -157,7 +157,11 @@ owlsh works fully offline on built-in rules. You can also connect a model for sh
 - **An API key.** Claude, ChatGPT, Gemini, or OpenRouter.
 - **A local model.** Run Ollama on your own machine, fully offline.
 
-The header shows which model is connected. Whichever you pick, hints stay graded: you pull them with `h`, they escalate one tier at a time (how you're working, then where to look, then the class of technique), and each one costs score. owlsh sends the model your redacted session, never the write-up, and a guard drops anything that would give the answer away.
+The header shows which model is connected. Whichever you pick, hints stay graded: you pull them with `h`, they escalate one tier at a time (how you're working, then where to look, then the class of technique), and each one costs score (3, 6, then 10 points). Taking none costs nothing.
+
+owlsh sends the model your redacted session, never the write-up. If you link a write-up, the model is told only which objectives you have hit and which you have not, as abstract labels, not the write-up text. A fail-closed guard then strips anything concrete (IPs, paths, CVEs, credentials, or a step you have not reached), so a hint nudges your process without handing you the answer.
+
+In plain terms: a hint is a friend who can see your moves but not the answer key. With no model it is a generic nudge; connect your own and it reacts to your actual run; add a write-up and it knows which step you are stuck on.
 
 ## How it works
 
