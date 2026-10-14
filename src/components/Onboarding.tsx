@@ -646,10 +646,7 @@ export function Onboarding() {
           <div className="space-y-8">
             <div className="flex items-center gap-2.5">
               <OwlMark size={36} />
-              <div>
-                <div className="font-display text-[15px] font-semibold leading-tight text-fg">owlsh</div>
-                <div className="label text-[10px] text-faint">activation</div>
-              </div>
+              <div className="font-display text-[15px] font-semibold leading-tight text-fg">owlsh</div>
             </div>
             <ProgressRail step={step} stepDone={stepDone} />
           </div>
