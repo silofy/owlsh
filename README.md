@@ -11,7 +11,7 @@
 
 Record your run against any box, then get a graded debrief: what you achieved, where you lost time, and the one thing to fix next. It grades defenders too.
 
-**[owlsh.com](https://owlsh.com)** · [Features](#features) · [Install](#install) · [Usage](#usage) · [AI coaching](#ai-coaching) · [How it works](#how-it-works) · [Testing](TESTING.md)
+**[owlsh.com](https://owlsh.com)** · [Features](#features) · [How it works](#how-it-works) · [Install](#install) · [Usage](#usage) · [AI coaching](#ai-coaching) · [Testing](TESTING.md)
 
 </div>
 
@@ -49,52 +49,32 @@ owlsh records the commands you run against a target on Hack The Box, TryHackMe, 
 - **Progress across runs.** Grade, coverage and methodology charted over your history.
 - **Local-first.** Deterministic scoring. An optional model only sharpens the wording, never the numbers.
 
+## How it works
+
+Three steps, all on your machine:
+
+1. **Record.** A small agent watches your shell through a normal terminal, no kernel hooks or special privileges. (Or import a Claude Code, Burp, or Sysmon capture instead.)
+2. **Grade.** owlsh scores the run the same way every time, against MITRE ATT&CK, the Kill Chain and CWE, and compares it to the best line through the box.
+3. **Coach.** The debrief shows your grade, the one fix that matters most, and where you went off-path. An optional AI model only sharpens the wording, never the numbers.
+
+It all lands in one versioned JSON report ([schema](schema/owlsh-report.schema.json)) the app renders. Nothing leaves your machine unless you opt in (see [Privacy](#privacy)).
+
 ## Install
 
 **Desktop app.** Grab the installer for your OS from the **[latest release](https://github.com/silofy/owlsh/releases/latest)** (`.dmg`, `.msi`/`.exe`, `.AppImage`/`.deb`/`.rpm`). Builds aren't signed yet: on macOS, right-click then **Open**; on Windows SmartScreen, choose **More info** then **Run anyway**. Each release lists `SHA256SUMS` so you can verify a download.
 
 ### Capture agent
 
-One static binary (musl). No Rust toolchain, no runtime deps. It runs the same on Kali, Parrot, and cloud boxes like HTB Pwnbox. Install it one of three ways:
+One static binary (musl), no runtime deps, same on Kali, Parrot, and cloud boxes like HTB Pwnbox:
 
 ```sh
-# 1. One-line installer: downloads the prebuilt binary, verifies it against SHA256SUMS, installs to ~/.local/bin
-curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh    # Kali, Parrot, Pwnbox, macOS
-irm https://raw.githubusercontent.com/silofy/owlsh/main/install.ps1 | iex         # Windows
+curl -fsSL https://raw.githubusercontent.com/silofy/owlsh/main/install.sh | sh   # macOS, Kali, Parrot, Pwnbox
+irm  https://raw.githubusercontent.com/silofy/owlsh/main/install.ps1 | iex       # Windows
 ```
 
-```sh
-# 2. Debian package: grab owlsh_<ver>_amd64.deb (or _arm64.deb) from the latest release:
-#    https://github.com/silofy/owlsh/releases/latest
-sudo dpkg -i owlsh_*.deb
-```
+The installer verifies the binary against `SHA256SUMS` and drops it in `~/.local/bin`. Also shipped as a `.deb`, with a signed apt repo coming (see [`packaging/`](packaging/)).
 
-```sh
-# 3. apt (once the signed repo is published, see packaging/apt/)
-curl -fsSL https://silofy.github.io/watcher-apt/watcher-archive-keyring.asc | sudo tee /usr/share/keyrings/owlsh.asc >/dev/null
-echo "deb [signed-by=/usr/share/keyrings/owlsh.asc] https://silofy.github.io/watcher-apt stable main" | sudo tee /etc/apt/sources.list.d/owlsh.list
-sudo apt update && sudo apt install owlsh
-```
-
-Then record a run. How you capture depends on where you work:
-
-- **Your own VM (Kali, Parrot) over VPN.** Capture live; each command streams straight into the desktop app:
-
-  ```sh
-  owlsh --attach --platform htb --target <box>
-  ```
-  Set `--platform` to `htb`, `thm`, `offsec`, `immersive`, or `local`. If `~/.local/bin` isn't on your `PATH`, the installer prints the one line to add it. Add `--web` to fold in Burp traffic (see [Usage](#usage)).
-
-- **A cloud box with no local app (HTB Pwnbox, OffSec Kali).** Install the agent inside the cloud VM, capture to a file, and open it on your own machine:
-
-  ```sh
-  owlsh --export ~/.owlsh-exports/run.json --platform htb --target <box>
-  ```
-  Then drop `run.json` into **History → Import session** in the app. It can also pull the file over SSH for you; the setup wizard walks you through it.
-
-**Just look at a report.** No install: open the [live demos](#demos), or run `npm install && npm run dev` and visit <http://localhost:5173>.
-
-**Build from source.** Run `npm run doctor` (it checks Rust and platform libraries and prints any fix), then `npm run tauri dev`. Needs Node 24+ and Rust. Full walkthrough: **[TESTING.md](TESTING.md)**.
+**Just want to look around?** Skip the install and open the [live demos](#demos). To build from source, run `npm run doctor` then `npm run tauri dev` (needs Node 24+ and Rust, see [TESTING.md](TESTING.md)).
 
 ## Demos
 
@@ -105,19 +85,23 @@ Two scripted runs you can watch build live in your browser, no install. These ar
 
 ## The debrief
 
-When the run ends, the live panel settles into a single-column, lesson-first report: the verdict, then the one thing to fix, then the detail. You get "what do I do differently next time" before you scroll. [See it in the demo ▶](https://silofy.github.io/owlsh/?demo=abducted)
-
-![The graded debrief](docs/screenshots/grade.png)
+When the run ends, the live panel settles into a single-column, lesson-first report: the verdict, then the one thing to fix, then the detail. You get "what do I do differently next time" before you scroll. [See it in the demo ▶](https://silofy.github.io/owlsh/?demo=saltmarsh)
 
 ## Usage
 
-With the [capture agent](#install) installed, record a run. It streams into the app live; type `exit` to stop:
+Record a run. It streams into the desktop app live; type `exit` to stop. When it ends you get the graded debrief. That's the whole loop.
 
 ```sh
-owlsh --attach --platform htb --target <box>   # --platform: htb | thm | offsec | immersive | local
+owlsh --attach --platform htb --target <box>   # platform: htb | thm | offsec | immersive | local
 ```
 
-owlsh also grades a run from any of the sources below. Each feeds the same engine and is tagged by source in the debrief. Use the CLI, or **History → Import session** in the app (or drag a file onto it):
+**On a cloud box** (Pwnbox, OffSec Kali) with no local app? Capture to a file instead, then open it via **History → Import session** (or drag it in). The app can also pull it over SSH; the wizard walks you through it. Full guide: **[CAPTURE.md](crates/capture/CAPTURE.md)**.
+
+```sh
+owlsh --export run.json --platform htb --target <box>
+```
+
+**Grade from another source.** owlsh scores a run from any of these too, each tagged by source in the debrief. A run with no write-up is still graded against a canonical methodology ladder, so coverage is meaningful:
 
 | Source | Command |
 | --- | --- |
@@ -127,26 +111,13 @@ owlsh also grades a run from any of the sources below. Each feeds the same engin
 | Sysmon / EDR | `npm run ingest:sysmon -- --events <sysmon.json>` |
 | Defensive investigation | `npm run ingest:defense -- --incident <attacker capture> --run <analyst session>` |
 
-A run imported without a write-up is graded against a canonical methodology ladder (host or web), so coverage is meaningful rather than zero. The **defensive** run uses the attacker capture as the answer key and scores five metrics: Coverage, Reconstruction, Time-to-detect, Scoping and Discipline.
+The **defensive** run uses the attacker capture as the answer key and scores the analyst's investigation.
 
-**Live widget.** A compact companion to keep in a pane beside your shell, like a tmux split. It mirrors your run as you work (phase, elapsed time, stealth, findings) and flags your own loose threads, like an unused credential or a path you never revisited. It never tells you the next move. Hints are opt-in (`h`), escalate one tier at a time, and each pull costs score.
+**Optional extras:**
 
-```sh
-npm run widget -- --report <session.json> --size medium   # small | medium | large; [s] cycles, [h] hint, [q] quit
-```
-
-In the desktop app, click **Widget** in the header for the same view in a small, always-on-top window you can park beside your terminal. It follows your newest capture, and hints you pull there are recorded the same way. Three sizes: **small** (phase and one line), **medium** (stats and your open threads), and **large** (adds your latest finds and pace). Switch with S/M/L in its header or the `s` key.
-
-**Draft a report.** Turn a graded run into an OSCP/CPTS-style Markdown report (findings with severity, evidence, reproduction and remediation), deterministic and offline:
-
-```sh
-npm run report                      # the bundled demo → dist/report.md
-npm run report -- --report <path>   # from your own report JSON
-```
-
-**Web traffic (optional).** With **Burp Suite** and its **MCP Server** extension running, add `--web` to any capture to fold HTTP attacks onto the same timeline (SQLi to CWE-89, IDOR to CWE-639, traversal to CWE-22). Off by default, in-scope traffic only, with auth headers, cookies and tokens stripped before anything is stored. Full setup: **[docs/web-capture.md](docs/web-capture.md)**.
-
-**Cloud box with no local terminal to watch?** Install the agent there and capture to a file the app pulls over SSH: `owlsh --export ~/.owlsh-exports/run.json --platform htb --target <box>`. Full capture guide: **[crates/capture/CAPTURE.md](crates/capture/CAPTURE.md)**.
+- **Live widget.** A compact, always-on-top companion to park beside your shell. Click **Widget** in the app (or run `npm run widget`). It mirrors your run and flags loose threads; pull hints with `h`, each costs score.
+- **Draft a report.** Turn a run into an OSCP/CPTS-style Markdown report: `npm run report`.
+- **Web traffic.** Add `--web` to fold Burp HTTP attacks onto the timeline, redacted and in-scope only. [Setup](docs/web-capture.md).
 
 ## AI coaching
 
@@ -162,10 +133,6 @@ The header shows which model is connected. Whichever you pick, hints stay graded
 owlsh sends the model your redacted session, never the write-up. If you link a write-up, the model is told only which objectives you have hit and which you have not, as abstract labels, not the write-up text. A fail-closed guard then strips anything concrete (IPs, paths, CVEs, credentials, or a step you have not reached), so a hint nudges your process without handing you the answer.
 
 In plain terms: a hint is a friend who can see your moves but not the answer key. With no model it is a generic nudge; connect your own and it reacts to your actual run; add a write-up and it knows which step you are stuck on.
-
-## How it works
-
-A small Rust agent captures your shell through a normal PTY (ConPTY on Windows, openpty on Unix), with **no eBPF, ptrace, or kernel hooks**. The capture is processed **deterministically** (segmentation, MITRE tagging, golden-path diff, metrics) into one versioned JSON report (`schema/owlsh-report.schema.json`) that the UI renders. An optional model (local Ollama or an opt-in cloud model) only sharpens the coaching text, never the numbers. A run saved to the optional encrypted store can be rebuilt into the same report ([docs/store-report.md](docs/store-report.md)).
 
 ## Privacy
 
